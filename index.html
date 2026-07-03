@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Warda Marble - Pro</title>
+    <title>Warda Marble - Professional</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -223,7 +223,7 @@
     <!-- ===== INVOICES TAB ===== -->
     <div id="invoicesTab" class="tab-content">
         <div class="panel">
-            <h3>📄 Invoices</h3>
+            <h3>📄 All Invoices</h3>
             <div class="search-box"><input type="text" id="invoiceSearch" placeholder="🔍 Search..." onkeyup="displayInvoices()"></div>
             <div style="overflow-x:auto;max-height:400px;overflow-y:auto">
                 <table id="invoicesTable">
@@ -300,7 +300,8 @@
 </div>
 
 <!-- ===== MODALS ===== -->
-<div id="invoiceModal" class="modal"><div class="modal-content"><div id="invoiceDetails"></div><div style="text-align:center;margin-top:15px;"><button onclick="closeModal()">Close</button><button onclick="printInvoice()">🖨️ Print</button><button onclick="shareInvoiceImage()" class="btn-whatsapp">📷 Share</button></div></div></div>
+<div id="invoiceModal" class="modal"><div class="modal-content"><div id="invoiceDetails"></div><div style="text-align:center;margin-top:15px;display:flex;flex-wrap:wrap;justify-content:center;gap:6px"><button onclick="closeModal()">Close</button><button onclick="printInvoice()">🖨️ Print</button><button onclick="shareInvoiceImage()" class="btn-whatsapp">📷 Share</button><button onclick="openEditInvoiceFromModal()" class="btn-warning">✏️ Edit</button></div></div></div>
+<div id="editInvoiceModal" class="modal"><div class="modal-content"><h3>✏️ Edit Invoice</h3><div class="form-group"><label>Customer Name</label><input type="text" id="editCustName"></div><div class="form-group"><label>Phone</label><input type="text" id="editCustPhone"></div><div class="form-group"><label>Total</label><input type="number" id="editTotal" step="0.01"></div><div class="form-group"><label>Paid</label><input type="number" id="editPaid" step="0.01"></div><button onclick="saveEditInvoice()" class="btn-success">💾 Save</button><button onclick="closeEditInvoice()" class="btn-danger">Cancel</button></div></div>
 <div id="paymentModal" class="modal"><div class="modal-content"><h3>💰 Receive Payment</h3><input type="number" id="paymentAmount" step="0.01" placeholder="Amount"><br><br><input type="text" id="paymentNotes" placeholder="Notes"><br><br><button onclick="confirmPayment()" class="btn-success">Confirm</button><button onclick="closePaymentModal()" class="btn-danger">Cancel</button></div></div>
 <div id="customerLedgerModal" class="modal"><div class="modal-content"><h3 id="ledgerTitle">Customer Ledger</h3><div id="ledgerContent"></div></div></div>
 
@@ -336,6 +337,8 @@ const database = firebase.database();
 // ==================== AUTH ====================
 let isAdmin = false;
 let currentPayInvoice = null;
+let currentEditInvoiceNo = null;
+let deletedItems = [];
 
 function loginWithFirebase() {
     const email = document.getElementById('loginEmail').value;
@@ -522,25 +525,59 @@ function loadInventory() {
         let r = tb.insertRow();
         r.insertCell(0).innerHTML = p.name;
         r.insertCell(1).innerHTML = p.size;
-        r.insertCell(2).innerHTML = `<input type="number" value="${p.selling}" onchange="updateProduct(${p.id},'selling',this.value)" style="width:80px;">`;
-        r.insertCell(3).innerHTML = `<input type="number" value="${p.cost}" onchange="updateProduct(${p.id},'cost',this.value)" style="width:80px;">`;
-        r.insertCell(4).innerHTML = `<input type="number" value="${p.stock}" onchange="updateProduct(${p.id},'stock',this.value)" style="width:80px;">`;
+        r.insertCell(2).innerHTML = `<input type="number" value="${p.selling}" onchange="updateProduct(${p.id},'selling',this.value)" style="width:70px;">`;
+        r.insertCell(3).innerHTML = `<input type="number" value="${p.cost}" onchange="updateProduct(${p.id},'cost',this.value)" style="width:70px;">`;
+        r.insertCell(4).innerHTML = `<input type="number" value="${p.stock}" onchange="updateProduct(${p.id},'stock',this.value)" style="width:70px;">`;
         let c = r.insertCell(5);
-        let del = document.createElement('button');
-        del.innerHTML = '✕';
-        del.className = 'btn-danger';
-        del.onclick = () => {
+        
+        let editBtn = document.createElement('button');
+        editBtn.innerHTML = '✏️';
+        editBtn.className = 'btn-warning';
+        editBtn.onclick = () => { editProduct(p.id); };
+        c.appendChild(editBtn);
+        
+        let delBtn = document.createElement('button');
+        delBtn.innerHTML = '✕';
+        delBtn.className = 'btn-danger';
+        delBtn.onclick = () => {
             if(!isAdmin) return showToast('🔒 Login first!');
-            if(confirm('Delete?')) {
+            if(confirm('Delete this product?')) {
+                deletedItems.push({ type: 'product', data: p });
                 products = products.filter(x => x.id !== p.id);
                 saveData();
                 loadInventory();
                 displayProducts();
-                showToast('Deleted');
+                showToast('Deleted - Use Undo');
             }
         };
-        c.appendChild(del);
+        c.appendChild(delBtn);
+        
+        let undoBtn = document.createElement('button');
+        undoBtn.innerHTML = '↩️';
+        undoBtn.className = 'btn-success';
+        undoBtn.onclick = () => { undoDelete(); };
+        c.appendChild(undoBtn);
     });
+}
+
+function editProduct(id) {
+    if(!isAdmin) return showToast('🔒 Login first!');
+    let p = products.find(x => x.id === id);
+    if(!p) return;
+    let name = prompt('Name:', p.name);
+    if(name !== null && name.trim() !== '') p.name = name.trim();
+    let size = prompt('Size:', p.size);
+    if(size !== null) p.size = size;
+    let selling = prompt('Selling Price:', p.selling);
+    if(selling !== null && !isNaN(selling)) p.selling = parseFloat(selling);
+    let cost = prompt('Purchase Price:', p.cost);
+    if(cost !== null && !isNaN(cost)) p.cost = parseFloat(cost);
+    let stock = prompt('Stock:', p.stock);
+    if(stock !== null && !isNaN(stock)) p.stock = parseFloat(stock);
+    saveData();
+    loadInventory();
+    displayProducts();
+    showToast('✅ Product updated');
 }
 
 function updateProduct(id, field, value) {
@@ -549,7 +586,6 @@ function updateProduct(id, field, value) {
     if(p) {
         p[field] = parseFloat(value) || 0;
         saveData();
-        showToast('Updated');
     }
 }
 
@@ -564,6 +600,29 @@ function addNewProduct() {
     loadInventory();
     displayProducts();
     showToast('✅ Product added');
+}
+
+function undoDelete() {
+    if(deletedItems.length === 0) return showToast('Nothing to undo');
+    let last = deletedItems.pop();
+    if(last.type === 'product') {
+        products.push(last.data);
+        saveData();
+        loadInventory();
+        displayProducts();
+        showToast('✅ Product restored');
+    } else if(last.type === 'invoice') {
+        orders.push(last.data);
+        // Update customer
+        let cust = customers.find(c => c.phone === last.data.phone);
+        if(cust) {
+            cust.invoices.push({ invoiceNo: last.data.invoiceNo, date: last.data.date, amount: last.data.total, paid: last.data.paid, status: last.data.status });
+        }
+        saveData();
+        displayInvoices();
+        displayCustomers();
+        showToast('✅ Invoice restored');
+    }
 }
 
 // ==================== CART ====================
@@ -674,15 +733,11 @@ function confirmOrder() {
     let profit = sub - totalCost;
     let invNo = 'INV-' + String(orders.length + 1).padStart(4, '0');
     
-    // Update stock - ONLY selected item
+    // Update stock - ONLY the exact item
     cart.forEach(i => {
         let p = products.find(pr => pr.name === i.name && pr.size === i.size);
         if(p && p.stock > 0) {
             let qtyToSubtract = i.qty;
-            // For SQM items, convert to pieces if needed
-            if(p.type === 'sqm' && i.size.includes('m x')) {
-                // Keep as is
-            }
             p.stock = Math.max(0, p.stock - qtyToSubtract);
         }
     });
@@ -712,27 +767,31 @@ function confirmOrder() {
         customers.push(custObj); 
     }
     
-    // Check if this is advance payment
+    // Check if advance exists
     let advanceUsed = 0;
-    if(custObj.advance > 0 && rec > 0) {
+    if(custObj.advance && custObj.advance > 0) {
         advanceUsed = Math.min(custObj.advance, total);
         custObj.advance -= advanceUsed;
-        // Adjust paid amount
-        let remaining = total - advanceUsed;
-        rec = Math.max(0, rec - advanceUsed);
+        total = total - advanceUsed;
+        // Adjust paid
+        let remaining = total;
         paid = Math.min(rec, remaining);
-        total = remaining;
     }
     
     custObj.invoices.push({ invoiceNo: invNo, date: order.date, amount: total, paid: paid, status: status });
     
-    // Ledger entry
     if(!custObj.ledger) custObj.ledger = [];
     if(paid > 0) {
         custObj.ledger.push({ date: order.date, type: 'Payment Received', amount: paid });
     }
     if(advanceUsed > 0) {
         custObj.ledger.push({ date: order.date, type: 'Advance Used', amount: advanceUsed });
+    }
+    // If extra received, add as advance
+    if(rec > total) {
+        let extra = rec - total;
+        custObj.advance = (custObj.advance || 0) + extra;
+        custObj.ledger.push({ date: order.date, type: 'Advance (Extra)', amount: extra });
     }
     
     saveData();
@@ -763,9 +822,26 @@ function displayCustomers() {
         div.className = 'customer-card';
         div.innerHTML = `<div style="display:flex;justify-content:space-between;flex-wrap:wrap;margin-bottom:6px"><div><strong>${c.name}</strong> ${c.phone ? '📞 ' + c.phone : ''}</div><div><span class="badge ${due > 0 ? 'badge-unpaid' : 'badge-paid'}">${due > 0 ? 'Due: ' + formatCurrency(due) : 'Settled'}</span></div></div>
         <div style="font-size:10px;color:#666;">Advance: ${formatCurrency(c.advance || 0)} | Total Paid: ${formatCurrency(totalPaid)}</div>
-        <div class="action-btns"><button onclick="viewCustomerLedger('${c.phone}')" class="btn-info" style="padding:2px 8px;font-size:9px;">📊 Ledger</button><button onclick="addCustomerPayment('${c.phone}')" class="btn-success" style="padding:2px 8px;font-size:9px;">💰 Pay</button><button onclick="addAdvancePayment('${c.phone}')" class="btn-warning" style="padding:2px 8px;font-size:9px;">📈 Advance</button></div>`;
+        <div class="action-btns">
+            <button onclick="viewCustomerLedger('${c.phone}')" class="btn-info" style="padding:2px 8px;font-size:9px;">📊 Ledger</button>
+            <button onclick="addCustomerPayment('${c.phone}')" class="btn-success" style="padding:2px 8px;font-size:9px;">💰 Pay</button>
+            <button onclick="addAdvancePayment('${c.phone}')" class="btn-warning" style="padding:2px 8px;font-size:9px;">📈 Advance</button>
+            <button onclick="viewCustomerInvoices('${c.phone}')" class="btn-primary" style="padding:2px 8px;font-size:9px;">📄 Invoices</button>
+        </div>`;
         container.appendChild(div);
     });
+}
+
+function viewCustomerInvoices(phone) {
+    let cust = customers.find(c => c.phone === phone);
+    if(!cust) { showToast('Customer not found'); return; }
+    let msg = `📋 INVOICES FOR ${cust.name}\n━━━━━━━━━━━━━━━━━━━\n`;
+    cust.invoices.forEach((i, idx) => {
+        let bal = i.amount - i.paid;
+        msg += `${idx+1}. ${i.invoiceNo} | ${new Date(i.date).toLocaleDateString()} | ${formatCurrency(i.amount)} | ${bal > 0 ? 'Due: ' + formatCurrency(bal) : 'Paid'}\n`;
+    });
+    msg += `━━━━━━━━━━━━━━━━━━━\nAdvance: ${formatCurrency(cust.advance || 0)}`;
+    alert(msg);
 }
 
 function viewCustomerLedger(phone) {
@@ -822,7 +898,7 @@ function confirmPayment() {
     if(!cust) { showToast('Customer not found'); return; }
     let unpaid = cust.invoices.find(i => i.amount - i.paid > 0);
     if(!unpaid) { 
-        // If no unpaid invoice, add as advance
+        // Add as advance
         cust.advance = (cust.advance || 0) + amt;
         if(!cust.ledger) cust.ledger = [];
         cust.ledger.push({ date: new Date().toISOString(), type: 'Advance Payment (No Invoice)', amount: amt });
@@ -839,7 +915,7 @@ function confirmPayment() {
     if(order) { order.paid = unpaid.paid; order.status = unpaid.status; }
     if(!cust.ledger) cust.ledger = [];
     cust.ledger.push({ date: new Date().toISOString(), type: 'Payment - ' + notes, amount: payAmt });
-    // If extra amount received, add as advance
+    // Extra as advance
     if(amt > payAmt) {
         let extra = amt - payAmt;
         cust.advance = (cust.advance || 0) + extra;
@@ -867,11 +943,44 @@ function displayInvoices() {
         r.insertCell(3).innerHTML = formatCurrency(o.total);
         r.insertCell(4).innerHTML = `<span class="badge badge-${o.status}">${o.status}</span>`;
         let c = r.insertCell(5);
+        
         let viewBtn = document.createElement('button');
         viewBtn.innerHTML = '👁️';
         viewBtn.className = 'btn-info';
         viewBtn.onclick = () => viewInvoice(o.invoiceNo);
         c.appendChild(viewBtn);
+        
+        let editBtn = document.createElement('button');
+        editBtn.innerHTML = '✏️';
+        editBtn.className = 'btn-warning';
+        editBtn.onclick = () => { openEditInvoice(o.invoiceNo); };
+        c.appendChild(editBtn);
+        
+        let delBtn = document.createElement('button');
+        delBtn.innerHTML = '✕';
+        delBtn.className = 'btn-danger';
+        delBtn.onclick = () => {
+            if(!isAdmin) return showToast('🔒 Login first!');
+            if(confirm('Delete this invoice?')) {
+                deletedItems.push({ type: 'invoice', data: o });
+                orders = orders.filter(x => x.invoiceNo !== o.invoiceNo);
+                let cust = customers.find(c => c.phone === o.phone);
+                if(cust) {
+                    cust.invoices = cust.invoices.filter(i => i.invoiceNo !== o.invoiceNo);
+                }
+                saveData();
+                displayInvoices();
+                displayCustomers();
+                showToast('Deleted - Use Undo');
+            }
+        };
+        c.appendChild(delBtn);
+        
+        let undoBtn = document.createElement('button');
+        undoBtn.innerHTML = '↩️';
+        undoBtn.className = 'btn-success';
+        undoBtn.onclick = () => { undoDelete(); };
+        c.appendChild(undoBtn);
     });
 }
 
@@ -885,6 +994,68 @@ function viewInvoice(invNo) {
     let html = `<div id="invoicePrint" class="invoice-box"><div class="header"><h2>🏢 ${company.name}</h2><p>${company.phone}</p></div><div class="body"><div><strong>Invoice:</strong> ${o.invoiceNo}<br><strong>Date:</strong> ${new Date(o.date).toLocaleString()}<br><strong>Customer:</strong> ${o.customer}<br><strong>Phone:</strong> ${o.phone}</div>${items}<div style="text-align:right;margin-top:10px"><h3>Total: ${formatCurrency(o.total)}</h3><p>Paid: ${formatCurrency(o.paid || 0)}</p><p><strong>${rem > 0 ? 'Due: ' + formatCurrency(rem) : 'Fully Paid ✓'}</strong></p></div></div></div>`;
     document.getElementById('invoiceDetails').innerHTML = html;
     document.getElementById('invoiceModal').style.display = 'flex';
+    currentEditInvoiceNo = invNo;
+}
+
+function openEditInvoice(invNo) {
+    if(!isAdmin) return showToast('🔒 Login first!');
+    let o = orders.find(x => x.invoiceNo === invNo);
+    if(!o) return;
+    currentEditInvoiceNo = invNo;
+    document.getElementById('editCustName').value = o.customer;
+    document.getElementById('editCustPhone').value = o.phone || '';
+    document.getElementById('editTotal').value = o.total;
+    document.getElementById('editPaid').value = o.paid || 0;
+    document.getElementById('editInvoiceModal').style.display = 'flex';
+}
+
+function openEditInvoiceFromModal() {
+    if(!isAdmin) return showToast('🔒 Login first!');
+    openEditInvoice(currentEditInvoiceNo);
+    document.getElementById('invoiceModal').style.display = 'none';
+}
+
+function closeEditInvoice() {
+    document.getElementById('editInvoiceModal').style.display = 'none';
+}
+
+function saveEditInvoice() {
+    if(!isAdmin) return showToast('🔒 Login first!');
+    if(!currentEditInvoiceNo) return;
+    let o = orders.find(x => x.invoiceNo === currentEditInvoiceNo);
+    if(!o) return;
+    let newCust = document.getElementById('editCustName').value.trim();
+    let newPhone = document.getElementById('editCustPhone').value.trim();
+    let newTotal = parseFloat(document.getElementById('editTotal').value);
+    let newPaid = parseFloat(document.getElementById('editPaid').value);
+    if(!newTotal || newTotal <= 0) { showToast('Enter valid total'); return; }
+    
+    // Remove from old customer
+    let oldCust = customers.find(c => c.phone === o.phone);
+    if(oldCust) {
+        oldCust.invoices = oldCust.invoices.filter(i => i.invoiceNo !== o.invoiceNo);
+    }
+    
+    o.customer = newCust;
+    o.phone = newPhone;
+    o.total = newTotal;
+    o.paid = newPaid || 0;
+    o.remaining = newTotal - (newPaid || 0);
+    o.status = o.remaining <= 0 ? 'paid' : (o.paid > 0 ? 'partial' : 'unpaid');
+    
+    // Add to new customer
+    let newCustObj = customers.find(c => c.phone === newPhone);
+    if(!newCustObj) { 
+        newCustObj = { name: newCust, phone: newPhone, invoices: [], ledger: [], advance: 0 }; 
+        customers.push(newCustObj); 
+    }
+    newCustObj.invoices.push({ invoiceNo: o.invoiceNo, date: o.date, amount: newTotal, paid: newPaid || 0, status: o.status });
+    
+    saveData();
+    displayInvoices();
+    displayCustomers();
+    closeEditInvoice();
+    showToast('✅ Invoice updated');
 }
 
 function closeModal() { document.getElementById('invoiceModal').style.display = 'none'; }
@@ -969,7 +1140,7 @@ function updateSummary() {
     const pmBox = document.getElementById('paymentMinusBox');
     pmBox.className = 'summary-box ' + (paymentMinus > 0 ? 'negative' : 'positive');
     
-    // Stock Summary - showing only selected items
+    // Stock Summary
     let stockHtml = '<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;font-weight:bold;border-bottom:2px solid #ccc;padding:4px 0;"><span>Item</span><span>Opening</span><span>Sold</span><span>Closing</span></div>';
     products.forEach(item => {
         const sold = orders.filter(o => o.date.substring(0,10) === today).reduce((s,o) => { 
@@ -1070,7 +1241,6 @@ auth.onAuthStateChanged(user => {
     } else {
         isAdmin = false;
         if(!document.getElementById('loginModal').style.display || document.getElementById('loginModal').style.display === 'none') {
-            // Show login modal for first time visitors
             setTimeout(() => {
                 document.getElementById('loginModal').style.display = 'flex';
                 document.getElementById('appContainer').classList.add('view-only');
@@ -1084,7 +1254,6 @@ loadData();
 document.getElementById('companyNameSetting').value = company.name;
 document.getElementById('companyPhoneSetting').value = company.phone;
 
-// Show login if not already shown
 setTimeout(() => {
     if(!isAdmin) {
         document.getElementById('loginModal').style.display = 'flex';
@@ -1093,7 +1262,8 @@ setTimeout(() => {
 }, 1000);
 
 window.viewInvoice = viewInvoice;
+window.openEditInvoice = openEditInvoice;
+window.undoDelete = undoDelete;
 </script>
 </body>
 </html>
-
