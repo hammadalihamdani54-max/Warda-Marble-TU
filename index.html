@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Warda Marble - Secure</title>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Arial,sans-serif;}
+        body{background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);padding:10px;min-height:100vh;}
+        .container{max-width:1500px;margin:0 auto;background:white;border-radius:20px;overflow:hidden;box-shadow:0 20px 40px rgba(0,0,0,0.3);}
+        .header{background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);padding:12px 20px;text-align:center;position:relative;border-bottom:3px solid #ffd700;}
+        .header h2{color:#ffd700;font-size:24px;}
+        .header p{color:#a0c4e0;font-size:11px;margin-top:3px;}
+        .header-controls{position:absolute;top:10px;right:15px;display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
+        .header-controls button{padding:4px 10px;background:rgba(255,255,255,0.12);color:white;border:1px solid #ffd700;border-radius:5px;cursor:pointer;font-weight:bold;font-size:10px;transition:0.3s;}
+        .header-controls button:hover{background:#ffd700;color:#1a1a2e;}
+        .status-dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;}
+        .status-dot.online{background:#27ae60;box-shadow:0 0 10px #27ae60;}
+        .status-dot.offline{background:#e74c3c;box-shadow:0 0 10px #e74c3c;}
+        .admin-badge{background:#ffd700;color:#1a1a2e;padding:3px 8px;border-radius:15px;font-size:9px;font-weight:bold;}
+        .viewer-badge{background:#6b7a8a;color:white;padding:3px 8px;border-radius:15px;font-size:9px;font-weight:bold;}
+        .login-modal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);display:flex;justify-content:center;align-items:center;z-index:9999;}
+        .login-box{background:white;padding:25px;border-radius:15px;max-width:380px;width:90%;text-align:center;}
+        .login-box h2{color:#1a1a2e;margin-bottom:8px;}
+        .login-box p{color:#666;margin-bottom:12px;font-size:13px;}
+        .login-box input{width:100%;padding:10px;border:2px solid #ddd;border-radius:8px;font-size:14px;margin-bottom:10px;}
+        .login-box input:focus{border-color:#ffd700;outline:none;}
+        .login-box .btn{width:100%;padding:10px;border:none;border-radius:8px;font-size:14px;font-weight:bold;cursor:pointer;color:white;}
+        .login-box .btn-success{background:#27ae60;}
+        .login-box .btn-danger{background:#e74c3c;}
+        .login-box .skip-btn{background:#6b7a8a;}
+        .login-box .error{color:#e74c3c;font-size:12px;margin-top:5px;display:none;}
+        .view-only .btn,.view-only input,.view-only select{opacity:0.5;pointer-events:none;}
+        .tabs{display:flex;background:#1a1a2e;flex-wrap:wrap;padding:0 5px;}
+        .tab{padding:10px 18px;background:transparent;color:white;border:none;cursor:pointer;font-weight:bold;font-size:13px;transition:0.3s;border-bottom:3px solid transparent;}
+        .tab.active{background:#2c3e50;color:#ffd700;border-bottom-color:#ffd700;}
+        .tab-content{display:none;padding:15px;background:#f0f2f5;min-height:500px;}
+        .tab-content.active{display:block;}
+        .panel{background:white;padding:15px;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,0.06);margin-bottom:15px;}
+        .panel h3{margin-bottom:12px;color:#1a1a2e;border-left:4px solid #ffd700;padding-left:10px;font-size:16px;}
+        .product-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px;max-height:400px;overflow-y:auto;}
+        .product-card{background:white;padding:8px;border:1px solid #e2e8f0;border-radius:8px;cursor:pointer;transition:0.2s;}
+        .product-card:hover{border-color:#ffd700;transform:translateY(-2px);}
+        .product-name{font-weight:bold;font-size:13px;}
+        .product-size{font-size:10px;color:#666;}
+        .product-price{color:#27ae60;font-weight:bold;font-size:11px;}
+        .group-filter{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;}
+        .group-btn{padding:5px 14px;background:#e2e8f0;border:none;border-radius:20px;cursor:pointer;font-weight:bold;font-size:11px;}
+        .group-btn.active{background:#ffd700;}
+        .search-box input{width:100%;padding:8px 12px;border:1px solid #ddd;border-radius:6px;font-size:12px;margin-bottom:8px;}
+        .form-group{margin-bottom:10px;}
+        label{display:block;font-size:11px;font-weight:bold;margin-bottom:3px;color:#334155;}
+        input,select{width:100%;padding:6px 10px;border:1px solid #ddd;border-radius:5px;font-size:12px;}
+        button{padding:6px 12px;border:none;border-radius:5px;cursor:pointer;font-size:11px;font-weight:bold;transition:0.2s;margin:2px;}
+        .btn-success{background:#27ae60;color:white;}
+        .btn-danger{background:#e74c3c;color:white;}
+        .btn-warning{background:#f39c12;color:white;}
+        .btn-info{background:#3498db;color:white;}
+        .btn-outline{background:transparent;border:2px solid #1a2a4a;color:#1a2a4a;}
+        .mode-btns{display:flex;gap:6px;margin-bottom:12px;}
+        .mode-btn{flex:1;background:#e2e8f0;padding:6px;text-align:center;border-radius:6px;cursor:pointer;font-weight:bold;font-size:11px;}
+        .mode-btn.active{background:#ffd700;}
+        .input-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;}
+        .input-group{flex:1;min-width:80px;}
+        .total-box{background:#1a1a2e;color:white;padding:12px;border-radius:8px;margin-top:12px;text-align:right;}
+        .total-box p{margin:3px 0;font-size:12px;}
+        table{width:100%;border-collapse:collapse;font-size:11px;}
+        th,td{padding:6px;text-align:left;border-bottom:1px solid #e2e8f0;}
+        th{background:#1a1a2e;color:#ffd700;}
+        .badge{padding:2px 8px;border-radius:15px;font-size:9px;font-weight:bold;display:inline-block;}
+        .badge-paid{background:#27ae60;color:white;}
+        .badge-unpaid{background:#e74c3c;color:white;}
+        .badge-partial{background:#f39c12;color:white;}
+        .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:15px;}
+        .stat-card{background:linear-gradient(135deg,#1a1a2e,#2c3e50);padding:12px;border-radius:10px;text-align:center;color:white;}
+        .stat-card h4{font-size:12px;margin-bottom:5px;}
+        .stat-card .value{font-size:22px;font-weight:bold;color:#ffd700;}
+        .summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-bottom:12px;}
+        .summary-box{background:white;padding:10px;border-radius:8px;text-align:center;border:1px solid #e2e8f0;}
+        .summary-box .num{font-size:20px;font-weight:bold;}
+        .summary-box .lbl{font-size:10px;color:#666;}
+        .summary-box.positive .num{color:#27ae60;}
+        .summary-box.negative .num{color:#e74c3c;}
+        .summary-box.warning .num{color:#f39c12;}
+        .rtl{direction:rtl;text-align:right;}
+        .rtl .total-box{text-align:left;}
+        .invoice-box{max-width:600px;margin:auto;border:2px solid #ffd700;border-radius:10px;background:white;overflow:hidden;}
+        .invoice-box .header{background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);color:#ffd700;padding:12px;text-align:center;}
+        .invoice-box .body{padding:15px;}
+        .invoice-box table{width:100%;}
+        .invoice-box th{background:#1a1a2e;color:#ffd700;padding:6px;text-align:center;}
+        .invoice-box td{padding:6px;text-align:center;border-bottom:1px solid #ddd;}
+        .action-btns{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;justify-content:center;}
+        .modal{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:1000;justify-content:center;align-items:center;}
+        .modal-content{background:white;padding:20px;border-radius:15px;max-width:600px;width:95%;max-height:85vh;overflow:auto;}
+        .toast{position:fixed;bottom:20px;right:20px;background:#1a1a2e;color:#ffd700;padding:8px 16px;border-radius:8px;z-index:1000;font-size:12px;}
+        @media(max-width:480px){.product-list{grid-template-columns:1fr 1fr}.header h2{font-size:18px}}
+    </style>
+</head>
+<body>
+<div class="container" id="appContainer">
+    <!-- Header -->
+    <div class="header">
+        <h2 id="companyName">🏢 WARDA MARBLE</h2>
+        <p id="companyTagline">Premium Marble Solutions | <span id="statusText"><span class="status-dot online" id="statusDot"></span>Online</span></p>
+        <div class="header-controls">
+            <span id="roleBadge" class="viewer-badge">👁️ Viewer</span>
+            <button onclick="toggleLang()">🌐 AR</button>
+            <button onclick="toggleCurrency()">💱 USD</button>
+            <button onclick="showLoginModal()" id="loginBtn" style="background:#27ae60;border-color:#27ae60;">🔑 Login</button>
+            <button onclick="logout()" id="logoutBtn" style="display:none;background:#e74c3c;border-color:#e74c3c;">🚪 Logout</button>
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+        <button class="tab active" onclick="showTab('pos')">🛒 POS</button>
+        <button class="tab" onclick="showTab('inventory')">📦 Stock</button>
+        <button class="tab" onclick="showTab('invoices')">📄 Invoices</button>
+        <button class="tab" onclick="showTab('summary')">📊 Summary</button>
+        <button class="tab" onclick="showTab('settings')">⚙️ Settings</button>
+    </div>
+
+    <!-- ===== POS TAB ===== -->
+    <div id="posTab" class="tab-content active">
+        <div class="pos-grid" style="display:grid;grid-template-columns:1fr 1.2fr;gap:15px;">
+            <div class="panel">
+                <h3>📦 Products</h3>
+                <div class="group-filter">
+                    <button class="group-btn active" onclick="filterProducts('all')">All</button>
+                    <button class="group-btn" onclick="filterProducts('mwad')">مواد</button>
+                    <button class="group-btn" onclick="filterProducts('mojali')">مجلي</button>
+                    <button class="group-btn" onclick="filterProducts('mosnafar')">مصنفر</button>
+                </div>
+                <div class="search-box"><input type="text" id="searchProduct" placeholder="🔍 Search..." onkeyup="displayProducts()"></div>
+                <div class="product-list" id="productList"></div>
+            </div>
+            <div class="panel">
+                <h3>🛒 Cart</h3>
+                <div class="mode-btns">
+                    <div class="mode-btn active" onclick="setMode('sqm')">📐 SQM</div>
+                    <div class="mode-btn" onclick="setMode('manual')">📏 Manual</div>
+                    <div class="mode-btn" onclick="setMode('pieces')">🔧 Pieces</div>
+                </div>
+                <div class="input-row">
+                    <div class="input-group"><label>Item</label><input type="text" id="itemName" placeholder="Name"></div>
+                    <div class="input-group"><label>Cost</label><input type="number" id="costPrice" step="0.01"></div>
+                </div>
+                <div id="sqmFields"><div class="input-row"><div class="input-group"><label>Thick</label><input type="number" id="thick" value="3"></div><div class="input-group"><label>Width</label><input type="number" id="width" value="0.40" step="0.01"></div><div class="input-group"><label>Length</label><input type="number" id="length" value="0.80" step="0.01"></div><div class="input-group"><label>Price/m²</label><input type="number" id="sqmPrice" step="0.01"></div></div></div>
+                <div id="manualFields" style="display:none"><div class="input-row"><div class="input-group"><label>Area(m²)</label><input type="number" id="manualArea" step="0.01"></div><div class="input-group"><label>Price/m²</label><input type="number" id="manualPrice" step="0.01"></div></div></div>
+                <div id="piecesFields" style="display:none"><div class="input-row"><div class="input-group"><label>Size</label><input type="text" id="pieceSize"></div><div class="input-group"><label>Qty</label><input type="number" id="pieceQty" value="1"></div><div class="input-group"><label>Price/pc</label><input type="number" id="piecePrice" step="0.01"></div></div></div>
+                <button onclick="addToCart()" class="btn-success" style="width:100%">➕ Add</button>
+                <div style="margin-top:8px"><label>👤 Customer</label><input type="text" id="customerName" placeholder="Name"></div>
+                <div><label>📞 Phone</label><input type="text" id="customerPhone" placeholder="Phone"></div>
+                <div><label>💰 Received</label><input type="number" id="amountReceived" value="0" step="0.01" oninput="updateTotals()"></div>
+                <div style="max-height:200px;overflow:auto;margin-top:8px">
+                    <table id="cartTable">
+                        <thead><tr><th>Item</th><th>Size</th><th>Qty</th><th>Price</th><th>Total</th><th></th></tr></thead>
+                        <tbody id="cartBody"></tbody>
+                    </table>
+                </div>
+                <div class="total-box">
+                    <p><strong>Subtotal:</strong> <span id="subtotal">SAR 0.00</span></p>
+                    <p><strong>Tax (<span id="taxRateDisplay">15</span>%):</strong> <span id="taxAmount">SAR 0.00</span></p>
+                    <p><strong>Total:</strong> <span id="grandTotal">SAR 0.00</span></p>
+                    <p><strong>Received:</strong> <span id="received">SAR 0.00</span></p>
+                    <p id="balanceMsg" style="font-weight:bold"></p>
+                </div>
+                <div class="action-btns">
+                    <button onclick="confirmOrder()" class="btn-success">✅ Confirm</button>
+                    <button onclick="clearCart()" class="btn-danger">🗑️ Clear</button>
+                    <button onclick="undoCart()" class="btn-warning">↩️ Undo</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== INVENTORY TAB ===== -->
+    <div id="inventoryTab" class="tab-content">
+        <div class="panel">
+            <h3>📦 Stock Management</h3>
+            <div class="search-box"><input type="text" id="inventorySearch" placeholder="🔍 Search..." onkeyup="loadInventory()"></div>
+            <button onclick="addNewProduct()" class="btn-success" style="margin-bottom:8px">➕ Add Product</button>
+            <div style="overflow-x:auto;max-height:400px;overflow-y:auto">
+                <table id="inventoryTable">
+                    <thead><tr><th>Name</th><th>Size</th><th>Selling</th><th>Cost</th><th>Stock</th><th>Actions</th></tr></thead>
+                    <tbody id="inventoryBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== INVOICES TAB ===== -->
+    <div id="invoicesTab" class="tab-content">
+        <div class="panel">
+            <h3>📄 Invoices</h3>
+            <div class="search-box"><input type="text" id="invoiceSearch" placeholder="🔍 Search..." onkeyup="displayInvoices()"></div>
+            <div style="overflow-x:auto;max-height:400px;overflow-y:auto">
+                <table id="invoicesTable">
+                    <thead><tr><th>Invoice</th><th>Date</th><th>Customer</th><th>Total</th><th>Status</th><th>Actions</th></tr></thead>
+                    <tbody id="invoicesBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== SUMMARY TAB ===== -->
+    <div id="summaryTab" class="tab-content">
+        <div class="panel">
+            <h3>📊 Summary</h3>
+            <div class="summary-grid">
+                <div class="summary-box positive"><div class="num" id="sumTodaySale">0.00</div><div class="lbl">Today's Sale</div></div>
+                <div class="summary-box warning"><div class="num" id="sumUdharSale">0.00</div><div class="lbl">Udhar</div></div>
+                <div class="summary-box positive"><div class="num" id="sumTotalJamma">0.00</div><div class="lbl">Total Jamma</div></div>
+            </div>
+            <div id="stockSummaryDisplay" style="background:#f8fafc;padding:10px;border-radius:8px;max-height:200px;overflow-y:auto;"></div>
+        </div>
+    </div>
+
+    <!-- ===== SETTINGS TAB ===== -->
+    <div id="settingsTab" class="tab-content">
+        <div class="panel">
+            <h3>⚙️ Settings</h3>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:15px">
+                <div>
+                    <h4>🏢 Company</h4>
+                    <div class="form-group"><label>Name</label><input type="text" id="companyNameSetting"></div>
+                    <div class="form-group"><label>Phone</label><input type="text" id="companyPhoneSetting"></div>
+                    <button onclick="saveCompanySettings()" class="btn-success">💾 Save</button>
+                </div>
+                <div>
+                    <h4>💰 Tax</h4>
+                    <div class="form-group"><label><input type="checkbox" id="taxEnableCheck"> Enable Tax</label></div>
+                    <div class="form-group"><label>Rate (%)</label><input type="number" id="taxRateSetting" value="15"></div>
+                    <button onclick="saveTaxSettings()" class="btn-success">💾 Save</button>
+                </div>
+                <div>
+                    <h4>💾 Data</h4>
+                    <button onclick="backupData()" class="btn-info">📥 Backup</button>
+                    <button onclick="document.getElementById('restoreFile').click()" class="btn-warning">📤 Restore</button>
+                    <input type="file" id="restoreFile" style="display:none" onchange="restoreData(this)">
+                    <button onclick="resetAll()" class="btn-danger">⚠️ Reset</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== LOGIN MODAL ===== -->
+<div id="loginModal" class="login-modal">
+    <div class="login-box">
+        <h2>🔐 Admin Login</h2>
+        <p>Login to manage system</p>
+        <input type="email" id="loginEmail" placeholder="Email" value="admin@warda.com">
+        <input type="password" id="loginPassword" placeholder="Password" onkeydown="if(event.key==='Enter') loginWithFirebase()">
+        <button onclick="loginWithFirebase()" class="btn btn-success">🔓 Login</button>
+        <button onclick="skipLogin()" class="btn skip-btn" style="margin-top:6px;">👁️ Continue as Viewer</button>
+        <div id="loginError" class="error">❌ Invalid credentials!</div>
+        <div style="margin-top:8px;font-size:11px;color:#999;">Email: admin@warda.com | Pass: Hamdani5</div>
+    </div>
+</div>
+
+<!-- ===== MODALS ===== -->
+<div id="invoiceModal" class="modal"><div class="modal-content"><div id="invoiceDetails"></div><div style="text-align:center;margin-top:15px;"><button onclick="closeModal()">Close</button><button onclick="printInvoice()">🖨️ Print</button></div></div></div>
+
+<script>
+// ==================== FIREBASE CONFIG ====================
+const firebaseConfig = {
+    apiKey: "AIzaSyBacJhHOK-xZ9TgQfbN8swRNYIhmsIh0nk",
+    authDomain: "warda-marble.firebaseapp.com",
+    databaseURL: "https://warda-marble-default-rtdb.firebaseio.com",
+    projectId: "warda-marble",
+    storageBucket: "warda-marble.firebasestorage.app",
+    messagingSenderId: "696018619200",
+    appId: "1:696018619200:web:a4239b1f35ea7a98ad08a5"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const database = firebase.database();
+
+// ==================== AUTH SYSTEM ====================
+let isAdmin = false;
+
+function loginWithFirebase() {
+    const email = document.getElementById('loginEmail').value;
+    const password = document.getElementById('loginPassword').value;
+    const error = document.getElementById('loginError');
+    
+    auth.signInWithEmailAndPassword(email, password)
+        .then(() => {
+            isAdmin = true;
+            document.getElementById('loginModal').style.display = 'none';
+            document.getElementById('roleBadge').textContent = '👑 Admin';
+            document.getElementById('roleBadge').className = 'admin-badge';
+            document.getElementById('loginBtn').style.display = 'none';
+            document.getElementById('logoutBtn').style.display = 'inline-block';
+            document.getElementById('appContainer').classList.remove('view-only');
+            showToast('✅ Admin Login Successful!');
+            loadData();
+        })
+        .catch(() => {
+            error.style.display = 'block';
+            setTimeout(() => error.style.display = 'none', 3000);
+        });
+}
+
+function skipLogin() {
+    document.getElementById('loginModal').style.display = 'none';
+    document.getElementById('roleBadge').textContent = '👁️ Viewer';
+    document.getElementById('roleBadge').className = 'viewer-badge';
+    document.getElementById('appContainer').classList.add('view-only');
+    showToast('👁️ Viewer Mode');
+    loadData();
+}
+
+function showLoginModal() {
+    document.getElementById('loginModal').style.display = 'flex';
+}
+
+function logout() {
+    auth.signOut().then(() => {
+        isAdmin = false;
+        document.getElementById('roleBadge').textContent = '👁️ Viewer';
+        document.getElementById('roleBadge').className = 'viewer-badge';
+        document.getElementById('loginBtn').style.display = 'inline-block';
+        document.getElementById('logoutBtn').style.display = 'none';
+        document.getElementById('appContainer').classList.add('view-only');
+        showToast('👁️ Logged out');
+    });
+}
+
+// ==================== DATA ==================
+let products = [], orders = [], customers = [], cart = [], cartHistory = [];
+let currentLang = 'en', currentCurrency = 'SAR', currentMode = 'sqm';
+let currentGroup = 'all';
+let taxEnabled = true, taxRate = 15;
+let company = { name: "WARDA MARBLE", phone: "+966 59 807 4287" };
+
+function buildProducts() {
+    return [
+        { id: 1, name: "زاویہ اپ ڈاون", size: "4*4*3mm", group: 'mwad', selling: 0, cost: 0, stock: 9200, type: 'pieces' },
+        { id: 2, name: "زاویہ اپ ڈاون", size: "4*4*2mm", group: 'mwad', selling: 0, cost: 0, stock: 6600, type: 'pieces' },
+        { id: 3, name: "ابیض مجلی مبروم", size: "3*7", group: 'mojali', selling: 65, cost: 50, stock: 50, type: 'sqm' },
+        { id: 4, name: "ابیض مجلی مبروم", size: "3*10", group: 'mojali', selling: 65, cost: 50, stock: 50, type: 'sqm' },
+        { id: 5, name: "ابیض مجلی سادہ", size: "3*7", group: 'mojali', selling: 60, cost: 45, stock: 50, type: 'sqm' },
+        { id: 6, name: "ابیض مصنفر مبروم", size: "3*7", group: 'mosnafar', selling: 55, cost: 42, stock: 50, type: 'sqm' },
+        { id: 7, name: "مسمار مغلوب", size: "10*40", group: 'mwad', selling: 0, cost: 0, stock: 4800, type: 'pieces' }
+    ];
+}
+
+function loadData() {
+    let p = localStorage.getItem('products');
+    products = p ? JSON.parse(p) : buildProducts();
+    let o = localStorage.getItem('orders');
+    orders = o ? JSON.parse(o) : [];
+    let c = localStorage.getItem('customers');
+    customers = c ? JSON.parse(c) : [];
+    displayProducts();
+    loadInventory();
+    displayInvoices();
+    updateSummary();
+}
+
+function saveData() {
+    localStorage.setItem('products', JSON.stringify(products));
+    localStorage.setItem('orders', JSON.stringify(orders));
+    localStorage.setItem('customers', JSON.stringify(customers));
+}
+
+function showToast(msg) {
+    let t = document.createElement('div');
+    t.className = 'toast';
+    t.innerText = msg;
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 2500);
+}
+
+function formatCurrency(amt) {
+    let s = currentCurrency === 'SAR' ? 'SAR ' : '$ ';
+    return s + amt.toFixed(2);
+}
+
+function toggleLang() {
+    currentLang = currentLang === 'en' ? 'ar' : 'en';
+    if(currentLang === 'ar') document.body.classList.add('rtl');
+    else document.body.classList.remove('rtl');
+    displayProducts();
+}
+
+function toggleCurrency() {
+    currentCurrency = currentCurrency === 'SAR' ? 'USD' : 'SAR';
+    displayProducts();
+}
+
+function setMode(mode) {
+    currentMode = mode;
+    document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.mode-btn')[mode === 'sqm' ? 0 : mode === 'manual' ? 1 : 2].classList.add('active');
+    document.getElementById('sqmFields').style.display = mode === 'sqm' ? 'block' : 'none';
+    document.getElementById('manualFields').style.display = mode === 'manual' ? 'block' : 'none';
+    document.getElementById('piecesFields').style.display = mode === 'pieces' ? 'block' : 'none';
+}
+
+function showTab(tab) {
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    document.getElementById(tab + 'Tab').classList.add('active');
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    event.target.classList.add('active');
+    if(tab === 'inventory') loadInventory();
+    if(tab === 'invoices') displayInvoices();
+    if(tab === 'summary') updateSummary();
+}
+
+// ==================== PRODUCTS ==================
+function displayProducts() {
+    let search = document.getElementById('searchProduct').value.toLowerCase();
+    let filtered = products.filter(p => (currentGroup === 'all' || p.group === currentGroup) && (p.name.toLowerCase().includes(search) || p.size.toLowerCase().includes(search)));
+    let c = document.getElementById('productList');
+    c.innerHTML = '';
+    filtered.forEach(p => {
+        let d = document.createElement('div');
+        d.className = 'product-card';
+        d.innerHTML = `<div class="product-name">${p.name}</div><div class="product-size">${p.size}</div><div class="product-price">${p.selling > 0 ? formatCurrency(p.selling) : 'Set Price'}${p.type === 'sqm' ? '/m²' : '/pc'}</div><div>Stock: ${p.stock}</div>`;
+        d.onclick = () => {
+            document.getElementById('itemName').value = p.name;
+            document.getElementById('costPrice').value = p.cost;
+            if(p.type === 'sqm') { setMode('sqm'); document.getElementById('sqmPrice').value = p.selling; }
+            else { setMode('pieces'); document.getElementById('pieceSize').value = p.size; document.getElementById('piecePrice').value = p.selling; }
+        };
+        c.appendChild(d);
+    });
+}
+
+function filterProducts(g) {
+    currentGroup = g;
+    document.querySelectorAll('.group-btn').forEach(b => b.classList.remove('active'));
+    event.target.classList.add('active');
+    displayProducts();
+}
+
+function loadInventory() {
+    let search = document.getElementById('inventorySearch').value.toLowerCase();
+    let filtered = products.filter(p => p.name.toLowerCase().includes(search) || p.size.toLowerCase().includes(search));
+    let tb = document.getElementById('inventoryBody');
+    tb.innerHTML = '';
+    filtered.forEach(p => {
+        let r = tb.insertRow();
+        r.insertCell(0).innerHTML = p.name;
+        r.insertCell(1).innerHTML = p.size;
+        r.insertCell(2).innerHTML = p.selling;
+        r.insertCell(3).innerHTML = p.cost;
+        r.insertCell(4).innerHTML = p.stock;
+        let c = r.insertCell(5);
+        let d = document.createElement('button');
+        d.innerHTML = '✕';
+        d.className = 'btn-danger';
+        d.onclick = () => {
+            if(!isAdmin) return showToast('🔒 Login first!');
+            if(confirm('Delete?')) { products = products.filter(x => x.id !== p.id); saveData(); loadInventory(); displayProducts(); showToast('Deleted'); }
+        };
+        c.appendChild(d);
+    });
+}
+
+function addNewProduct() {
+    if(!isAdmin) return showToast('🔒 Login first!');
+    let type = confirm('Marble (SQM) - OK, Fitting - Cancel') ? 'sqm' : 'pieces';
+    let name = prompt('Product name:');
+    if(!name) return;
+    let id = products.length ? Math.max(...products.map(p => p.id)) + 1 : 1;
+    products.push({ id, name, size: prompt('Size:'), group: 'mwad', selling: parseFloat(prompt('Selling price:')) || 0, cost: parseFloat(prompt('Cost price:')) || 0, stock: parseInt(prompt('Stock:')) || 50, type });
+    saveData();
+    loadInventory();
+    displayProducts();
+    showToast('✅ Product added');
+}
+
+// ==================== CART ==================
+function addToCart() {
+    let name = document.getElementById('itemName').value;
+    if(!name) return showToast('Select item first');
+    let cost = parseFloat(document.getElementById('costPrice').value) || 0;
+    if(currentMode === 'sqm') {
+        let w = parseFloat(document.getElementById('width').value) || 0.40;
+        let l = parseFloat(document.getElementById('length').value) || 0.80;
+        let p = parseFloat(document.getElementById('sqmPrice').value);
+        if(!p) return showToast('Enter price');
+        let area = w * l;
+        cart.push({ id: Date.now(), name, size: `${w.toFixed(2)}m x ${l.toFixed(2)}m`, qty: area.toFixed(2) + ' m²', price: p, cost: cost || p * 0.7, total: area * p });
+    } else if(currentMode === 'manual') {
+        let area = parseFloat(document.getElementById('manualArea').value);
+        let p = parseFloat(document.getElementById('manualPrice').value);
+        if(!area || !p) return showToast('Enter area and price');
+        cart.push({ id: Date.now(), name, size: 'Manual', qty: area.toFixed(2) + ' m²', price: p, cost: cost || p * 0.7, total: area * p });
+    } else {
+        let qty = parseFloat(document.getElementById('pieceQty').value) || 1;
+        let p = parseFloat(document.getElementById('piecePrice').value);
+        if(!p) return showToast('Enter price');
+        cart.push({ id: Date.now(), name, size: document.getElementById('pieceSize').value, qty: qty + ' pcs', price: p, cost: cost || p * 0.6, total: qty * p });
+    }
+    updateCartDisplay();
+    showToast('Added to cart');
+}
+
+function updateCartDisplay() {
+    let tb = document.getElementById('cartBody');
+    tb.innerHTML = '';
+    let sub = 0;
+    cart.forEach((item, idx) => {
+        sub += item.total;
+        let r = tb.insertRow();
+        r.insertCell(0).innerHTML = item.name;
+        r.insertCell(1).innerHTML = item.size;
+        r.insertCell(2).innerHTML = item.qty;
+        r.insertCell(3).innerHTML = formatCurrency(item.price);
+        r.insertCell(4).innerHTML = formatCurrency(item.total);
+        let btn = document.createElement('button');
+        btn.innerHTML = '✖';
+        btn.className = 'btn-danger';
+        btn.onclick = () => { cart.splice(idx, 1); updateCartDisplay(); };
+        r.insertCell(5).appendChild(btn);
+    });
+    updateTotals(sub);
+}
+
+function updateTotals(sub) {
+    if(!sub) sub = cart.reduce((s, i) => s + i.total, 0);
+    let tax = taxEnabled ? sub * taxRate / 100 : 0;
+    let total = sub + tax;
+    document.getElementById('subtotal').innerHTML = formatCurrency(sub);
+    document.getElementById('taxAmount').innerHTML = formatCurrency(tax);
+    document.getElementById('grandTotal').innerHTML = formatCurrency(total);
+    let rec = parseFloat(document.getElementById('amountReceived').value) || 0;
+    document.getElementById('received').innerHTML = formatCurrency(rec);
+    let bal = total - rec;
+    document.getElementById('balanceMsg').innerHTML = bal > 0 ? `Due: ${formatCurrency(bal)}` : bal < 0 ? `Refund: ${formatCurrency(Math.abs(bal))}` : 'Fully Paid ✓';
+}
+
+function clearCart() {
+    if(!confirm('Clear cart?')) return;
+    cart = [];
+    updateCartDisplay();
+}
+
+function undoCart() {
+    if(cartHistory.length) { cart = cartHistory.pop(); updateCartDisplay(); showToast('Undo'); }
+    else showToast('Nothing to undo');
+}
+
+function confirmOrder() {
+    if(!isAdmin) return showToast('🔒 Login first!');
+    if(!cart.length) return showToast('Cart empty');
+    let cust = document.getElementById('customerName').value || 'Walk-in';
+    let phone = document.getElementById('customerPhone').value || '';
+    let rec = parseFloat(document.getElementById('amountReceived').value) || 0;
+    let sub = cart.reduce((s, i) => s + i.total, 0);
+    let tax = taxEnabled ? sub * taxRate / 100 : 0;
+    let total = sub + tax;
+    let invNo = 'INV-' + String(orders.length + 1).padStart(4, '0');
+    cart.forEach(i => { let p = products.find(pr => pr.name === i.name); if(p && p.stock > 0) p.stock--; });
+    let paid = Math.min(rec, total);
+    let status = paid >= total ? 'paid' : (paid > 0 ? 'partial' : 'unpaid');
+    let order = { invoiceNo: invNo, date: new Date().toISOString(), customer: cust, phone, items: [...cart], subtotal: sub, taxAmount: tax, total, cost: cart.reduce((s, i) => s + i.cost, 0), profit: total - cart.reduce((s, i) => s + i.cost, 0), status, paid };
+    orders.push(order);
+    let custObj = customers.find(c => c.phone === phone);
+    if(!custObj) { custObj = { name: cust, phone, invoices: [] }; customers.push(custObj); }
+    custObj.invoices.push({ invoiceNo: invNo, date: order.date, amount: total, paid, status });
+    saveData();
+    showToast('✅ Order confirmed! ' + invNo);
+    cart = [];
+    updateCartDisplay();
+    displayProducts();
+    loadInventory();
+    displayInvoices();
+    updateSummary();
+    document.getElementById('customerName').value = '';
+    document.getElementById('customerPhone').value = '';
+    document.getElementById('amountReceived').value = '0';
+}
+
+// ==================== INVOICES ==================
+function displayInvoices() {
+    let search = document.getElementById('invoiceSearch').value.toLowerCase();
+    let filtered = orders.filter(o => o.invoiceNo.toLowerCase().includes(search) || o.customer.toLowerCase().includes(search)).reverse();
+    let tb = document.getElementById('invoicesBody');
+    tb.innerHTML = '';
+    filtered.forEach(o => {
+        let r = tb.insertRow();
+        r.insertCell(0).innerHTML = o.invoiceNo;
+        r.insertCell(1).innerHTML = new Date(o.date).toLocaleDateString();
+        r.insertCell(2).innerHTML = o.customer;
+        r.insertCell(3).innerHTML = formatCurrency(o.total);
+        r.insertCell(4).innerHTML = `<span class="badge badge-${o.status}">${o.status}</span>`;
+        let c = r.insertCell(5);
+        let viewBtn = document.createElement('button');
+        viewBtn.innerHTML = 'View';
+        viewBtn.className = 'btn-info';
+        viewBtn.onclick = () => viewInvoice(o.invoiceNo);
+        c.appendChild(viewBtn);
+    });
+}
+
+function viewInvoice(invNo) {
+    let o = orders.find(x => x.invoiceNo === invNo);
+    if(!o) return;
+    let items = '<table><thead><tr><th>Item</th><th>Size</th><th>Qty</th><th>Price</th><th>Total</th></tr></thead><tbody>';
+    o.items.forEach(i => { items += `<tr><td>${i.name}</td><td>${i.size}</td><td>${i.qty}</td><td>${formatCurrency(i.price)}</td><td>${formatCurrency(i.total)}</td></tr>`; });
+    items += '</tbody></table>';
+    let rem = o.total - (o.paid || 0);
+    let html = `<div class="invoice-box"><div class="header"><h2>🏢 ${company.name}</h2></div><div class="body"><div><strong>Invoice:</strong> ${o.invoiceNo}<br><strong>Date:</strong> ${new Date(o.date).toLocaleString()}<br><strong>Customer:</strong> ${o.customer}</div>${items}<div style="text-align:right;margin-top:10px"><h3>Total: ${formatCurrency(o.total)}</h3><p>Paid: ${formatCurrency(o.paid || 0)}</p><p><strong>${rem > 0 ? 'Due: ' + formatCurrency(rem) : 'Fully Paid ✓'}</strong></p></div></div></div>`;
+    document.getElementById('invoiceDetails').innerHTML = html;
+    document.getElementById('invoiceModal').style.display = 'flex';
+}
+
+function closeModal() { document.getElementById('invoiceModal').style.display = 'none'; }
+function printInvoice() { let w = window.open('', '_blank'); w.document.write(`<html><head><title>Invoice</title><style>body{padding:20px} table{width:100%} th,td{padding:8px;border-bottom:1px solid #ddd} th{background:#1a1a2e;color:#ffd700}</style></head><body>${document.getElementById('invoiceDetails').innerHTML}</body></html>`); w.document.close(); w.print(); }
+
+// ==================== SUMMARY ==================
+function updateSummary() {
+    const today = new Date().toISOString().split('T')[0];
+    const todaySales = orders.filter(o => o.date.substring(0,10) === today);
+    const todayCash = todaySales.filter(o => o.status === 'paid' || o.paid >= o.total).reduce((s,o) => s + o.total, 0);
+    const todayUdhar = todaySales.filter(o => o.status === 'unpaid' || o.status === 'partial').reduce((s,o) => s + (o.total - (o.paid||0)), 0);
+    document.getElementById('sumTodaySale').textContent = formatCurrency(todayCash + todayUdhar);
+    document.getElementById('sumUdharSale').textContent = formatCurrency(todayUdhar);
+    document.getElementById('sumTotalJamma').textContent = formatCurrency(todayCash);
+    
+    let stockHtml = '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;font-weight:bold;border-bottom:2px solid #ccc;padding:4px 0;"><span>Item</span><span>Sold</span><span>Stock</span></div>';
+    products.forEach(item => {
+        const sold = orders.filter(o => o.date.substring(0,10) === today).reduce((s,o) => { let t=0; o.items.forEach(i=>{ if(i.name===item.name) t+=parseFloat(i.qty)||0; }); return s+t; }, 0);
+        stockHtml += `<div style="display:grid;grid-template-columns:1fr 1fr 1fr;padding:3px 0;border-bottom:1px solid #eee;font-size:11px;"><span>${item.name}</span><span style="color:#f39c12;">${sold}</span><span style="font-weight:bold;">${item.stock}</span></div>`;
+    });
+    document.getElementById('stockSummaryDisplay').innerHTML = stockHtml;
+}
+
+// ==================== SETTINGS ==================
+function saveCompanySettings() {
+    company.name = document.getElementById('companyNameSetting').value;
+    company.phone = document.getElementById('companyPhoneSetting').value;
+    saveData();
+    document.getElementById('companyName').innerHTML = '🏢 ' + company.name;
+    showToast('Saved');
+}
+
+function saveTaxSettings() {
+    taxEnabled = document.getElementById('taxEnableCheck').checked;
+    taxRate = parseFloat(document.getElementById('taxRateSetting').value);
+    saveData();
+    document.getElementById('taxRateDisplay').innerHTML = taxRate;
+    updateCartDisplay();
+    showToast('Saved');
+}
+
+function backupData() {
+    let data = { products, orders, customers, taxEnabled, taxRate, company };
+    let a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([JSON.stringify(data)], {type: 'application/json'}));
+    a.download = `backup_${new Date().toISOString().slice(0,10)}.json`;
+    a.click();
+    showToast('Backup created');
+}
+
+function restoreData(file) {
+    let r = new FileReader();
+    r.onload = e => {
+        try {
+            let d = JSON.parse(e.target.result);
+            if(d.products) products = d.products;
+            if(d.orders) orders = d.orders;
+            if(d.customers) customers = d.customers;
+            if(d.taxEnabled !== undefined) taxEnabled = d.taxEnabled;
+            if(d.taxRate) taxRate = d.taxRate;
+            if(d.company) company = d.company;
+            saveData();
+            location.reload();
+        } catch(err) { showToast('Invalid backup'); }
+    };
+    r.readAsText(file.files[0]);
+}
+
+function resetAll() {
+    if(prompt('Type CONFIRM:') === 'CONFIRM') {
+        localStorage.clear();
+        location.reload();
+    }
+}
+
+// ==================== AUTO AUTH CHECK ====================
+auth.onAuthStateChanged(user => {
+    if(user) {
+        isAdmin = true;
+        document.getElementById('loginModal').style.display = 'none';
+        document.getElementById('roleBadge').textContent = '👑 Admin';
+        document.getElementById('roleBadge').className = 'admin-badge';
+        document.getElementById('loginBtn').style.display = 'none';
+        document.getElementById('logoutBtn').style.display = 'inline-block';
+        document.getElementById('appContainer').classList.remove('view-only');
+        loadData();
+    } else {
+        isAdmin = false;
+        document.getElementById('roleBadge').textContent = '👁️ Viewer';
+        document.getElementById('roleBadge').className = 'viewer-badge';
+        document.getElementById('loginBtn').style.display = 'inline-block';
+        document.getElementById('logoutBtn').style.display = 'none';
+        document.getElementById('appContainer').classList.add('view-only');
+        // Show login modal if not hidden
+        if(document.getElementById('loginModal').style.display !== 'flex') {
+            document.getElementById('loginModal').style.display = 'flex';
+        }
+    }
+});
+
+// ==================== INIT ==================
+loadData();
+document.getElementById('companyNameSetting').value = company.name;
+document.getElementById('companyPhoneSetting').value = company.phone;
+document.getElementById('taxEnableCheck').checked = taxEnabled;
+document.getElementById('taxRateSetting').value = taxRate;
+document.getElementById('taxRateDisplay').innerHTML = taxRate;
+</script>
+</body>
+</html>
