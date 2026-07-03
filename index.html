@@ -63,6 +63,7 @@
         .btn-warning{background:#f39c12;color:white;}
         .btn-info{background:#3498db;color:white;}
         .btn-outline{background:transparent;border:2px solid #1a2a4a;color:#1a2a4a;}
+        .btn-whatsapp{background:#25d366;color:white;}
         .mode-btns{display:flex;gap:6px;margin-bottom:12px;}
         .mode-btn{flex:1;background:#e2e8f0;padding:6px;text-align:center;border-radius:6px;cursor:pointer;font-weight:bold;font-size:11px;}
         .mode-btn.active{background:#ffd700;}
@@ -99,7 +100,9 @@
         .action-btns{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;justify-content:center;}
         .modal{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:1000;justify-content:center;align-items:center;}
         .modal-content{background:white;padding:20px;border-radius:15px;max-width:600px;width:95%;max-height:85vh;overflow:auto;}
-        .modal-content .close-btn{float:right;background:#e74c3c;color:white;border:none;padding:4px 12px;border-radius:5px;cursor:pointer;font-size:12px;}
+        .modal-header{display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #eef2f6;padding-bottom:10px;margin-bottom:10px;}
+        .modal-header h3{margin:0;}
+        .modal-close-btn{background:#e74c3c;color:white;border:none;padding:4px 12px;border-radius:5px;cursor:pointer;font-size:12px;}
         .toast{position:fixed;bottom:20px;right:20px;background:#1a1a2e;color:#ffd700;padding:8px 16px;border-radius:8px;z-index:1000;font-size:12px;}
         .customer-card{background:white;border:1px solid #e2e8f0;border-radius:10px;padding:10px;margin-bottom:8px;cursor:pointer;transition:0.2s;}
         .customer-card:hover{box-shadow:0 2px 8px rgba(0,0,0,0.1);}
@@ -111,11 +114,10 @@
         .expense-item .exp-actions{display:flex;gap:4px;}
         .tax-toggle{display:flex;align-items:center;gap:8px;margin:8px 0;}
         .tax-toggle input{width:auto;}
-        .customer-invoices{margin-top:10px;padding:10px;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;}
         .customer-invoices .inv-item{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #eee;font-size:11px;align-items:center;}
-        .modal-header{display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #eef2f6;padding-bottom:10px;margin-bottom:10px;}
-        .modal-header h3{margin:0;}
         @media(max-width:480px){.product-list{grid-template-columns:1fr 1fr}.header h2{font-size:18px}}
+        .backup-admin-only{background:linear-gradient(135deg,#1a2a4a,#2d3b5a);padding:10px;border-radius:8px;color:#ffd700;text-align:center;margin-top:10px;}
+        .backup-admin-only .label{font-size:10px;color:#a0c4e0;}
     </style>
 </head>
 <body>
@@ -311,12 +313,22 @@
                     <button onclick="saveCompanySettings()" class="btn-success">💾 Save</button>
                 </div>
                 <div>
-                    <h4>💾 Data</h4>
+                    <h4>💾 Data Management</h4>
                     <button onclick="backupData()" class="btn-info">📥 Backup</button>
                     <button onclick="document.getElementById('restoreFile').click()" class="btn-warning">📤 Restore</button>
                     <input type="file" id="restoreFile" style="display:none" onchange="restoreData(this)">
                     <button onclick="resetAll()" class="btn-danger">⚠️ Reset</button>
                     <button onclick="syncToCloud()" class="btn-success" style="margin-top:4px;">☁️ Sync</button>
+                    
+                    <!-- ===== EMAIL BACKUP (Admin Only) ===== -->
+                    <div id="emailBackupSection" class="backup-admin-only" style="margin-top:10px;">
+                        <div class="label">📧 Email Backup (Admin Only)</div>
+                        <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;justify-content:center;">
+                            <input type="email" id="backupEmail" placeholder="Enter email..." style="width:180px;padding:4px 8px;border-radius:4px;border:1px solid #ffd700;background:rgba(255,255,255,0.1);color:white;">
+                            <button onclick="sendEmailBackup()" class="btn-success" style="padding:4px 12px;">📧 Send</button>
+                        </div>
+                        <div style="font-size:9px;color:#a0c4e0;margin-top:4px;">Data will be sent as JSON attachment</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -324,11 +336,11 @@
 </div>
 
 <!-- ===== MODALS ===== -->
-<div id="invoiceModal" class="modal"><div class="modal-content"><div class="modal-header"><h3>📄 Invoice</h3><button class="close-btn" onclick="closeModal()">✕ Close</button></div><div id="invoiceDetails"></div><div style="text-align:center;margin-top:15px;display:flex;flex-wrap:wrap;justify-content:center;gap:6px"><button onclick="printInvoice()">🖨️ Print</button><button onclick="shareInvoiceImage()" class="btn-whatsapp">📷 Share</button><button onclick="openEditInvoiceFromModal()" class="btn-warning">✏️ Edit</button></div></div></div>
-<div id="editInvoiceModal" class="modal"><div class="modal-content"><div class="modal-header"><h3>✏️ Edit Invoice</h3><button class="close-btn" onclick="closeEditInvoice()">✕ Close</button></div><div class="form-group"><label>Customer Name</label><input type="text" id="editCustName"></div><div class="form-group"><label>Phone</label><input type="text" id="editCustPhone"></div><div class="form-group"><label>Total</label><input type="number" id="editTotal" step="0.01"></div><div class="form-group"><label>Paid</label><input type="number" id="editPaid" step="0.01"></div><button onclick="saveEditInvoice()" class="btn-success">💾 Save</button><button onclick="closeEditInvoice()" class="btn-danger">Cancel</button></div></div>
-<div id="paymentModal" class="modal"><div class="modal-content"><div class="modal-header"><h3>💰 Receive Payment</h3><button class="close-btn" onclick="closePaymentModal()">✕ Close</button></div><input type="number" id="paymentAmount" step="0.01" placeholder="Amount"><br><br><input type="text" id="paymentNotes" placeholder="Notes"><br><br><button onclick="confirmPayment()" class="btn-success">Confirm</button><button onclick="closePaymentModal()" class="btn-danger">Cancel</button></div></div>
-<div id="customerLedgerModal" class="modal"><div class="modal-content"><div class="modal-header"><h3 id="ledgerTitle">📊 Customer Ledger</h3><button class="close-btn" onclick="closeLedgerModal()">✕ Close</button></div><div id="ledgerContent"></div></div></div>
-<div id="customerInvoicesModal" class="modal"><div class="modal-content"><div class="modal-header"><h3 id="customerInvoicesTitle">📄 Customer Invoices</h3><button class="close-btn" onclick="closeCustomerInvoicesModal()">✕ Close</button></div><div id="customerInvoicesContent"></div></div></div>
+<div id="invoiceModal" class="modal"><div class="modal-content"><div class="modal-header"><h3>📄 Invoice</h3><button class="modal-close-btn" onclick="closeModal()">✕ Close</button></div><div id="invoiceDetails"></div><div style="text-align:center;margin-top:15px;display:flex;flex-wrap:wrap;justify-content:center;gap:6px"><button onclick="printInvoice()">🖨️ Print</button><button onclick="shareInvoiceImage()" class="btn-whatsapp">📷 Share</button><button onclick="sendWhatsAppDirect()" class="btn-whatsapp">📱 WhatsApp</button><button onclick="openEditInvoiceFromModal()" class="btn-warning">✏️ Edit</button></div></div></div>
+<div id="editInvoiceModal" class="modal"><div class="modal-content"><div class="modal-header"><h3>✏️ Edit Invoice</h3><button class="modal-close-btn" onclick="closeEditInvoice()">✕ Close</button></div><div class="form-group"><label>Customer Name</label><input type="text" id="editCustName"></div><div class="form-group"><label>Phone</label><input type="text" id="editCustPhone"></div><div class="form-group"><label>Total</label><input type="number" id="editTotal" step="0.01"></div><div class="form-group"><label>Paid</label><input type="number" id="editPaid" step="0.01"></div><button onclick="saveEditInvoice()" class="btn-success">💾 Save</button><button onclick="closeEditInvoice()" class="btn-danger">Cancel</button></div></div>
+<div id="paymentModal" class="modal"><div class="modal-content"><div class="modal-header"><h3>💰 Receive Payment</h3><button class="modal-close-btn" onclick="closePaymentModal()">✕ Close</button></div><input type="number" id="paymentAmount" step="0.01" placeholder="Amount"><br><br><input type="text" id="paymentNotes" placeholder="Notes"><br><br><button onclick="confirmPayment()" class="btn-success">Confirm</button><button onclick="closePaymentModal()" class="btn-danger">Cancel</button></div></div>
+<div id="customerLedgerModal" class="modal"><div class="modal-content"><div class="modal-header"><h3 id="ledgerTitle">📊 Customer Ledger</h3><button class="modal-close-btn" onclick="closeLedgerModal()">✕ Close</button></div><div id="ledgerContent"></div></div></div>
+<div id="customerInvoicesModal" class="modal"><div class="modal-content"><div class="modal-header"><h3 id="customerInvoicesTitle">📄 Customer Invoices</h3><button class="modal-close-btn" onclick="closeCustomerInvoicesModal()">✕ Close</button></div><div id="customerInvoicesContent"></div></div></div>
 
 <!-- ===== LOGIN MODAL ===== -->
 <div id="loginModal" class="login-modal">
@@ -363,8 +375,8 @@ const database = firebase.database();
 let isAdmin = false;
 let currentPayInvoice = null;
 let currentEditInvoiceNo = null;
+let currentInvoiceForWhatsApp = null;
 let deletedItems = [];
-let deletedExpenses = [];
 
 function loginWithFirebase() {
     const email = document.getElementById('loginEmail').value;
@@ -379,6 +391,7 @@ function loginWithFirebase() {
             document.getElementById('loginBtn').style.display = 'none';
             document.getElementById('logoutBtn').style.display = 'inline-block';
             document.getElementById('appContainer').classList.remove('view-only');
+            document.getElementById('emailBackupSection').style.display = 'block';
             showToast('✅ Admin Login Successful!');
             loadData();
         })
@@ -393,6 +406,7 @@ function skipLogin() {
     document.getElementById('roleBadge').textContent = '👁️ Viewer';
     document.getElementById('roleBadge').className = 'viewer-badge';
     document.getElementById('appContainer').classList.add('view-only');
+    document.getElementById('emailBackupSection').style.display = 'none';
     showToast('👁️ Viewer Mode');
     loadData();
 }
@@ -409,6 +423,7 @@ function logout() {
         document.getElementById('loginBtn').style.display = 'inline-block';
         document.getElementById('logoutBtn').style.display = 'none';
         document.getElementById('appContainer').classList.add('view-only');
+        document.getElementById('emailBackupSection').style.display = 'none';
         showToast('👁️ Logged out');
     });
 }
@@ -555,13 +570,11 @@ function loadInventory() {
         r.insertCell(3).innerHTML = `<input type="number" value="${p.cost}" onchange="updateProduct(${p.id},'cost',this.value)" style="width:70px;">`;
         r.insertCell(4).innerHTML = `<input type="number" value="${p.stock}" onchange="updateProduct(${p.id},'stock',this.value)" style="width:70px;">`;
         let c = r.insertCell(5);
-        
         let editBtn = document.createElement('button');
         editBtn.innerHTML = '✏️';
         editBtn.className = 'btn-warning';
         editBtn.onclick = () => { editProduct(p.id); };
         c.appendChild(editBtn);
-        
         let delBtn = document.createElement('button');
         delBtn.innerHTML = '✕';
         delBtn.className = 'btn-danger';
@@ -577,7 +590,6 @@ function loadInventory() {
             }
         };
         c.appendChild(delBtn);
-        
         let undoBtn = document.createElement('button');
         undoBtn.innerHTML = '↩️';
         undoBtn.className = 'btn-success';
@@ -647,6 +659,11 @@ function undoDelete() {
         displayInvoices();
         displayCustomers();
         showToast('✅ Invoice restored');
+    } else if(last.type === 'customer') {
+        customers.push(last.data);
+        saveData();
+        displayCustomers();
+        showToast('✅ Customer restored');
     } else if(last.type === 'expense') {
         expenses.push(last.data);
         saveData();
@@ -846,16 +863,41 @@ function displayCustomers() {
         let totalPaid = c.invoices.reduce((s, i) => s + i.paid, 0);
         let div = document.createElement('div');
         div.className = 'customer-card';
-        div.innerHTML = `<div style="display:flex;justify-content:space-between;flex-wrap:wrap;margin-bottom:6px"><div><strong>${c.name}</strong> ${c.phone ? '📞 ' + c.phone : ''}</div><div><span class="badge ${due > 0 ? 'badge-unpaid' : 'badge-paid'}">${due > 0 ? 'Due: ' + formatCurrency(due) : 'Settled'}</span></div></div>
+        div.innerHTML = `<div style="display:flex;justify-content:space-between;flex-wrap:wrap;margin-bottom:6px">
+            <div><strong>${c.name}</strong> ${c.phone ? '📞 ' + c.phone : ''}</div>
+            <div><span class="badge ${due > 0 ? 'badge-unpaid' : 'badge-paid'}">${due > 0 ? 'Due: ' + formatCurrency(due) : 'Settled'}</span></div>
+        </div>
         <div style="font-size:10px;color:#666;">Advance: ${formatCurrency(c.advance || 0)} | Total Paid: ${formatCurrency(totalPaid)}</div>
         <div class="action-btns">
             <button onclick="viewCustomerInvoices('${c.phone}')" class="btn-info" style="padding:2px 8px;font-size:9px;">📄 Invoices</button>
             <button onclick="viewCustomerLedger('${c.phone}')" class="btn-primary" style="padding:2px 8px;font-size:9px;">📊 Ledger</button>
             <button onclick="addCustomerPayment('${c.phone}')" class="btn-success" style="padding:2px 8px;font-size:9px;">💰 Pay</button>
             <button onclick="addAdvancePayment('${c.phone}')" class="btn-warning" style="padding:2px 8px;font-size:9px;">📈 Advance</button>
+            <button onclick="deleteCustomer('${c.phone}')" class="btn-danger" style="padding:2px 8px;font-size:9px;">🗑️ Delete</button>
+            <button onclick="undoDelete()" class="btn-success" style="padding:2px 8px;font-size:9px;">↩️ Undo</button>
         </div>`;
         container.appendChild(div);
     });
+}
+
+function deleteCustomer(phone) {
+    if(!isAdmin) return showToast('🔒 Login first!');
+    let cust = customers.find(c => c.phone === phone);
+    if(!cust) { showToast('Customer not found'); return; }
+    let due = cust.invoices.reduce((s, i) => s + (i.amount - i.paid), 0);
+    if(due > 0) {
+        if(!confirm(`⚠️ This customer has due amount ${formatCurrency(due)}. Are you sure?`)) return;
+    } else {
+        if(!confirm(`Delete customer "${cust.name}"?`)) return;
+    }
+    deletedItems.push({ type: 'customer', data: JSON.parse(JSON.stringify(cust)) });
+    customers = customers.filter(c => c.phone !== phone);
+    orders = orders.filter(o => o.phone !== phone);
+    saveData();
+    displayCustomers();
+    displayInvoices();
+    updateSummary();
+    showToast(`✅ Customer "${cust.name}" deleted! Use Undo to restore.`);
 }
 
 function viewCustomerInvoices(phone) {
@@ -867,7 +909,7 @@ function viewCustomerInvoices(phone) {
         html = '<div style="color:#666;padding:10px;">No invoices found</div>';
     } else {
         html = `<div style="max-height:400px;overflow-y:auto;">`;
-        cust.invoices.forEach((i, idx) => {
+        cust.invoices.forEach((i) => {
             let bal = i.amount - i.paid;
             let status = bal <= 0 ? 'Paid' : (i.paid > 0 ? 'Partial' : 'Unpaid');
             html += `<div class="inv-item">
@@ -903,7 +945,6 @@ function deleteInvoiceFromCustomer(invNo) {
             saveData();
             displayInvoices();
             displayCustomers();
-            // Refresh customer invoices view
             let phone = document.getElementById('customerInvoicesTitle').textContent.split(' - ')[1];
             if(phone) viewCustomerInvoices(phone);
             showToast('Deleted - Use Undo');
@@ -1012,19 +1053,16 @@ function displayInvoices() {
         r.insertCell(3).innerHTML = formatCurrency(o.total);
         r.insertCell(4).innerHTML = `<span class="badge badge-${o.status}">${o.status}</span>`;
         let c = r.insertCell(5);
-        
         let viewBtn = document.createElement('button');
         viewBtn.innerHTML = '👁️';
         viewBtn.className = 'btn-info';
         viewBtn.onclick = () => viewInvoice(o.invoiceNo);
         c.appendChild(viewBtn);
-        
         let editBtn = document.createElement('button');
         editBtn.innerHTML = '✏️';
         editBtn.className = 'btn-warning';
         editBtn.onclick = () => { openEditInvoice(o.invoiceNo); };
         c.appendChild(editBtn);
-        
         let delBtn = document.createElement('button');
         delBtn.innerHTML = '✕';
         delBtn.className = 'btn-danger';
@@ -1044,7 +1082,6 @@ function displayInvoices() {
             }
         };
         c.appendChild(delBtn);
-        
         let undoBtn = document.createElement('button');
         undoBtn.innerHTML = '↩️';
         undoBtn.className = 'btn-success';
@@ -1056,6 +1093,7 @@ function displayInvoices() {
 function viewInvoice(invNo) {
     let o = orders.find(x => x.invoiceNo === invNo);
     if(!o) return;
+    currentInvoiceForWhatsApp = invNo;
     let items = '<table><thead><tr><th>Item</th><th>Size</th><th>Qty</th><th>Price</th><th>Total</th></tr></thead><tbody>';
     o.items.forEach(i => { items += `<tr><td>${i.name}</td><td>${i.size}</td><td>${i.qtyDisplay || i.qty}</td><td>${formatCurrency(i.price)}</td><td>${formatCurrency(i.total)}</td></tr>`; });
     items += '</tbody></table>';
@@ -1098,26 +1136,22 @@ function saveEditInvoice() {
     let newTotal = parseFloat(document.getElementById('editTotal').value);
     let newPaid = parseFloat(document.getElementById('editPaid').value);
     if(!newTotal || newTotal <= 0) { showToast('Enter valid total'); return; }
-    
     let oldCust = customers.find(c => c.phone === o.phone);
     if(oldCust) {
         oldCust.invoices = oldCust.invoices.filter(i => i.invoiceNo !== o.invoiceNo);
     }
-    
     o.customer = newCust;
     o.phone = newPhone;
     o.total = newTotal;
     o.paid = newPaid || 0;
     o.remaining = newTotal - (newPaid || 0);
     o.status = o.remaining <= 0 ? 'paid' : (o.paid > 0 ? 'partial' : 'unpaid');
-    
     let newCustObj = customers.find(c => c.phone === newPhone);
     if(!newCustObj) { 
         newCustObj = { name: newCust, phone: newPhone, invoices: [], ledger: [], advance: 0 }; 
         customers.push(newCustObj); 
     }
     newCustObj.invoices.push({ invoiceNo: o.invoiceNo, date: o.date, amount: newTotal, paid: newPaid || 0, status: o.status });
-    
     saveData();
     displayInvoices();
     displayCustomers();
@@ -1143,6 +1177,18 @@ async function shareInvoiceImage() {
     w.document.write(`<html><body style="margin:0"><img src="${img}" style="max-width:100%"></body></html>`);
     w.document.close();
     showToast('Image ready');
+}
+
+// ==================== WHATSAPP DIRECT SHARE ====================
+function sendWhatsAppDirect() {
+    let o = orders.find(x => x.invoiceNo === currentInvoiceForWhatsApp);
+    if(!o) return;
+    if(!o.phone) { showToast('No phone number for this customer'); return; }
+    let phone = o.phone.replace(/\D/g, '');
+    if(phone.startsWith('05')) phone = '966' + phone.substring(1);
+    let msg = `${company.name} Invoice ${o.invoiceNo}%0ATotal: ${formatCurrency(o.total)}%0APaid: ${formatCurrency(o.paid || 0)}%0ABalance: ${formatCurrency(o.total - (o.paid || 0))}%0A${company.tagline}`;
+    window.open(`https://wa.me/${phone}?text=${msg}`, '_blank');
+    showToast('📱 Opening WhatsApp...');
 }
 
 // ==================== EXPENSES ====================
@@ -1177,7 +1223,7 @@ function loadExpenses() {
             <span class="exp-actions">
                 <button onclick="editExpense(${e.id})" class="btn-warning" style="padding:2px 6px;font-size:9px;">✏️</button>
                 <button onclick="deleteExpense(${e.id})" class="btn-danger" style="padding:2px 6px;font-size:9px;">✕</button>
-                <button onclick="undoDeleteExpense()" class="btn-success" style="padding:2px 6px;font-size:9px;">↩️</button>
+                <button onclick="undoDelete()" class="btn-success" style="padding:2px 6px;font-size:9px;">↩️</button>
             </span>`;
         container.appendChild(div);
     });
@@ -1217,21 +1263,6 @@ function deleteExpense(id) {
     }
 }
 
-function undoDeleteExpense() {
-    if(deletedItems.length === 0) return showToast('Nothing to undo');
-    let last = deletedItems[deletedItems.length - 1];
-    if(last.type === 'expense') {
-        expenses.push(last.data);
-        deletedItems.pop();
-        saveData();
-        loadExpenses();
-        updateSummary();
-        showToast('✅ Expense restored');
-    } else {
-        undoDelete();
-    }
-}
-
 // ==================== SUMMARY ====================
 function updateSummary() {
     const today = new Date().toISOString().split('T')[0];
@@ -1257,9 +1288,8 @@ function updateSummary() {
     const pmBox = document.getElementById('paymentMinusBox');
     pmBox.className = 'summary-box ' + (paymentMinus > 0 ? 'negative' : 'positive');
     
-    // ===== PROFIT / LOSS =====
     const openingStock = products.reduce((sum, p) => sum + (p.stock * p.cost), 0);
-    const stockIn = 0; // Will be added when stock purchase is tracked
+    const stockIn = 0;
     const closingStock = products.reduce((sum, p) => sum + (p.stock * p.cost), 0);
     const ikhrajat = todayIkhrajat;
     const totalSales = todaySales.reduce((s, o) => s + o.total, 0);
@@ -1275,7 +1305,6 @@ function updateSummary() {
     document.getElementById('plTotalProfit').innerHTML = 
         `Profit/Loss: <span style="color:${profitColor};">${formatCurrency(totalProfit)}</span>`;
     
-    // Stock Summary
     let stockHtml = '<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;font-weight:bold;border-bottom:2px solid #ccc;padding:4px 0;"><span>Item</span><span>Opening</span><span>Sold</span><span>Closing</span></div>';
     products.forEach(item => {
         const sold = orders.filter(o => o.date.substring(0,10) === today).reduce((s,o) => { 
@@ -1290,7 +1319,6 @@ function updateSummary() {
     });
     document.getElementById('stockSummaryDisplay').innerHTML = stockHtml;
     
-    // Monthly Summary
     const month = today.substring(0,7);
     const monthSales = orders.filter(o => o.date.substring(0,7) === month);
     const monthExp = expenses.filter(e => e.date.substring(0,7) === month);
@@ -1312,6 +1340,47 @@ function updateSummary() {
         mhtml += `<tr><td>${d}</td><td>${formatCurrency(data.sale)}</td><td>${formatCurrency(data.udhar)}</td><td>${formatCurrency(data.ikhrajat)}</td><td style="color:${profit >= 0 ? '#27ae60' : '#e74c3c'}">${formatCurrency(profit)}</td><td>${formatCurrency(data.sale - data.ikhrajat)}</td></tr>`;
     });
     document.getElementById('monthlySummaryBody').innerHTML = mhtml || '<tr><td colspan="6">No data</td></tr>';
+}
+
+// ==================== EMAIL BACKUP ====================
+function sendEmailBackup() {
+    if(!isAdmin) return showToast('🔒 Admin only!');
+    let email = document.getElementById('backupEmail').value.trim();
+    if(!email) { showToast('Please enter email address'); return; }
+    
+    // Create backup data
+    let data = { 
+        products, orders, customers, expenses, company,
+        backupDate: new Date().toISOString(),
+        version: '1.0'
+    };
+    let jsonData = JSON.stringify(data, null, 2);
+    let blob = new Blob([jsonData], {type: 'application/json'});
+    let url = URL.createObjectURL(blob);
+    
+    // Open email with attachment
+    let subject = encodeURIComponent(`Warda Marble Backup - ${new Date().toLocaleDateString()}`);
+    let body = encodeURIComponent(`Please find attached backup file.\n\nDate: ${new Date().toLocaleString()}\nCompany: ${company.name}\n\nThis file contains all business data including products, orders, customers, and expenses.`);
+    
+    // Try to open email client
+    let mailtoLink = `mailto:${email}?subject=${subject}&body=${body}`;
+    
+    // Also download the file
+    let a = document.createElement('a');
+    a.href = url;
+    a.download = `warda_backup_${new Date().toISOString().slice(0,10)}.json`;
+    a.click();
+    
+    // Open email
+    setTimeout(() => {
+        window.open(mailtoLink, '_blank');
+        showToast('📧 Email opened with attachment');
+    }, 500);
+    
+    // Clean up
+    setTimeout(() => {
+        URL.revokeObjectURL(url);
+    }, 5000);
 }
 
 // ==================== SETTINGS ====================
@@ -1373,26 +1442,26 @@ auth.onAuthStateChanged(user => {
         document.getElementById('loginBtn').style.display = 'none';
         document.getElementById('logoutBtn').style.display = 'inline-block';
         document.getElementById('appContainer').classList.remove('view-only');
+        document.getElementById('emailBackupSection').style.display = 'block';
         loadData();
     } else {
         isAdmin = false;
-        // Only show login if not already logged in
         if(document.getElementById('loginModal').style.display !== 'flex') {
             setTimeout(() => {
                 document.getElementById('loginModal').style.display = 'flex';
                 document.getElementById('appContainer').classList.add('view-only');
+                document.getElementById('emailBackupSection').style.display = 'none';
             }, 1000);
         }
     }
 });
 
 // ==================== INIT ====================
-// Load data first
 loadData();
 document.getElementById('companyNameSetting').value = company.name;
 document.getElementById('companyPhoneSetting').value = company.phone;
+document.getElementById('emailBackupSection').style.display = 'none';
 
-// Show login only if not authenticated
 setTimeout(() => {
     if(!isAdmin) {
         document.getElementById('loginModal').style.display = 'flex';
@@ -1406,7 +1475,7 @@ window.undoDelete = undoDelete;
 window.viewCustomerInvoices = viewCustomerInvoices;
 window.closeCustomerInvoicesModal = closeCustomerInvoicesModal;
 window.closeLedgerModal = closeLedgerModal;
-window.undoDeleteExpense = undoDeleteExpense;
+window.sendWhatsAppDirect = sendWhatsAppDirect;
 </script>
 </body>
 </html>
