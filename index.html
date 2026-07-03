@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Warda Marble - Professional System</title>
+    <title>Warda Marble - Pro</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -32,7 +32,6 @@
         .login-box input:focus{border-color:#ffd700;outline:none;}
         .login-box .btn{width:100%;padding:10px;border:none;border-radius:8px;font-size:14px;font-weight:bold;cursor:pointer;color:white;}
         .login-box .btn-success{background:#27ae60;}
-        .login-box .btn-danger{background:#e74c3c;}
         .login-box .skip-btn{background:#6b7a8a;}
         .login-box .error{color:#e74c3c;font-size:12px;margin-top:5px;display:none;}
         .view-only .btn,.view-only input,.view-only select{opacity:0.5;pointer-events:none;}
@@ -106,6 +105,9 @@
         .ledger-entry .amount.credit{color:#27ae60;}
         .ledger-entry .amount.debit{color:#e74c3c;}
         .balance-box{background:#1a1a2e;color:#ffd700;padding:8px;border-radius:6px;text-align:center;margin-top:8px;}
+        .expense-item{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #eee;}
+        .tax-toggle{display:flex;align-items:center;gap:8px;margin:8px 0;}
+        .tax-toggle input{width:auto;}
         @media(max-width:480px){.product-list{grid-template-columns:1fr 1fr}.header h2{font-size:18px}}
     </style>
 </head>
@@ -131,7 +133,7 @@
         <button class="tab" onclick="showTab('inventory')">📦 Stock</button>
         <button class="tab" onclick="showTab('invoices')">📄 Invoices</button>
         <button class="tab" onclick="showTab('summary')">📊 Summary</button>
-        <button class="tab" onclick="showTab('reports')">📅 Reports</button>
+        <button class="tab" onclick="showTab('expenses')">💸 Expenses</button>
         <button class="tab" onclick="showTab('settings')">⚙️ Settings</button>
     </div>
 
@@ -158,7 +160,7 @@
                 </div>
                 <div class="input-row">
                     <div class="input-group"><label>Item</label><input type="text" id="itemName" placeholder="Name"></div>
-                    <div class="input-group"><label>Cost</label><input type="number" id="costPrice" step="0.01"></div>
+                    <div class="input-group"><label>Purchase Price</label><input type="number" id="costPrice" step="0.01"></div>
                 </div>
                 <div id="sqmFields"><div class="input-row"><div class="input-group"><label>Thick</label><input type="number" id="thick" value="3"></div><div class="input-group"><label>Width</label><input type="number" id="width" value="0.40" step="0.01"></div><div class="input-group"><label>Length</label><input type="number" id="length" value="0.80" step="0.01"></div><div class="input-group"><label>Price/m²</label><input type="number" id="sqmPrice" step="0.01"></div></div></div>
                 <div id="manualFields" style="display:none"><div class="input-row"><div class="input-group"><label>Area(m²)</label><input type="number" id="manualArea" step="0.01"></div><div class="input-group"><label>Price/m²</label><input type="number" id="manualPrice" step="0.01"></div></div></div>
@@ -167,6 +169,10 @@
                 <div style="margin-top:8px"><label>👤 Customer</label><input type="text" id="customerName" placeholder="Name"></div>
                 <div><label>📞 Phone</label><input type="text" id="customerPhone" placeholder="Phone"></div>
                 <div><label>💰 Received</label><input type="number" id="amountReceived" value="0" step="0.01" oninput="updateTotals()"></div>
+                <div class="tax-toggle">
+                    <input type="checkbox" id="taxEnable" onchange="updateTotals()">
+                    <label for="taxEnable">Enable Tax (15%)</label>
+                </div>
                 <div style="max-height:200px;overflow:auto;margin-top:8px">
                     <table id="cartTable">
                         <thead><tr><th>Item</th><th>Size</th><th>Qty</th><th>Price</th><th>Total</th><th></th></tr></thead>
@@ -175,16 +181,16 @@
                 </div>
                 <div class="total-box">
                     <p><strong>Subtotal:</strong> <span id="subtotal">SAR 0.00</span></p>
-                    <p><strong>Tax (<span id="taxRateDisplay">15</span>%):</strong> <span id="taxAmount">SAR 0.00</span></p>
+                    <p><strong>Tax:</strong> <span id="taxAmount">SAR 0.00</span></p>
                     <p><strong>Total:</strong> <span id="grandTotal">SAR 0.00</span></p>
                     <p><strong>Received:</strong> <span id="received">SAR 0.00</span></p>
                     <p id="balanceMsg" style="font-weight:bold"></p>
+                    <p id="profitDisplay" style="font-weight:bold;color:#ffd700;"></p>
                 </div>
                 <div class="action-btns">
                     <button onclick="confirmOrder()" class="btn-success">✅ Confirm</button>
                     <button onclick="clearCart()" class="btn-danger">🗑️ Clear</button>
                     <button onclick="undoCart()" class="btn-warning">↩️ Undo</button>
-                    <button onclick="saveCartAsDraft()" class="btn-info">💾 Draft</button>
                 </div>
             </div>
         </div>
@@ -255,22 +261,17 @@
         </div>
     </div>
 
-    <!-- ===== REPORTS TAB ===== -->
-    <div id="reportsTab" class="tab-content">
+    <!-- ===== EXPENSES TAB ===== -->
+    <div id="expensesTab" class="tab-content">
         <div class="panel">
-            <h3>📅 Reports</h3>
-            <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap">
-                <label style="margin:0;font-size:12px;">Date:</label>
-                <input type="date" id="reportDate" style="width:180px" onchange="loadReports()">
-                <button onclick="loadReports()" class="btn-info">Load</button>
-                <button onclick="printReport()" class="btn-success">🖨️ Print</button>
-            </div>
-            <div class="stats-grid">
-                <div class="stat-card"><h4>Sales</h4><div class="value" id="reportTotalSales">SAR 0</div></div>
-                <div class="stat-card"><h4>Profit</h4><div class="value" id="reportTotalProfit">SAR 0</div></div>
-                <div class="stat-card"><h4>Orders</h4><div class="value" id="reportTotalOrders">0</div></div>
-            </div>
-            <div id="reportList" style="max-height:350px;overflow-y:auto;"></div>
+            <h3>💸 Expenses</h3>
+            <div class="form-group"><label>Expense Head</label><input type="text" id="expenseHead" placeholder="e.g. Petrol, Electricity"></div>
+            <div class="form-group"><label>Amount</label><input type="number" id="expenseAmount" step="0.01"></div>
+            <div class="form-group"><label>Note (optional)</label><input type="text" id="expenseNote" placeholder="Any details"></div>
+            <button onclick="addExpense()" class="btn-success" style="width:100%">➕ Add Expense</button>
+            
+            <h3 style="margin-top:15px;">📋 Today's Expenses</h3>
+            <div id="expenseList" style="max-height:300px;overflow-y:auto;"></div>
         </div>
     </div>
 
@@ -286,12 +287,6 @@
                     <button onclick="saveCompanySettings()" class="btn-success">💾 Save</button>
                 </div>
                 <div>
-                    <h4>💰 Tax</h4>
-                    <div class="form-group"><label><input type="checkbox" id="taxEnableCheck"> Enable Tax</label></div>
-                    <div class="form-group"><label>Rate (%)</label><input type="number" id="taxRateSetting" value="15"></div>
-                    <button onclick="saveTaxSettings()" class="btn-success">💾 Save</button>
-                </div>
-                <div>
                     <h4>💾 Data</h4>
                     <button onclick="backupData()" class="btn-info">📥 Backup</button>
                     <button onclick="document.getElementById('restoreFile').click()" class="btn-warning">📤 Restore</button>
@@ -305,8 +300,7 @@
 </div>
 
 <!-- ===== MODALS ===== -->
-<div id="invoiceModal" class="modal"><div class="modal-content"><div id="invoiceDetails"></div><div style="text-align:center;margin-top:15px;display:flex;flex-wrap:wrap;justify-content:center;gap:6px"><button onclick="closeModal()">Close</button><button onclick="printInvoice()">🖨️ Print</button><button onclick="shareInvoiceImage()" class="btn-whatsapp">📷 Share</button><button onclick="editInvoiceFromModal()" class="btn-warning">✏️ Edit</button></div></div></div>
-<div id="editInvoiceModal" class="modal"><div class="modal-content"><h3>✏️ Edit Invoice</h3><div class="form-group"><label>Customer Name</label><input type="text" id="editCustName"></div><div class="form-group"><label>Phone</label><input type="text" id="editCustPhone"></div><div class="form-group"><label>Total</label><input type="number" id="editTotal" step="0.01"></div><div class="form-group"><label>Paid</label><input type="number" id="editPaid" step="0.01"></div><button onclick="saveEditInvoice()" class="btn-success">💾 Save</button><button onclick="closeEditInvoice()" class="btn-danger">Cancel</button></div></div>
+<div id="invoiceModal" class="modal"><div class="modal-content"><div id="invoiceDetails"></div><div style="text-align:center;margin-top:15px;"><button onclick="closeModal()">Close</button><button onclick="printInvoice()">🖨️ Print</button><button onclick="shareInvoiceImage()" class="btn-whatsapp">📷 Share</button></div></div></div>
 <div id="paymentModal" class="modal"><div class="modal-content"><h3>💰 Receive Payment</h3><input type="number" id="paymentAmount" step="0.01" placeholder="Amount"><br><br><input type="text" id="paymentNotes" placeholder="Notes"><br><br><button onclick="confirmPayment()" class="btn-success">Confirm</button><button onclick="closePaymentModal()" class="btn-danger">Cancel</button></div></div>
 <div id="customerLedgerModal" class="modal"><div class="modal-content"><h3 id="ledgerTitle">Customer Ledger</h3><div id="ledgerContent"></div></div></div>
 
@@ -341,8 +335,7 @@ const database = firebase.database();
 
 // ==================== AUTH ====================
 let isAdmin = false;
-let currentEditInvoiceNo = null;
-let deletedInvoices = [];
+let currentPayInvoice = null;
 
 function loginWithFirebase() {
     const email = document.getElementById('loginEmail').value;
@@ -392,19 +385,23 @@ function logout() {
 }
 
 // ==================== DATA ====================
-let products = [], orders = [], customers = [], cart = [], cartHistory = [];
+let products = [], orders = [], customers = [], cart = [], cartHistory = [], expenses = [];
 let currentLang = 'en', currentCurrency = 'SAR', currentMode = 'sqm';
 let currentGroup = 'all';
-let taxEnabled = true, taxRate = 15;
+let taxEnabled = false;
 let company = { name: "WARDA MARBLE", phone: "+966 59 807 4287" };
 
 function buildProducts() {
     let prods = []; let id = 1;
     let mwad = [
-        ["زاویہ اپ ڈاون","4*4*3mm",9200],["زاویہ اپ ڈاون","4*4*2mm",6600],
-        ["مسمار مغلوب","10*40",4800],["مسمار مغلوب","10*50",4800],
-        ["براغی سقف","10*72",2200],["براغی سقف","10*92",2100],
-        ["جولی ابو جمل","Standard",5],["دسک بوش","9 بوسہ",20]
+        ["زاویہ اپ ڈاون","4*4*3mm",9200],
+        ["زاویہ اپ ڈاون","4*4*2mm",6600],
+        ["مسمار مغلوب","10*40",4800],
+        ["مسمار مغلوب","10*50",4800],
+        ["براغی سقف","10*72",2200],
+        ["براغی سقف","10*92",2100],
+        ["جولی ابو جمل","Standard",5],
+        ["دسک بوش","9 بوسہ",20]
     ];
     mwad.forEach(m => { prods.push({ id: id++, name: m[0], size: m[1], group: 'mwad', selling: 0, cost: 0, stock: m[2], type: 'pieces' }); });
     
@@ -425,18 +422,21 @@ function loadData() {
     orders = o ? JSON.parse(o) : [];
     let c = localStorage.getItem('customers');
     customers = c ? JSON.parse(c) : [];
+    let e = localStorage.getItem('expenses');
+    expenses = e ? JSON.parse(e) : [];
     displayProducts();
     loadInventory();
     displayInvoices();
     displayCustomers();
+    loadExpenses();
     updateSummary();
-    loadReports();
 }
 
 function saveData() {
     localStorage.setItem('products', JSON.stringify(products));
     localStorage.setItem('orders', JSON.stringify(orders));
     localStorage.setItem('customers', JSON.stringify(customers));
+    localStorage.setItem('expenses', JSON.stringify(expenses));
 }
 
 function showToast(msg) {
@@ -482,7 +482,7 @@ function showTab(tab) {
     if(tab === 'invoices') displayInvoices();
     if(tab === 'customers') displayCustomers();
     if(tab === 'summary') updateSummary();
-    if(tab === 'reports') loadReports();
+    if(tab === 'expenses') loadExpenses();
 }
 
 // ==================== PRODUCTS ====================
@@ -532,20 +532,14 @@ function loadInventory() {
         del.onclick = () => {
             if(!isAdmin) return showToast('🔒 Login first!');
             if(confirm('Delete?')) {
-                deletedInvoices.push({ type: 'product', data: p });
                 products = products.filter(x => x.id !== p.id);
                 saveData();
                 loadInventory();
                 displayProducts();
-                showToast('Deleted - Use Undo?');
+                showToast('Deleted');
             }
         };
         c.appendChild(del);
-        let undo = document.createElement('button');
-        undo.innerHTML = '↩️';
-        undo.className = 'btn-warning';
-        undo.onclick = () => undoDelete();
-        c.appendChild(undo);
     });
 }
 
@@ -565,34 +559,11 @@ function addNewProduct() {
     let name = prompt('Product name:');
     if(!name) return;
     let id = products.length ? Math.max(...products.map(p => p.id)) + 1 : 1;
-    products.push({ id, name, size: prompt('Size:'), group: 'mwad', selling: parseFloat(prompt('Selling price:')) || 0, cost: parseFloat(prompt('Cost price:')) || 0, stock: parseInt(prompt('Stock:')) || 50, type });
+    products.push({ id, name, size: prompt('Size:'), group: 'mwad', selling: parseFloat(prompt('Selling price:')) || 0, cost: parseFloat(prompt('Purchase price:')) || 0, stock: parseInt(prompt('Stock:')) || 50, type });
     saveData();
     loadInventory();
     displayProducts();
     showToast('✅ Product added');
-}
-
-function undoDelete() {
-    if(deletedInvoices.length === 0) return showToast('Nothing to undo');
-    let last = deletedInvoices.pop();
-    if(last.type === 'product') {
-        products.push(last.data);
-        saveData();
-        loadInventory();
-        displayProducts();
-        showToast('✅ Restored');
-    } else if(last.type === 'invoice') {
-        orders.push(last.data);
-        // Update customer
-        let cust = customers.find(c => c.phone === last.data.phone);
-        if(cust) {
-            cust.invoices.push({ invoiceNo: last.data.invoiceNo, date: last.data.date, amount: last.data.total, paid: last.data.paid, status: last.data.status });
-        }
-        saveData();
-        displayInvoices();
-        displayCustomers();
-        showToast('✅ Invoice restored');
-    }
 }
 
 // ==================== CART ====================
@@ -600,23 +571,36 @@ function addToCart() {
     let name = document.getElementById('itemName').value;
     if(!name) return showToast('Select item first');
     let cost = parseFloat(document.getElementById('costPrice').value) || 0;
+    let total = 0;
+    let qty = 0;
+    let price = 0;
+    
     if(currentMode === 'sqm') {
         let w = parseFloat(document.getElementById('width').value) || 0.40;
         let l = parseFloat(document.getElementById('length').value) || 0.80;
         let p = parseFloat(document.getElementById('sqmPrice').value);
         if(!p) return showToast('Enter price');
         let area = w * l;
-        cart.push({ id: Date.now(), name, size: `${w.toFixed(2)}m x ${l.toFixed(2)}m`, qty: area.toFixed(2) + ' m²', price: p, cost: cost || p * 0.7, total: area * p });
+        qty = area;
+        price = p;
+        total = area * p;
+        cart.push({ id: Date.now(), name, size: `${w.toFixed(2)}m x ${l.toFixed(2)}m`, qty: qty, qtyDisplay: qty.toFixed(2) + ' m²', price: price, cost: cost, total: total });
     } else if(currentMode === 'manual') {
         let area = parseFloat(document.getElementById('manualArea').value);
         let p = parseFloat(document.getElementById('manualPrice').value);
         if(!area || !p) return showToast('Enter area and price');
-        cart.push({ id: Date.now(), name, size: 'Manual', qty: area.toFixed(2) + ' m²', price: p, cost: cost || p * 0.7, total: area * p });
+        qty = area;
+        price = p;
+        total = area * p;
+        cart.push({ id: Date.now(), name, size: 'Manual', qty: qty, qtyDisplay: qty.toFixed(2) + ' m²', price: price, cost: cost, total: total });
     } else {
-        let qty = parseFloat(document.getElementById('pieceQty').value) || 1;
+        let q = parseFloat(document.getElementById('pieceQty').value) || 1;
         let p = parseFloat(document.getElementById('piecePrice').value);
         if(!p) return showToast('Enter price');
-        cart.push({ id: Date.now(), name, size: document.getElementById('pieceSize').value, qty: qty + ' pcs', price: p, cost: cost || p * 0.6, total: qty * p });
+        qty = q;
+        price = p;
+        total = q * p;
+        cart.push({ id: Date.now(), name, size: document.getElementById('pieceSize').value, qty: qty, qtyDisplay: qty + ' pcs', price: price, cost: cost, total: total });
     }
     updateCartDisplay();
     showToast('Added to cart');
@@ -626,13 +610,15 @@ function updateCartDisplay() {
     let tb = document.getElementById('cartBody');
     tb.innerHTML = '';
     let sub = 0;
+    let totalCost = 0;
     cart.forEach((item, idx) => {
         sub += item.total;
+        totalCost += item.qty * (item.cost || 0);
         let r = tb.insertRow();
-        r.insertCell(0).innerHTML = `<input type="text" value="${item.name}" onchange="editCartItem(${idx},'name',this.value)" style="width:100%;">`;
-        r.insertCell(1).innerHTML = `<input type="text" value="${item.size}" onchange="editCartItem(${idx},'size',this.value)" style="width:100%;">`;
-        r.insertCell(2).innerHTML = `<input type="number" value="${parseFloat(item.qty)}" onchange="editCartItem(${idx},'qty',this.value)" style="width:60px;">`;
-        r.insertCell(3).innerHTML = `<input type="number" value="${item.price}" onchange="editCartItem(${idx},'price',this.value)" style="width:80px;">`;
+        r.insertCell(0).innerHTML = item.name;
+        r.insertCell(1).innerHTML = item.size;
+        r.insertCell(2).innerHTML = item.qtyDisplay;
+        r.insertCell(3).innerHTML = formatCurrency(item.price);
         r.insertCell(4).innerHTML = formatCurrency(item.total);
         let btn = document.createElement('button');
         btn.innerHTML = '✖';
@@ -640,25 +626,18 @@ function updateCartDisplay() {
         btn.onclick = () => { cart.splice(idx, 1); updateCartDisplay(); };
         r.insertCell(5).appendChild(btn);
     });
-    updateTotals(sub);
+    updateTotals(sub, totalCost);
 }
 
-function editCartItem(idx, field, value) {
-    if(idx >= 0 && idx < cart.length) {
-        if(field === 'qty' || field === 'price') {
-            cart[idx][field] = parseFloat(value) || 0;
-        } else {
-            cart[idx][field] = value;
-        }
-        cart[idx].total = parseFloat(cart[idx].qty) * parseFloat(cart[idx].price);
-        updateCartDisplay();
+function updateTotals(sub, totalCost) {
+    if(!sub) {
+        sub = cart.reduce((s, i) => s + i.total, 0);
+        totalCost = cart.reduce((s, i) => s + (i.qty * (i.cost || 0)), 0);
     }
-}
-
-function updateTotals(sub) {
-    if(!sub) sub = cart.reduce((s, i) => s + i.total, 0);
-    let tax = taxEnabled ? sub * taxRate / 100 : 0;
+    let tax = document.getElementById('taxEnable').checked ? sub * 0.15 : 0;
     let total = sub + tax;
+    let profit = sub - totalCost;
+    
     document.getElementById('subtotal').innerHTML = formatCurrency(sub);
     document.getElementById('taxAmount').innerHTML = formatCurrency(tax);
     document.getElementById('grandTotal').innerHTML = formatCurrency(total);
@@ -666,6 +645,7 @@ function updateTotals(sub) {
     document.getElementById('received').innerHTML = formatCurrency(rec);
     let bal = total - rec;
     document.getElementById('balanceMsg').innerHTML = bal > 0 ? `Due: ${formatCurrency(bal)}` : bal < 0 ? `Refund: ${formatCurrency(Math.abs(bal))}` : 'Fully Paid ✓';
+    document.getElementById('profitDisplay').innerHTML = `Profit: ${formatCurrency(profit)}`;
 }
 
 function clearCart() {
@@ -680,13 +660,6 @@ function undoCart() {
     else showToast('Nothing to undo');
 }
 
-function saveCartAsDraft() {
-    if(cart.length === 0) return showToast('Cart empty');
-    let draft = JSON.parse(JSON.stringify(cart));
-    localStorage.setItem('cart_draft', JSON.stringify(draft));
-    showToast('💾 Draft saved');
-}
-
 // ==================== CONFIRM ORDER ====================
 function confirmOrder() {
     if(!isAdmin) return showToast('🔒 Login first!');
@@ -695,21 +668,73 @@ function confirmOrder() {
     let phone = document.getElementById('customerPhone').value || '';
     let rec = parseFloat(document.getElementById('amountReceived').value) || 0;
     let sub = cart.reduce((s, i) => s + i.total, 0);
-    let tax = taxEnabled ? sub * taxRate / 100 : 0;
+    let totalCost = cart.reduce((s, i) => s + (i.qty * (i.cost || 0)), 0);
+    let tax = document.getElementById('taxEnable').checked ? sub * 0.15 : 0;
     let total = sub + tax;
+    let profit = sub - totalCost;
     let invNo = 'INV-' + String(orders.length + 1).padStart(4, '0');
-    cart.forEach(i => { let p = products.find(pr => pr.name === i.name); if(p && p.stock > 0) p.stock--; });
+    
+    // Update stock - ONLY selected item
+    cart.forEach(i => {
+        let p = products.find(pr => pr.name === i.name && pr.size === i.size);
+        if(p && p.stock > 0) {
+            let qtyToSubtract = i.qty;
+            // For SQM items, convert to pieces if needed
+            if(p.type === 'sqm' && i.size.includes('m x')) {
+                // Keep as is
+            }
+            p.stock = Math.max(0, p.stock - qtyToSubtract);
+        }
+    });
+    
     let paid = Math.min(rec, total);
     let status = paid >= total ? 'paid' : (paid > 0 ? 'partial' : 'unpaid');
-    let order = { invoiceNo: invNo, date: new Date().toISOString(), customer: cust, phone, items: [...cart], subtotal: sub, taxAmount: tax, total, cost: cart.reduce((s, i) => s + i.cost, 0), profit: total - cart.reduce((s, i) => s + i.cost, 0), status, paid };
+    let order = { 
+        invoiceNo: invNo, 
+        date: new Date().toISOString(), 
+        customer: cust, 
+        phone, 
+        items: cart.map(i => ({...i})), 
+        subtotal: sub, 
+        taxAmount: tax, 
+        total, 
+        cost: totalCost, 
+        profit: profit, 
+        status, 
+        paid,
+        payments: paid > 0 ? [{amount: paid, notes: 'POS Payment', date: new Date().toISOString()}] : []
+    };
     orders.push(order);
+    
     let custObj = customers.find(c => c.phone === phone);
-    if(!custObj) { custObj = { name: cust, phone, invoices: [], ledger: [] }; customers.push(custObj); }
-    custObj.invoices.push({ invoiceNo: invNo, date: order.date, amount: total, paid, status });
+    if(!custObj) { 
+        custObj = { name: cust, phone, invoices: [], ledger: [], advance: 0 }; 
+        customers.push(custObj); 
+    }
+    
+    // Check if this is advance payment
+    let advanceUsed = 0;
+    if(custObj.advance > 0 && rec > 0) {
+        advanceUsed = Math.min(custObj.advance, total);
+        custObj.advance -= advanceUsed;
+        // Adjust paid amount
+        let remaining = total - advanceUsed;
+        rec = Math.max(0, rec - advanceUsed);
+        paid = Math.min(rec, remaining);
+        total = remaining;
+    }
+    
+    custObj.invoices.push({ invoiceNo: invNo, date: order.date, amount: total, paid: paid, status: status });
+    
+    // Ledger entry
+    if(!custObj.ledger) custObj.ledger = [];
     if(paid > 0) {
-        if(!custObj.ledger) custObj.ledger = [];
         custObj.ledger.push({ date: order.date, type: 'Payment Received', amount: paid });
     }
+    if(advanceUsed > 0) {
+        custObj.ledger.push({ date: order.date, type: 'Advance Used', amount: advanceUsed });
+    }
+    
     saveData();
     showToast('✅ Order confirmed! ' + invNo);
     cart = [];
@@ -718,8 +743,8 @@ function confirmOrder() {
     loadInventory();
     displayInvoices();
     displayCustomers();
+    loadExpenses();
     updateSummary();
-    loadReports();
     document.getElementById('customerName').value = '';
     document.getElementById('customerPhone').value = '';
     document.getElementById('amountReceived').value = '0';
@@ -736,7 +761,9 @@ function displayCustomers() {
         let totalPaid = c.invoices.reduce((s, i) => s + i.paid, 0);
         let div = document.createElement('div');
         div.className = 'customer-card';
-        div.innerHTML = `<div style="display:flex;justify-content:space-between;flex-wrap:wrap;margin-bottom:6px"><div><strong>${c.name}</strong> ${c.phone ? '📞 ' + c.phone : ''}</div><div><span class="badge ${due > 0 ? 'badge-unpaid' : 'badge-paid'}">${due > 0 ? 'Due: ' + formatCurrency(due) : 'Settled'}</span></div></div><div style="font-size:10px;color:#666;">Total Paid: ${formatCurrency(totalPaid)}</div><div class="action-btns"><button onclick="viewCustomerLedger('${c.phone}')" class="btn-info" style="padding:2px 8px;font-size:9px;">📊 Ledger</button><button onclick="addCustomerPayment('${c.phone}')" class="btn-success" style="padding:2px 8px;font-size:9px;">💰 Pay</button></div>`;
+        div.innerHTML = `<div style="display:flex;justify-content:space-between;flex-wrap:wrap;margin-bottom:6px"><div><strong>${c.name}</strong> ${c.phone ? '📞 ' + c.phone : ''}</div><div><span class="badge ${due > 0 ? 'badge-unpaid' : 'badge-paid'}">${due > 0 ? 'Due: ' + formatCurrency(due) : 'Settled'}</span></div></div>
+        <div style="font-size:10px;color:#666;">Advance: ${formatCurrency(c.advance || 0)} | Total Paid: ${formatCurrency(totalPaid)}</div>
+        <div class="action-btns"><button onclick="viewCustomerLedger('${c.phone}')" class="btn-info" style="padding:2px 8px;font-size:9px;">📊 Ledger</button><button onclick="addCustomerPayment('${c.phone}')" class="btn-success" style="padding:2px 8px;font-size:9px;">💰 Pay</button><button onclick="addAdvancePayment('${c.phone}')" class="btn-warning" style="padding:2px 8px;font-size:9px;">📈 Advance</button></div>`;
         container.appendChild(div);
     });
 }
@@ -746,7 +773,7 @@ function viewCustomerLedger(phone) {
     if(!cust) { showToast('Customer not found'); return; }
     document.getElementById('ledgerTitle').textContent = '📊 ' + cust.name + ' - Ledger';
     let due = cust.invoices.reduce((s, i) => s + (i.amount - i.paid), 0);
-    let html = `<div style="margin-bottom:8px;"><strong>Balance: ${due > 0 ? 'Due ' + formatCurrency(due) : 'Settled'}</strong></div>`;
+    let html = `<div style="margin-bottom:8px;"><strong>Balance: ${due > 0 ? 'Due ' + formatCurrency(due) : 'Settled'}</strong> | Advance: ${formatCurrency(cust.advance || 0)}</div>`;
     html += `<div style="max-height:300px;overflow-y:auto;">`;
     cust.invoices.forEach(i => {
         let bal = i.amount - i.paid;
@@ -764,10 +791,24 @@ function viewCustomerLedger(phone) {
 
 function addCustomerPayment(phone) {
     if(!isAdmin) return showToast('🔒 Login first!');
+    currentPayInvoice = phone;
     document.getElementById('paymentModal').style.display = 'flex';
     document.getElementById('paymentAmount').value = '';
     document.getElementById('paymentNotes').value = '';
-    currentPayInvoice = phone;
+}
+
+function addAdvancePayment(phone) {
+    if(!isAdmin) return showToast('🔒 Login first!');
+    let amount = prompt('Enter advance amount:');
+    if(!amount || isNaN(amount) || parseFloat(amount) <= 0) return;
+    let cust = customers.find(c => c.phone === phone);
+    if(!cust) { showToast('Customer not found'); return; }
+    cust.advance = (cust.advance || 0) + parseFloat(amount);
+    if(!cust.ledger) cust.ledger = [];
+    cust.ledger.push({ date: new Date().toISOString(), type: 'Advance Payment Received', amount: parseFloat(amount) });
+    saveData();
+    displayCustomers();
+    showToast('✅ Advance added: ' + formatCurrency(parseFloat(amount)));
 }
 
 function closePaymentModal() { document.getElementById('paymentModal').style.display = 'none'; }
@@ -780,7 +821,17 @@ function confirmPayment() {
     let cust = customers.find(c => c.phone === currentPayInvoice);
     if(!cust) { showToast('Customer not found'); return; }
     let unpaid = cust.invoices.find(i => i.amount - i.paid > 0);
-    if(!unpaid) { showToast('No pending invoice'); return; }
+    if(!unpaid) { 
+        // If no unpaid invoice, add as advance
+        cust.advance = (cust.advance || 0) + amt;
+        if(!cust.ledger) cust.ledger = [];
+        cust.ledger.push({ date: new Date().toISOString(), type: 'Advance Payment (No Invoice)', amount: amt });
+        saveData();
+        displayCustomers();
+        showToast('✅ Advance added: ' + formatCurrency(amt));
+        closePaymentModal();
+        return;
+    }
     let payAmt = Math.min(amt, unpaid.amount - unpaid.paid);
     unpaid.paid += payAmt;
     unpaid.status = unpaid.paid >= unpaid.amount ? 'paid' : 'partial';
@@ -788,6 +839,12 @@ function confirmPayment() {
     if(order) { order.paid = unpaid.paid; order.status = unpaid.status; }
     if(!cust.ledger) cust.ledger = [];
     cust.ledger.push({ date: new Date().toISOString(), type: 'Payment - ' + notes, amount: payAmt });
+    // If extra amount received, add as advance
+    if(amt > payAmt) {
+        let extra = amt - payAmt;
+        cust.advance = (cust.advance || 0) + extra;
+        cust.ledger.push({ date: new Date().toISOString(), type: 'Advance (Extra)', amount: extra });
+    }
     saveData();
     displayCustomers();
     displayInvoices();
@@ -815,32 +872,6 @@ function displayInvoices() {
         viewBtn.className = 'btn-info';
         viewBtn.onclick = () => viewInvoice(o.invoiceNo);
         c.appendChild(viewBtn);
-        let editBtn = document.createElement('button');
-        editBtn.innerHTML = '✏️';
-        editBtn.className = 'btn-warning';
-        editBtn.onclick = () => openEditInvoice(o.invoiceNo);
-        c.appendChild(editBtn);
-        let delBtn = document.createElement('button');
-        delBtn.innerHTML = '✕';
-        delBtn.className = 'btn-danger';
-        delBtn.onclick = () => {
-            if(!isAdmin) return showToast('🔒 Login first!');
-            if(confirm('Delete invoice?')) {
-                deletedInvoices.push({ type: 'invoice', data: o });
-                orders = orders.filter(x => x.invoiceNo !== o.invoiceNo);
-                customers.forEach(c => { c.invoices = c.invoices.filter(i => i.invoiceNo !== o.invoiceNo); });
-                saveData();
-                displayInvoices();
-                displayCustomers();
-                showToast('Deleted - Use Undo');
-            }
-        };
-        c.appendChild(delBtn);
-        let undoBtn = document.createElement('button');
-        undoBtn.innerHTML = '↩️';
-        undoBtn.className = 'btn-warning';
-        undoBtn.onclick = () => undoDelete();
-        c.appendChild(undoBtn);
     });
 }
 
@@ -848,70 +879,12 @@ function viewInvoice(invNo) {
     let o = orders.find(x => x.invoiceNo === invNo);
     if(!o) return;
     let items = '<table><thead><tr><th>Item</th><th>Size</th><th>Qty</th><th>Price</th><th>Total</th></tr></thead><tbody>';
-    o.items.forEach(i => { items += `<tr><td>${i.name}</td><td>${i.size}</td><td>${i.qty}</td><td>${formatCurrency(i.price)}</td><td>${formatCurrency(i.total)}</td></tr>`; });
+    o.items.forEach(i => { items += `<tr><td>${i.name}</td><td>${i.size}</td><td>${i.qtyDisplay || i.qty}</td><td>${formatCurrency(i.price)}</td><td>${formatCurrency(i.total)}</td></tr>`; });
     items += '</tbody></table>';
     let rem = o.total - (o.paid || 0);
     let html = `<div id="invoicePrint" class="invoice-box"><div class="header"><h2>🏢 ${company.name}</h2><p>${company.phone}</p></div><div class="body"><div><strong>Invoice:</strong> ${o.invoiceNo}<br><strong>Date:</strong> ${new Date(o.date).toLocaleString()}<br><strong>Customer:</strong> ${o.customer}<br><strong>Phone:</strong> ${o.phone}</div>${items}<div style="text-align:right;margin-top:10px"><h3>Total: ${formatCurrency(o.total)}</h3><p>Paid: ${formatCurrency(o.paid || 0)}</p><p><strong>${rem > 0 ? 'Due: ' + formatCurrency(rem) : 'Fully Paid ✓'}</strong></p></div></div></div>`;
     document.getElementById('invoiceDetails').innerHTML = html;
     document.getElementById('invoiceModal').style.display = 'flex';
-    currentEditInvoiceNo = invNo;
-}
-
-function openEditInvoice(invNo) {
-    if(!isAdmin) return showToast('🔒 Login first!');
-    let o = orders.find(x => x.invoiceNo === invNo);
-    if(!o) return;
-    currentEditInvoiceNo = invNo;
-    document.getElementById('editCustName').value = o.customer;
-    document.getElementById('editCustPhone').value = o.phone || '';
-    document.getElementById('editTotal').value = o.total;
-    document.getElementById('editPaid').value = o.paid || 0;
-    document.getElementById('editInvoiceModal').style.display = 'flex';
-}
-
-function closeEditInvoice() {
-    document.getElementById('editInvoiceModal').style.display = 'none';
-}
-
-function saveEditInvoice() {
-    if(!isAdmin) return showToast('🔒 Login first!');
-    if(!currentEditInvoiceNo) return;
-    let o = orders.find(x => x.invoiceNo === currentEditInvoiceNo);
-    if(!o) return;
-    let newCust = document.getElementById('editCustName').value;
-    let newPhone = document.getElementById('editCustPhone').value;
-    let newTotal = parseFloat(document.getElementById('editTotal').value);
-    let newPaid = parseFloat(document.getElementById('editPaid').value);
-    if(!newTotal || newTotal <= 0) return showToast('Enter valid total');
-    // Update customer
-    let oldCust = customers.find(c => c.phone === o.phone);
-    if(oldCust) {
-        oldCust.invoices = oldCust.invoices.filter(i => i.invoiceNo !== o.invoiceNo);
-        if(oldCust.invoices.length === 0) {
-            customers = customers.filter(c => c.phone !== o.phone);
-        }
-    }
-    o.customer = newCust;
-    o.phone = newPhone;
-    o.total = newTotal;
-    o.paid = newPaid;
-    o.remaining = newTotal - newPaid;
-    o.status = newPaid >= newTotal ? 'paid' : (newPaid > 0 ? 'partial' : 'unpaid');
-    // Add to new customer
-    let newCustObj = customers.find(c => c.phone === newPhone);
-    if(!newCustObj) { newCustObj = { name: newCust, phone: newPhone, invoices: [], ledger: [] }; customers.push(newCustObj); }
-    newCustObj.invoices.push({ invoiceNo: o.invoiceNo, date: o.date, amount: newTotal, paid: newPaid, status: o.status });
-    saveData();
-    displayInvoices();
-    displayCustomers();
-    closeEditInvoice();
-    showToast('✅ Invoice updated');
-}
-
-function editInvoiceFromModal() {
-    if(!isAdmin) return showToast('🔒 Login first!');
-    openEditInvoice(currentEditInvoiceNo);
-    document.getElementById('invoiceModal').style.display = 'none';
 }
 
 function closeModal() { document.getElementById('invoiceModal').style.display = 'none'; }
@@ -934,6 +907,43 @@ async function shareInvoiceImage() {
     showToast('Image ready');
 }
 
+// ==================== EXPENSES ====================
+function addExpense() {
+    if(!isAdmin) return showToast('🔒 Login first!');
+    let head = document.getElementById('expenseHead').value.trim();
+    let amount = parseFloat(document.getElementById('expenseAmount').value);
+    let note = document.getElementById('expenseNote').value.trim();
+    if(!head || !amount || amount <= 0) { showToast('Enter valid expense'); return; }
+    expenses.push({ id: Date.now(), head, amount, note, date: new Date().toISOString() });
+    saveData();
+    loadExpenses();
+    updateSummary();
+    document.getElementById('expenseHead').value = '';
+    document.getElementById('expenseAmount').value = '';
+    document.getElementById('expenseNote').value = '';
+    showToast('✅ Expense added');
+}
+
+function loadExpenses() {
+    let container = document.getElementById('expenseList');
+    let today = new Date().toISOString().split('T')[0];
+    let todayExp = expenses.filter(e => e.date.substring(0,10) === today);
+    container.innerHTML = '';
+    if(todayExp.length === 0) { container.innerHTML = '<div style="color:#666;padding:10px;">No expenses today</div>'; return; }
+    let total = 0;
+    todayExp.forEach(e => {
+        total += e.amount;
+        let div = document.createElement('div');
+        div.className = 'expense-item';
+        div.innerHTML = `<span><strong>${e.head}</strong> ${e.note ? '- ' + e.note : ''}</span><span>${formatCurrency(e.amount)}</span>`;
+        container.appendChild(div);
+    });
+    let totalDiv = document.createElement('div');
+    totalDiv.style.cssText = 'font-weight:bold;padding:8px 0;border-top:2px solid #ccc;';
+    totalDiv.innerHTML = `Total: ${formatCurrency(total)}`;
+    container.appendChild(totalDiv);
+}
+
 // ==================== SUMMARY ====================
 function updateSummary() {
     const today = new Date().toISOString().split('T')[0];
@@ -942,7 +952,7 @@ function updateSummary() {
     const todaySales = orders.filter(o => o.date.substring(0,10) === today);
     const todayCash = todaySales.filter(o => o.status === 'paid' || o.paid >= o.total).reduce((s,o) => s + o.total, 0);
     const todayUdhar = todaySales.filter(o => o.status === 'unpaid' || o.status === 'partial').reduce((s,o) => s + (o.total - (o.paid||0)), 0);
-    const todayIkhrajat = 0;
+    const todayIkhrajat = expenses.filter(e => e.date.substring(0,10) === today).reduce((s,e) => s + e.amount, 0);
     const sabqaWusool = orders.filter(o => o.date.substring(0,10) < today).reduce((s,o) => s + (o.paid||0), 0);
     const advanceWusool = todaySales.reduce((s,o) => s + (o.paid||0), 0);
     const totalJamma = todayCash + sabqaWusool + advanceWusool;
@@ -959,59 +969,42 @@ function updateSummary() {
     const pmBox = document.getElementById('paymentMinusBox');
     pmBox.className = 'summary-box ' + (paymentMinus > 0 ? 'negative' : 'positive');
     
-    // Stock Summary
+    // Stock Summary - showing only selected items
     let stockHtml = '<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;font-weight:bold;border-bottom:2px solid #ccc;padding:4px 0;"><span>Item</span><span>Opening</span><span>Sold</span><span>Closing</span></div>';
     products.forEach(item => {
-        const sold = orders.filter(o => o.date.substring(0,10) === today).reduce((s,o) => { let t=0; o.items.forEach(i=>{ if(i.name===item.name) t+=parseFloat(i.qty)||0; }); return s+t; }, 0);
+        const sold = orders.filter(o => o.date.substring(0,10) === today).reduce((s,o) => { 
+            let t=0; 
+            o.items.forEach(i=>{ 
+                if(i.name === item.name && i.size === item.size) t += parseFloat(i.qty) || 0; 
+            }); 
+            return s+t; 
+        }, 0);
         const opening = item.stock + sold;
-        stockHtml += `<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;padding:3px 0;border-bottom:1px solid #eee;font-size:11px;"><span>${item.name}</span><span>${opening}</span><span style="color:#f39c12;">${sold}</span><span style="font-weight:bold;">${item.stock}</span></div>`;
+        stockHtml += `<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;padding:3px 0;border-bottom:1px solid #eee;font-size:11px;"><span>${item.name} ${item.size}</span><span>${opening}</span><span style="color:#f39c12;">${sold}</span><span style="font-weight:bold;">${item.stock}</span></div>`;
     });
     document.getElementById('stockSummaryDisplay').innerHTML = stockHtml;
     
     // Monthly Summary
     const month = today.substring(0,7);
     const monthSales = orders.filter(o => o.date.substring(0,7) === month);
+    const monthExp = expenses.filter(e => e.date.substring(0,7) === month);
     const monthData = {};
     monthSales.forEach(o => {
         if (!monthData[o.date.substring(0,10)]) monthData[o.date.substring(0,10)] = { sale: 0, udhar: 0, ikhrajat: 0 };
         if (o.status === 'paid' || o.paid >= o.total) monthData[o.date.substring(0,10)].sale += o.total;
         else monthData[o.date.substring(0,10)].udhar += (o.total - (o.paid||0));
     });
+    monthExp.forEach(e => {
+        let d = e.date.substring(0,10);
+        if (!monthData[d]) monthData[d] = { sale: 0, udhar: 0, ikhrajat: 0 };
+        monthData[d].ikhrajat += e.amount;
+    });
     let mhtml = '';
     Object.keys(monthData).sort().forEach(d => {
         const data = monthData[d];
-        mhtml += `<tr><td>${d}</td><td>${formatCurrency(data.sale)}</td><td>${formatCurrency(data.udhar)}</td><td>${formatCurrency(data.ikhrajat)}</td><td>${formatCurrency(data.sale+data.udhar)}</td></tr>`;
+        mhtml += `<tr><td>${d}</td><td>${formatCurrency(data.sale)}</td><td>${formatCurrency(data.udhar)}</td><td>${formatCurrency(data.ikhrajat)}</td><td>${formatCurrency(data.sale + data.udhar - data.ikhrajat)}</td></tr>`;
     });
     document.getElementById('monthlySummaryBody').innerHTML = mhtml || '<tr><td colspan="5">No data</td></tr>';
-}
-
-// ==================== REPORTS ====================
-function loadReports() {
-    let date = document.getElementById('reportDate').value;
-    if(!date) { let d = new Date(); date = d.toISOString().slice(0,10); document.getElementById('reportDate').value = date; }
-    let dayOrders = orders.filter(o => o.date.slice(0,10) === date);
-    let total = dayOrders.reduce((s,o) => s + o.total, 0);
-    let profit = dayOrders.reduce((s,o) => s + o.profit, 0);
-    document.getElementById('reportTotalSales').innerHTML = formatCurrency(total);
-    document.getElementById('reportTotalProfit').innerHTML = formatCurrency(profit);
-    document.getElementById('reportTotalOrders').innerHTML = dayOrders.length;
-    let container = document.getElementById('reportList');
-    container.innerHTML = '';
-    if(dayOrders.length === 0) { container.innerHTML = '<div style="text-align:center;padding:20px;color:#666;">No orders</div>'; return; }
-    dayOrders.forEach(o => {
-        let div = document.createElement('div');
-        div.style.cssText = 'background:white;border-radius:8px;padding:10px;margin-bottom:8px;border-left:3px solid #ffd700;box-shadow:0 1px 3px rgba(0,0,0,0.05);';
-        div.innerHTML = `<div style="display:flex;justify-content:space-between;flex-wrap:wrap"><div><strong>${o.invoiceNo}</strong><br><small>${new Date(o.date).toLocaleTimeString()}</small></div><div><strong>${formatCurrency(o.total)}</strong><br>Paid: ${formatCurrency(o.paid||0)}</div></div><div>Customer: ${o.customer}</div><div class="action-btns"><button onclick="viewInvoice('${o.invoiceNo}')" class="btn-info" style="padding:2px 8px;">👁️</button><button onclick="openEditInvoice('${o.invoiceNo}')" class="btn-warning" style="padding:2px 8px;">✏️</button></div>`;
-        container.appendChild(div);
-    });
-}
-
-function printReport() {
-    let content = document.getElementById('reportList').innerHTML;
-    let w = window.open('', '_blank');
-    w.document.write(`<html><head><title>Report</title><style>body{padding:20px;font-family:Arial;} .card{background:white;border-radius:8px;padding:10px;margin-bottom:8px;border-left:3px solid #ffd700;}</style></head><body><h1>📊 Daily Report</h1><p>Date: ${document.getElementById('reportDate').value}</p>${content}</body></html>`);
-    w.document.close();
-    w.print();
 }
 
 // ==================== SETTINGS ====================
@@ -1023,17 +1016,8 @@ function saveCompanySettings() {
     showToast('Saved');
 }
 
-function saveTaxSettings() {
-    taxEnabled = document.getElementById('taxEnableCheck').checked;
-    taxRate = parseFloat(document.getElementById('taxRateSetting').value);
-    saveData();
-    document.getElementById('taxRateDisplay').innerHTML = taxRate;
-    updateCartDisplay();
-    showToast('Saved');
-}
-
 function backupData() {
-    let data = { products, orders, customers, taxEnabled, taxRate, company };
+    let data = { products, orders, customers, expenses, company };
     let a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob([JSON.stringify(data)], {type: 'application/json'}));
     a.download = `backup_${new Date().toISOString().slice(0,10)}.json`;
@@ -1049,8 +1033,7 @@ function restoreData(file) {
             if(d.products) products = d.products;
             if(d.orders) orders = d.orders;
             if(d.customers) customers = d.customers;
-            if(d.taxEnabled !== undefined) taxEnabled = d.taxEnabled;
-            if(d.taxRate) taxRate = d.taxRate;
+            if(d.expenses) expenses = d.expenses;
             if(d.company) company = d.company;
             saveData();
             location.reload();
@@ -1066,15 +1049,14 @@ function resetAll() {
     }
 }
 
-// ==================== FIREBASE SYNC ====================
 function syncToCloud() {
-    const data = { products, orders, customers, taxEnabled, taxRate, company };
+    const data = { products, orders, customers, expenses, company };
     database.ref('warda_data').set(data).then(() => {
         showToast('✅ Synced to cloud!');
     }).catch(() => { showToast('❌ Sync failed!'); });
 }
 
-// ==================== AUTO AUTH CHECK ====================
+// ==================== AUTO AUTH ====================
 auth.onAuthStateChanged(user => {
     if(user) {
         isAdmin = true;
@@ -1088,7 +1070,11 @@ auth.onAuthStateChanged(user => {
     } else {
         isAdmin = false;
         if(!document.getElementById('loginModal').style.display || document.getElementById('loginModal').style.display === 'none') {
-            // Only show if not already shown
+            // Show login modal for first time visitors
+            setTimeout(() => {
+                document.getElementById('loginModal').style.display = 'flex';
+                document.getElementById('appContainer').classList.add('view-only');
+            }, 500);
         }
     }
 });
@@ -1097,22 +1083,16 @@ auth.onAuthStateChanged(user => {
 loadData();
 document.getElementById('companyNameSetting').value = company.name;
 document.getElementById('companyPhoneSetting').value = company.phone;
-document.getElementById('taxEnableCheck').checked = taxEnabled;
-document.getElementById('taxRateSetting').value = taxRate;
-document.getElementById('taxRateDisplay').innerHTML = taxRate;
-document.getElementById('reportDate').value = new Date().toISOString().slice(0,10);
 
-// If not logged in, show login
+// Show login if not already shown
 setTimeout(() => {
     if(!isAdmin) {
         document.getElementById('loginModal').style.display = 'flex';
         document.getElementById('appContainer').classList.add('view-only');
     }
-}, 500);
+}, 1000);
 
 window.viewInvoice = viewInvoice;
-window.openEditInvoice = openEditInvoice;
-window.undoDelete = undoDelete;
 </script>
 </body>
 </html>
