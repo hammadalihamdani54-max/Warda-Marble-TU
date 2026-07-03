@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Warda Marble - Pro</title>
+    <title>Warda Marble - Professional</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -99,6 +99,7 @@
         .action-btns{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;justify-content:center;}
         .modal{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:1000;justify-content:center;align-items:center;}
         .modal-content{background:white;padding:20px;border-radius:15px;max-width:600px;width:95%;max-height:85vh;overflow:auto;}
+        .modal-content .close-btn{float:right;background:#e74c3c;color:white;border:none;padding:4px 12px;border-radius:5px;cursor:pointer;font-size:12px;}
         .toast{position:fixed;bottom:20px;right:20px;background:#1a1a2e;color:#ffd700;padding:8px 16px;border-radius:8px;z-index:1000;font-size:12px;}
         .customer-card{background:white;border:1px solid #e2e8f0;border-radius:10px;padding:10px;margin-bottom:8px;cursor:pointer;transition:0.2s;}
         .customer-card:hover{box-shadow:0 2px 8px rgba(0,0,0,0.1);}
@@ -106,11 +107,14 @@
         .ledger-entry .amount.credit{color:#27ae60;}
         .ledger-entry .amount.debit{color:#e74c3c;}
         .balance-box{background:#1a1a2e;color:#ffd700;padding:8px;border-radius:6px;text-align:center;margin-top:8px;}
-        .expense-item{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #eee;}
+        .expense-item{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #eee;align-items:center;}
+        .expense-item .exp-actions{display:flex;gap:4px;}
         .tax-toggle{display:flex;align-items:center;gap:8px;margin:8px 0;}
         .tax-toggle input{width:auto;}
         .customer-invoices{margin-top:10px;padding:10px;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;}
-        .customer-invoices .inv-item{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #eee;font-size:11px;}
+        .customer-invoices .inv-item{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #eee;font-size:11px;align-items:center;}
+        .modal-header{display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #eef2f6;padding-bottom:10px;margin-bottom:10px;}
+        .modal-header h3{margin:0;}
         @media(max-width:480px){.product-list{grid-template-columns:1fr 1fr}.header h2{font-size:18px}}
     </style>
 </head>
@@ -320,11 +324,11 @@
 </div>
 
 <!-- ===== MODALS ===== -->
-<div id="invoiceModal" class="modal"><div class="modal-content"><div id="invoiceDetails"></div><div style="text-align:center;margin-top:15px;display:flex;flex-wrap:wrap;justify-content:center;gap:6px"><button onclick="closeModal()">Close</button><button onclick="printInvoice()">🖨️ Print</button><button onclick="shareInvoiceImage()" class="btn-whatsapp">📷 Share</button><button onclick="openEditInvoiceFromModal()" class="btn-warning">✏️ Edit</button></div></div></div>
-<div id="editInvoiceModal" class="modal"><div class="modal-content"><h3>✏️ Edit Invoice</h3><div class="form-group"><label>Customer Name</label><input type="text" id="editCustName"></div><div class="form-group"><label>Phone</label><input type="text" id="editCustPhone"></div><div class="form-group"><label>Total</label><input type="number" id="editTotal" step="0.01"></div><div class="form-group"><label>Paid</label><input type="number" id="editPaid" step="0.01"></div><button onclick="saveEditInvoice()" class="btn-success">💾 Save</button><button onclick="closeEditInvoice()" class="btn-danger">Cancel</button></div></div>
-<div id="paymentModal" class="modal"><div class="modal-content"><h3>💰 Receive Payment</h3><input type="number" id="paymentAmount" step="0.01" placeholder="Amount"><br><br><input type="text" id="paymentNotes" placeholder="Notes"><br><br><button onclick="confirmPayment()" class="btn-success">Confirm</button><button onclick="closePaymentModal()" class="btn-danger">Cancel</button></div></div>
-<div id="customerLedgerModal" class="modal"><div class="modal-content"><h3 id="ledgerTitle">Customer Ledger</h3><div id="ledgerContent"></div></div></div>
-<div id="customerInvoicesModal" class="modal"><div class="modal-content"><h3 id="customerInvoicesTitle">Customer Invoices</h3><div id="customerInvoicesContent"></div></div></div>
+<div id="invoiceModal" class="modal"><div class="modal-content"><div class="modal-header"><h3>📄 Invoice</h3><button class="close-btn" onclick="closeModal()">✕ Close</button></div><div id="invoiceDetails"></div><div style="text-align:center;margin-top:15px;display:flex;flex-wrap:wrap;justify-content:center;gap:6px"><button onclick="printInvoice()">🖨️ Print</button><button onclick="shareInvoiceImage()" class="btn-whatsapp">📷 Share</button><button onclick="openEditInvoiceFromModal()" class="btn-warning">✏️ Edit</button></div></div></div>
+<div id="editInvoiceModal" class="modal"><div class="modal-content"><div class="modal-header"><h3>✏️ Edit Invoice</h3><button class="close-btn" onclick="closeEditInvoice()">✕ Close</button></div><div class="form-group"><label>Customer Name</label><input type="text" id="editCustName"></div><div class="form-group"><label>Phone</label><input type="text" id="editCustPhone"></div><div class="form-group"><label>Total</label><input type="number" id="editTotal" step="0.01"></div><div class="form-group"><label>Paid</label><input type="number" id="editPaid" step="0.01"></div><button onclick="saveEditInvoice()" class="btn-success">💾 Save</button><button onclick="closeEditInvoice()" class="btn-danger">Cancel</button></div></div>
+<div id="paymentModal" class="modal"><div class="modal-content"><div class="modal-header"><h3>💰 Receive Payment</h3><button class="close-btn" onclick="closePaymentModal()">✕ Close</button></div><input type="number" id="paymentAmount" step="0.01" placeholder="Amount"><br><br><input type="text" id="paymentNotes" placeholder="Notes"><br><br><button onclick="confirmPayment()" class="btn-success">Confirm</button><button onclick="closePaymentModal()" class="btn-danger">Cancel</button></div></div>
+<div id="customerLedgerModal" class="modal"><div class="modal-content"><div class="modal-header"><h3 id="ledgerTitle">📊 Customer Ledger</h3><button class="close-btn" onclick="closeLedgerModal()">✕ Close</button></div><div id="ledgerContent"></div></div></div>
+<div id="customerInvoicesModal" class="modal"><div class="modal-content"><div class="modal-header"><h3 id="customerInvoicesTitle">📄 Customer Invoices</h3><button class="close-btn" onclick="closeCustomerInvoicesModal()">✕ Close</button></div><div id="customerInvoicesContent"></div></div></div>
 
 <!-- ===== LOGIN MODAL ===== -->
 <div id="loginModal" class="login-modal">
@@ -360,6 +364,7 @@ let isAdmin = false;
 let currentPayInvoice = null;
 let currentEditInvoiceNo = null;
 let deletedItems = [];
+let deletedExpenses = [];
 
 function loginWithFirebase() {
     const email = document.getElementById('loginEmail').value;
@@ -642,6 +647,11 @@ function undoDelete() {
         displayInvoices();
         displayCustomers();
         showToast('✅ Invoice restored');
+    } else if(last.type === 'expense') {
+        expenses.push(last.data);
+        saveData();
+        loadExpenses();
+        showToast('✅ Expense restored');
     }
 }
 
@@ -876,6 +886,10 @@ function viewCustomerInvoices(phone) {
     document.getElementById('customerInvoicesModal').style.display = 'flex';
 }
 
+function closeCustomerInvoicesModal() {
+    document.getElementById('customerInvoicesModal').style.display = 'none';
+}
+
 function deleteInvoiceFromCustomer(invNo) {
     if(!isAdmin) return showToast('🔒 Login first!');
     if(confirm('Delete this invoice?')) {
@@ -916,6 +930,10 @@ function viewCustomerLedger(phone) {
     html += `</div><div class="balance-box">Net Balance: ${due > 0 ? 'Due ' + formatCurrency(due) : 'Settled'}</div>`;
     document.getElementById('ledgerContent').innerHTML = html;
     document.getElementById('customerLedgerModal').style.display = 'flex';
+}
+
+function closeLedgerModal() {
+    document.getElementById('customerLedgerModal').style.display = 'none';
 }
 
 function addCustomerPayment(phone) {
@@ -1155,13 +1173,63 @@ function loadExpenses() {
         total += e.amount;
         let div = document.createElement('div');
         div.className = 'expense-item';
-        div.innerHTML = `<span><strong>${e.head}</strong> ${e.note ? '- ' + e.note : ''}</span><span>${formatCurrency(e.amount)}</span>`;
+        div.innerHTML = `<span><strong>${e.head}</strong> ${e.note ? '- ' + e.note : ''}</span>
+            <span class="exp-actions">
+                <button onclick="editExpense(${e.id})" class="btn-warning" style="padding:2px 6px;font-size:9px;">✏️</button>
+                <button onclick="deleteExpense(${e.id})" class="btn-danger" style="padding:2px 6px;font-size:9px;">✕</button>
+                <button onclick="undoDeleteExpense()" class="btn-success" style="padding:2px 6px;font-size:9px;">↩️</button>
+            </span>`;
         container.appendChild(div);
     });
     let totalDiv = document.createElement('div');
     totalDiv.style.cssText = 'font-weight:bold;padding:8px 0;border-top:2px solid #ccc;';
     totalDiv.innerHTML = `Total: ${formatCurrency(total)}`;
     container.appendChild(totalDiv);
+}
+
+function editExpense(id) {
+    if(!isAdmin) return showToast('🔒 Login first!');
+    let exp = expenses.find(e => e.id === id);
+    if(!exp) return;
+    let head = prompt('Expense Head:', exp.head);
+    if(head !== null && head.trim() !== '') exp.head = head.trim();
+    let amount = prompt('Amount:', exp.amount);
+    if(amount !== null && !isNaN(amount)) exp.amount = parseFloat(amount);
+    let note = prompt('Note:', exp.note || '');
+    if(note !== null) exp.note = note.trim();
+    saveData();
+    loadExpenses();
+    showToast('✅ Expense updated');
+}
+
+function deleteExpense(id) {
+    if(!isAdmin) return showToast('🔒 Login first!');
+    if(confirm('Delete this expense?')) {
+        let exp = expenses.find(e => e.id === id);
+        if(exp) {
+            deletedItems.push({ type: 'expense', data: exp });
+            expenses = expenses.filter(e => e.id !== id);
+            saveData();
+            loadExpenses();
+            updateSummary();
+            showToast('Deleted - Use Undo');
+        }
+    }
+}
+
+function undoDeleteExpense() {
+    if(deletedItems.length === 0) return showToast('Nothing to undo');
+    let last = deletedItems[deletedItems.length - 1];
+    if(last.type === 'expense') {
+        expenses.push(last.data);
+        deletedItems.pop();
+        saveData();
+        loadExpenses();
+        updateSummary();
+        showToast('✅ Expense restored');
+    } else {
+        undoDelete();
+    }
 }
 
 // ==================== SUMMARY ====================
@@ -1189,34 +1257,15 @@ function updateSummary() {
     const pmBox = document.getElementById('paymentMinusBox');
     pmBox.className = 'summary-box ' + (paymentMinus > 0 ? 'negative' : 'positive');
     
-    // ===== PROFIT / LOSS CALCULATION =====
-    // Opening Stock = Previous day's closing stock
-    // Stock In = Today's purchases (from stock history)
-    // Closing Stock = Today's closing stock
-    // Ikhrajat = Today's expenses
-    
-    // Calculate opening stock (previous day's total stock value)
-    const prevDate = new Date();
-    prevDate.setDate(prevDate.getDate() - 1);
-    const prevDateStr = prevDate.toISOString().split('T')[0];
-    
-    // Get previous day's stock from daily stock history
-    let prevStock = 0;
-    // For now, using current stock as opening (simplified)
-    // In real system, you'd track daily stock
+    // ===== PROFIT / LOSS =====
     const openingStock = products.reduce((sum, p) => sum + (p.stock * p.cost), 0);
     const stockIn = 0; // Will be added when stock purchase is tracked
     const closingStock = products.reduce((sum, p) => sum + (p.stock * p.cost), 0);
     const ikhrajat = todayIkhrajat;
-    
-    // Total Sales for today
     const totalSales = todaySales.reduce((s, o) => s + o.total, 0);
-    
-    // Profit/Loss = Total Sales - (Opening Stock + Stock In - Closing Stock + Ikhrajat)
     const totalCost = openingStock + stockIn - closingStock + ikhrajat;
     const totalProfit = totalSales - totalCost;
     
-    // Update Profit/Loss display
     document.getElementById('plOpeningStock').textContent = formatCurrency(openingStock);
     document.getElementById('plStockIn').textContent = formatCurrency(stockIn);
     document.getElementById('plClosingStock').textContent = formatCurrency(closingStock);
@@ -1241,7 +1290,7 @@ function updateSummary() {
     });
     document.getElementById('stockSummaryDisplay').innerHTML = stockHtml;
     
-    // Monthly Summary with Profit
+    // Monthly Summary
     const month = today.substring(0,7);
     const monthSales = orders.filter(o => o.date.substring(0,7) === month);
     const monthExp = expenses.filter(e => e.date.substring(0,7) === month);
@@ -1327,31 +1376,37 @@ auth.onAuthStateChanged(user => {
         loadData();
     } else {
         isAdmin = false;
-        if(!document.getElementById('loginModal').style.display || document.getElementById('loginModal').style.display === 'none') {
+        // Only show login if not already logged in
+        if(document.getElementById('loginModal').style.display !== 'flex') {
             setTimeout(() => {
                 document.getElementById('loginModal').style.display = 'flex';
                 document.getElementById('appContainer').classList.add('view-only');
-            }, 500);
+            }, 1000);
         }
     }
 });
 
 // ==================== INIT ====================
+// Load data first
 loadData();
 document.getElementById('companyNameSetting').value = company.name;
 document.getElementById('companyPhoneSetting').value = company.phone;
 
+// Show login only if not authenticated
 setTimeout(() => {
     if(!isAdmin) {
         document.getElementById('loginModal').style.display = 'flex';
         document.getElementById('appContainer').classList.add('view-only');
     }
-}, 1000);
+}, 1500);
 
 window.viewInvoice = viewInvoice;
 window.openEditInvoice = openEditInvoice;
 window.undoDelete = undoDelete;
 window.viewCustomerInvoices = viewCustomerInvoices;
+window.closeCustomerInvoicesModal = closeCustomerInvoicesModal;
+window.closeLedgerModal = closeLedgerModal;
+window.undoDeleteExpense = undoDeleteExpense;
 </script>
 </body>
 </html>
