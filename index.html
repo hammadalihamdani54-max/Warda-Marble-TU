@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Warda Marble - Professional</title>
+    <title>Warda Marble - Pro</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -100,7 +100,8 @@
         .modal{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:1000;justify-content:center;align-items:center;}
         .modal-content{background:white;padding:20px;border-radius:15px;max-width:600px;width:95%;max-height:85vh;overflow:auto;}
         .toast{position:fixed;bottom:20px;right:20px;background:#1a1a2e;color:#ffd700;padding:8px 16px;border-radius:8px;z-index:1000;font-size:12px;}
-        .customer-card{background:white;border:1px solid #e2e8f0;border-radius:10px;padding:10px;margin-bottom:8px;}
+        .customer-card{background:white;border:1px solid #e2e8f0;border-radius:10px;padding:10px;margin-bottom:8px;cursor:pointer;transition:0.2s;}
+        .customer-card:hover{box-shadow:0 2px 8px rgba(0,0,0,0.1);}
         .ledger-entry{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #eee;font-size:11px;}
         .ledger-entry .amount.credit{color:#27ae60;}
         .ledger-entry .amount.debit{color:#e74c3c;}
@@ -108,6 +109,8 @@
         .expense-item{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #eee;}
         .tax-toggle{display:flex;align-items:center;gap:8px;margin:8px 0;}
         .tax-toggle input{width:auto;}
+        .customer-invoices{margin-top:10px;padding:10px;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;}
+        .customer-invoices .inv-item{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #eee;font-size:11px;}
         @media(max-width:480px){.product-list{grid-template-columns:1fr 1fr}.header h2{font-size:18px}}
     </style>
 </head>
@@ -248,13 +251,30 @@
                 <div class="summary-box" id="paymentMinusBox"><div class="num" id="sumPaymentMinus">0.00</div><div class="lbl">Payment Minus</div></div>
             </div>
             
+            <!-- ===== PROFIT / LOSS ===== -->
+            <div style="background:linear-gradient(135deg,#1a2a4a,#2d3b5a);padding:15px;border-radius:10px;margin-bottom:15px;color:white;text-align:center;">
+                <h3 style="color:#ffd700;margin-bottom:8px;">📈 Profit / Loss</h3>
+                <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;font-size:12px;">
+                    <div><span style="color:#a0c4e0;">Opening Stock:</span><br><strong id="plOpeningStock">0</strong></div>
+                    <div><span style="color:#a0c4e0;">Stock In:</span><br><strong id="plStockIn">0</strong></div>
+                    <div><span style="color:#a0c4e0;">Closing Stock:</span><br><strong id="plClosingStock">0</strong></div>
+                    <div><span style="color:#a0c4e0;">Ikhrajat:</span><br><strong id="plIkhrajat">0</strong></div>
+                </div>
+                <div style="margin-top:10px;font-size:18px;font-weight:bold;border-top:1px solid #ffd700;padding-top:8px;">
+                    <span id="plTotalProfit" style="color:#ffd700;">Profit: 0.00</span>
+                </div>
+                <div style="font-size:10px;color:#a0c4e0;margin-top:4px;">
+                    Formula: Sales - (Opening + Stock In - Closing + Ikhrajat)
+                </div>
+            </div>
+            
             <h3>📦 Opening / Closing Stock</h3>
             <div id="stockSummaryDisplay" style="background:#f8fafc;padding:10px;border-radius:8px;max-height:200px;overflow-y:auto;"></div>
             
             <h3>📅 Monthly Summary</h3>
             <div style="overflow-x:auto;max-height:200px;overflow-y:auto">
                 <table id="monthlySummaryTable">
-                    <thead><tr><th>Date</th><th>Sale</th><th>Udhar</th><th>Ikhrajat</th><th>Jamma</th></tr></thead>
+                    <thead><tr><th>Date</th><th>Sale</th><th>Udhar</th><th>Ikhrajat</th><th>Profit</th><th>Jamma</th></tr></thead>
                     <tbody id="monthlySummaryBody"></tbody>
                 </table>
             </div>
@@ -304,6 +324,7 @@
 <div id="editInvoiceModal" class="modal"><div class="modal-content"><h3>✏️ Edit Invoice</h3><div class="form-group"><label>Customer Name</label><input type="text" id="editCustName"></div><div class="form-group"><label>Phone</label><input type="text" id="editCustPhone"></div><div class="form-group"><label>Total</label><input type="number" id="editTotal" step="0.01"></div><div class="form-group"><label>Paid</label><input type="number" id="editPaid" step="0.01"></div><button onclick="saveEditInvoice()" class="btn-success">💾 Save</button><button onclick="closeEditInvoice()" class="btn-danger">Cancel</button></div></div>
 <div id="paymentModal" class="modal"><div class="modal-content"><h3>💰 Receive Payment</h3><input type="number" id="paymentAmount" step="0.01" placeholder="Amount"><br><br><input type="text" id="paymentNotes" placeholder="Notes"><br><br><button onclick="confirmPayment()" class="btn-success">Confirm</button><button onclick="closePaymentModal()" class="btn-danger">Cancel</button></div></div>
 <div id="customerLedgerModal" class="modal"><div class="modal-content"><h3 id="ledgerTitle">Customer Ledger</h3><div id="ledgerContent"></div></div></div>
+<div id="customerInvoicesModal" class="modal"><div class="modal-content"><h3 id="customerInvoicesTitle">Customer Invoices</h3><div id="customerInvoicesContent"></div></div></div>
 
 <!-- ===== LOGIN MODAL ===== -->
 <div id="loginModal" class="login-modal">
@@ -613,7 +634,6 @@ function undoDelete() {
         showToast('✅ Product restored');
     } else if(last.type === 'invoice') {
         orders.push(last.data);
-        // Update customer
         let cust = customers.find(c => c.phone === last.data.phone);
         if(cust) {
             cust.invoices.push({ invoiceNo: last.data.invoiceNo, date: last.data.date, amount: last.data.total, paid: last.data.paid, status: last.data.status });
@@ -733,7 +753,6 @@ function confirmOrder() {
     let profit = sub - totalCost;
     let invNo = 'INV-' + String(orders.length + 1).padStart(4, '0');
     
-    // Update stock - ONLY the exact item
     cart.forEach(i => {
         let p = products.find(pr => pr.name === i.name && pr.size === i.size);
         if(p && p.stock > 0) {
@@ -767,13 +786,11 @@ function confirmOrder() {
         customers.push(custObj); 
     }
     
-    // Check if advance exists
     let advanceUsed = 0;
     if(custObj.advance && custObj.advance > 0) {
         advanceUsed = Math.min(custObj.advance, total);
         custObj.advance -= advanceUsed;
         total = total - advanceUsed;
-        // Adjust paid
         let remaining = total;
         paid = Math.min(rec, remaining);
     }
@@ -787,7 +804,6 @@ function confirmOrder() {
     if(advanceUsed > 0) {
         custObj.ledger.push({ date: order.date, type: 'Advance Used', amount: advanceUsed });
     }
-    // If extra received, add as advance
     if(rec > total) {
         let extra = rec - total;
         custObj.advance = (custObj.advance || 0) + extra;
@@ -823,10 +839,10 @@ function displayCustomers() {
         div.innerHTML = `<div style="display:flex;justify-content:space-between;flex-wrap:wrap;margin-bottom:6px"><div><strong>${c.name}</strong> ${c.phone ? '📞 ' + c.phone : ''}</div><div><span class="badge ${due > 0 ? 'badge-unpaid' : 'badge-paid'}">${due > 0 ? 'Due: ' + formatCurrency(due) : 'Settled'}</span></div></div>
         <div style="font-size:10px;color:#666;">Advance: ${formatCurrency(c.advance || 0)} | Total Paid: ${formatCurrency(totalPaid)}</div>
         <div class="action-btns">
-            <button onclick="viewCustomerLedger('${c.phone}')" class="btn-info" style="padding:2px 8px;font-size:9px;">📊 Ledger</button>
+            <button onclick="viewCustomerInvoices('${c.phone}')" class="btn-info" style="padding:2px 8px;font-size:9px;">📄 Invoices</button>
+            <button onclick="viewCustomerLedger('${c.phone}')" class="btn-primary" style="padding:2px 8px;font-size:9px;">📊 Ledger</button>
             <button onclick="addCustomerPayment('${c.phone}')" class="btn-success" style="padding:2px 8px;font-size:9px;">💰 Pay</button>
             <button onclick="addAdvancePayment('${c.phone}')" class="btn-warning" style="padding:2px 8px;font-size:9px;">📈 Advance</button>
-            <button onclick="viewCustomerInvoices('${c.phone}')" class="btn-primary" style="padding:2px 8px;font-size:9px;">📄 Invoices</button>
         </div>`;
         container.appendChild(div);
     });
@@ -835,13 +851,50 @@ function displayCustomers() {
 function viewCustomerInvoices(phone) {
     let cust = customers.find(c => c.phone === phone);
     if(!cust) { showToast('Customer not found'); return; }
-    let msg = `📋 INVOICES FOR ${cust.name}\n━━━━━━━━━━━━━━━━━━━\n`;
-    cust.invoices.forEach((i, idx) => {
-        let bal = i.amount - i.paid;
-        msg += `${idx+1}. ${i.invoiceNo} | ${new Date(i.date).toLocaleDateString()} | ${formatCurrency(i.amount)} | ${bal > 0 ? 'Due: ' + formatCurrency(bal) : 'Paid'}\n`;
-    });
-    msg += `━━━━━━━━━━━━━━━━━━━\nAdvance: ${formatCurrency(cust.advance || 0)}`;
-    alert(msg);
+    document.getElementById('customerInvoicesTitle').textContent = '📄 ' + cust.name + ' - Invoices';
+    let html = '';
+    if(cust.invoices.length === 0) {
+        html = '<div style="color:#666;padding:10px;">No invoices found</div>';
+    } else {
+        html = `<div style="max-height:400px;overflow-y:auto;">`;
+        cust.invoices.forEach((i, idx) => {
+            let bal = i.amount - i.paid;
+            let status = bal <= 0 ? 'Paid' : (i.paid > 0 ? 'Partial' : 'Unpaid');
+            html += `<div class="inv-item">
+                <span><strong>${i.invoiceNo}</strong> | ${new Date(i.date).toLocaleDateString()} | ${formatCurrency(i.amount)} | <span class="badge ${bal <= 0 ? 'badge-paid' : (i.paid > 0 ? 'badge-partial' : 'badge-unpaid')}">${status}</span></span>
+                <span>
+                    <button onclick="viewInvoice('${i.invoiceNo}')" class="btn-info" style="padding:2px 6px;font-size:9px;">👁️</button>
+                    <button onclick="openEditInvoice('${i.invoiceNo}')" class="btn-warning" style="padding:2px 6px;font-size:9px;">✏️</button>
+                    <button onclick="deleteInvoiceFromCustomer('${i.invoiceNo}')" class="btn-danger" style="padding:2px 6px;font-size:9px;">✕</button>
+                    <button onclick="undoDelete()" class="btn-success" style="padding:2px 6px;font-size:9px;">↩️</button>
+                </span>
+            </div>`;
+        });
+        html += `</div>`;
+    }
+    document.getElementById('customerInvoicesContent').innerHTML = html;
+    document.getElementById('customerInvoicesModal').style.display = 'flex';
+}
+
+function deleteInvoiceFromCustomer(invNo) {
+    if(!isAdmin) return showToast('🔒 Login first!');
+    if(confirm('Delete this invoice?')) {
+        let order = orders.find(o => o.invoiceNo === invNo);
+        if(order) {
+            deletedItems.push({ type: 'invoice', data: order });
+            orders = orders.filter(x => x.invoiceNo !== invNo);
+            customers.forEach(c => {
+                c.invoices = c.invoices.filter(i => i.invoiceNo !== invNo);
+            });
+            saveData();
+            displayInvoices();
+            displayCustomers();
+            // Refresh customer invoices view
+            let phone = document.getElementById('customerInvoicesTitle').textContent.split(' - ')[1];
+            if(phone) viewCustomerInvoices(phone);
+            showToast('Deleted - Use Undo');
+        }
+    }
 }
 
 function viewCustomerLedger(phone) {
@@ -898,7 +951,6 @@ function confirmPayment() {
     if(!cust) { showToast('Customer not found'); return; }
     let unpaid = cust.invoices.find(i => i.amount - i.paid > 0);
     if(!unpaid) { 
-        // Add as advance
         cust.advance = (cust.advance || 0) + amt;
         if(!cust.ledger) cust.ledger = [];
         cust.ledger.push({ date: new Date().toISOString(), type: 'Advance Payment (No Invoice)', amount: amt });
@@ -915,7 +967,6 @@ function confirmPayment() {
     if(order) { order.paid = unpaid.paid; order.status = unpaid.status; }
     if(!cust.ledger) cust.ledger = [];
     cust.ledger.push({ date: new Date().toISOString(), type: 'Payment - ' + notes, amount: payAmt });
-    // Extra as advance
     if(amt > payAmt) {
         let extra = amt - payAmt;
         cust.advance = (cust.advance || 0) + extra;
@@ -1030,7 +1081,6 @@ function saveEditInvoice() {
     let newPaid = parseFloat(document.getElementById('editPaid').value);
     if(!newTotal || newTotal <= 0) { showToast('Enter valid total'); return; }
     
-    // Remove from old customer
     let oldCust = customers.find(c => c.phone === o.phone);
     if(oldCust) {
         oldCust.invoices = oldCust.invoices.filter(i => i.invoiceNo !== o.invoiceNo);
@@ -1043,7 +1093,6 @@ function saveEditInvoice() {
     o.remaining = newTotal - (newPaid || 0);
     o.status = o.remaining <= 0 ? 'paid' : (o.paid > 0 ? 'partial' : 'unpaid');
     
-    // Add to new customer
     let newCustObj = customers.find(c => c.phone === newPhone);
     if(!newCustObj) { 
         newCustObj = { name: newCust, phone: newPhone, invoices: [], ledger: [], advance: 0 }; 
@@ -1140,6 +1189,43 @@ function updateSummary() {
     const pmBox = document.getElementById('paymentMinusBox');
     pmBox.className = 'summary-box ' + (paymentMinus > 0 ? 'negative' : 'positive');
     
+    // ===== PROFIT / LOSS CALCULATION =====
+    // Opening Stock = Previous day's closing stock
+    // Stock In = Today's purchases (from stock history)
+    // Closing Stock = Today's closing stock
+    // Ikhrajat = Today's expenses
+    
+    // Calculate opening stock (previous day's total stock value)
+    const prevDate = new Date();
+    prevDate.setDate(prevDate.getDate() - 1);
+    const prevDateStr = prevDate.toISOString().split('T')[0];
+    
+    // Get previous day's stock from daily stock history
+    let prevStock = 0;
+    // For now, using current stock as opening (simplified)
+    // In real system, you'd track daily stock
+    const openingStock = products.reduce((sum, p) => sum + (p.stock * p.cost), 0);
+    const stockIn = 0; // Will be added when stock purchase is tracked
+    const closingStock = products.reduce((sum, p) => sum + (p.stock * p.cost), 0);
+    const ikhrajat = todayIkhrajat;
+    
+    // Total Sales for today
+    const totalSales = todaySales.reduce((s, o) => s + o.total, 0);
+    
+    // Profit/Loss = Total Sales - (Opening Stock + Stock In - Closing Stock + Ikhrajat)
+    const totalCost = openingStock + stockIn - closingStock + ikhrajat;
+    const totalProfit = totalSales - totalCost;
+    
+    // Update Profit/Loss display
+    document.getElementById('plOpeningStock').textContent = formatCurrency(openingStock);
+    document.getElementById('plStockIn').textContent = formatCurrency(stockIn);
+    document.getElementById('plClosingStock').textContent = formatCurrency(closingStock);
+    document.getElementById('plIkhrajat').textContent = formatCurrency(ikhrajat);
+    
+    const profitColor = totalProfit >= 0 ? '#4ade80' : '#f87171';
+    document.getElementById('plTotalProfit').innerHTML = 
+        `Profit/Loss: <span style="color:${profitColor};">${formatCurrency(totalProfit)}</span>`;
+    
     // Stock Summary
     let stockHtml = '<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;font-weight:bold;border-bottom:2px solid #ccc;padding:4px 0;"><span>Item</span><span>Opening</span><span>Sold</span><span>Closing</span></div>';
     products.forEach(item => {
@@ -1155,7 +1241,7 @@ function updateSummary() {
     });
     document.getElementById('stockSummaryDisplay').innerHTML = stockHtml;
     
-    // Monthly Summary
+    // Monthly Summary with Profit
     const month = today.substring(0,7);
     const monthSales = orders.filter(o => o.date.substring(0,7) === month);
     const monthExp = expenses.filter(e => e.date.substring(0,7) === month);
@@ -1173,9 +1259,10 @@ function updateSummary() {
     let mhtml = '';
     Object.keys(monthData).sort().forEach(d => {
         const data = monthData[d];
-        mhtml += `<tr><td>${d}</td><td>${formatCurrency(data.sale)}</td><td>${formatCurrency(data.udhar)}</td><td>${formatCurrency(data.ikhrajat)}</td><td>${formatCurrency(data.sale + data.udhar - data.ikhrajat)}</td></tr>`;
+        const profit = data.sale - data.ikhrajat;
+        mhtml += `<tr><td>${d}</td><td>${formatCurrency(data.sale)}</td><td>${formatCurrency(data.udhar)}</td><td>${formatCurrency(data.ikhrajat)}</td><td style="color:${profit >= 0 ? '#27ae60' : '#e74c3c'}">${formatCurrency(profit)}</td><td>${formatCurrency(data.sale - data.ikhrajat)}</td></tr>`;
     });
-    document.getElementById('monthlySummaryBody').innerHTML = mhtml || '<tr><td colspan="5">No data</td></tr>';
+    document.getElementById('monthlySummaryBody').innerHTML = mhtml || '<tr><td colspan="6">No data</td></tr>';
 }
 
 // ==================== SETTINGS ====================
@@ -1264,6 +1351,7 @@ setTimeout(() => {
 window.viewInvoice = viewInvoice;
 window.openEditInvoice = openEditInvoice;
 window.undoDelete = undoDelete;
+window.viewCustomerInvoices = viewCustomerInvoices;
 </script>
 </body>
 </html>
