@@ -50,9 +50,6 @@
         .product-name{font-weight:bold;font-size:13px;}
         .product-size{font-size:10px;color:#666;}
         .product-price{color:#27ae60;font-weight:bold;font-size:11px;}
-        .group-filter{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;}
-        .group-btn{padding:5px 14px;background:#e2e8f0;border:none;border-radius:20px;cursor:pointer;font-weight:bold;font-size:11px;}
-        .group-btn.active{background:#ffd700;}
         .cat-tabs{display:flex;gap:4px;margin-bottom:10px;flex-wrap:wrap;}
         .cat-tab{padding:5px 12px;background:#e2e8f0;border:none;border-radius:20px;cursor:pointer;font-weight:bold;font-size:10px;transition:0.3s;}
         .cat-tab.active{background:#ffd700;color:#1a1a2e;}
@@ -74,6 +71,11 @@
         .input-group{flex:1;min-width:80px;}
         .total-box{background:#1a1a2e;color:white;padding:12px;border-radius:8px;margin-top:12px;text-align:right;}
         .total-box p{margin:3px 0;font-size:12px;}
+        .cart-tabs{display:flex;gap:4px;margin-bottom:10px;flex-wrap:wrap;}
+        .cart-tab{padding:5px 12px;background:#e2e8f0;border:none;border-radius:20px;cursor:pointer;font-weight:bold;font-size:10px;transition:0.3s;}
+        .cart-tab.active{background:#ffd700;color:#1a1a2e;}
+        .cart-container{display:none;}
+        .cart-container.active{display:block;}
         table{width:100%;border-collapse:collapse;font-size:11px;}
         th,td{padding:6px;text-align:left;border-bottom:1px solid #e2e8f0;}
         th{background:#1a1a2e;color:#ffd700;}
@@ -159,53 +161,120 @@
                     <button class="cat-tab" onclick="filterPOSCategory('mwad')">🧱 Materials</button>
                     <button class="cat-tab" onclick="filterPOSCategory('mojali')">✨ Polished</button>
                     <button class="cat-tab" onclick="filterPOSCategory('mosnafar')">🪨 Honed</button>
-                    <button class="cat-tab" onclick="filterPOSCategory('cornish')">🏗️ Cornish</button>
                 </div>
                 <div class="search-box"><input type="text" id="searchProduct" placeholder="🔍 Search..." onkeyup="displayProducts()"></div>
                 <div class="product-list" id="productList"></div>
             </div>
             <div class="panel">
                 <h3>🛒 Cart</h3>
-                <div style="font-size:11px;color:#666;margin-bottom:8px;">All items combine in one cart</div>
-                <div class="mode-btns">
-                    <div class="mode-btn active" onclick="setMode('sqm')">📐 SQM</div>
-                    <div class="mode-btn" onclick="setMode('manual')">📏 Manual</div>
-                    <div class="mode-btn" onclick="setMode('pieces')">🔧 Pieces</div>
+                <div class="cart-tabs" id="cartTabs">
+                    <button class="cart-tab active" onclick="switchCartTab('mwad')">🧱 Materials</button>
+                    <button class="cart-tab" onclick="switchCartTab('mojali')">✨ Polished</button>
+                    <button class="cart-tab" onclick="switchCartTab('mosnafar')">🪨 Honed</button>
                 </div>
-                <div class="input-row">
-                    <div class="input-group"><label>Item</label><input type="text" id="itemName" placeholder="Name"></div>
-                    <div class="input-group"><label>Purchase Price</label><input type="number" id="costPrice" step="0.01"></div>
+                
+                <div id="cartContainer_mwad" class="cart-container active">
+                    <div style="font-size:11px;color:#666;margin-bottom:8px;">🧱 Materials Cart</div>
+                    <div class="mode-btns">
+                        <div class="mode-btn active" onclick="setMode('pieces')">🔧 Pieces</div>
+                    </div>
+                    <div class="input-row">
+                        <div class="input-group"><label>Item</label><input type="text" id="itemName_mwad" placeholder="Name"></div>
+                        <div class="input-group"><label>Purchase Price</label><input type="number" id="costPrice_mwad" step="0.01"></div>
+                    </div>
+                    <div id="piecesFields_mwad"><div class="input-row"><div class="input-group"><label>Size</label><input type="text" id="pieceSize_mwad"></div><div class="input-group"><label>Qty</label><input type="number" id="pieceQty_mwad" value="1"></div><div class="input-group"><label>Price/pc</label><input type="number" id="piecePrice_mwad" step="0.01"></div></div></div>
+                    <button onclick="addToCart('mwad')" class="btn-success" style="width:100%">➕ Add</button>
+                    <div style="max-height:150px;overflow:auto;margin-top:8px">
+                        <table id="cartTable_mwad">
+                            <thead><tr><th>Item</th><th>Size</th><th>Qty</th><th>Price</th><th>Total</th><th></th></tr></thead>
+                            <tbody id="cartBody_mwad"></tbody>
+                        </table>
+                    </div>
+                    <div class="total-box">
+                        <p><strong>Subtotal:</strong> <span id="subtotal_mwad">SAR 0.00</span></p>
+                        <p><strong>Tax:</strong> <span id="taxAmount_mwad">SAR 0.00</span></p>
+                        <p><strong>Total:</strong> <span id="grandTotal_mwad">SAR 0.00</span></p>
+                        <p id="profitDisplay_mwad" style="font-weight:bold;color:#ffd700;"></p>
+                    </div>
                 </div>
-                <div id="sqmFields"><div class="input-row"><div class="input-group"><label>Thick</label><input type="number" id="thick" value="3"></div><div class="input-group"><label>Width</label><input type="number" id="width" value="0.40" step="0.01"></div><div class="input-group"><label>Length</label><input type="number" id="length" value="0.80" step="0.01"></div><div class="input-group"><label>Price/m²</label><input type="number" id="sqmPrice" step="0.01"></div></div></div>
-                <div id="manualFields" style="display:none"><div class="input-row"><div class="input-group"><label>Area(m²)</label><input type="number" id="manualArea" step="0.01"></div><div class="input-group"><label>Price/m²</label><input type="number" id="manualPrice" step="0.01"></div></div></div>
-                <div id="piecesFields" style="display:none"><div class="input-row"><div class="input-group"><label>Size</label><input type="text" id="pieceSize"></div><div class="input-group"><label>Qty</label><input type="number" id="pieceQty" value="1"></div><div class="input-group"><label>Price/pc</label><input type="number" id="piecePrice" step="0.01"></div></div></div>
-                <button onclick="addToCart()" class="btn-success" style="width:100%">➕ Add</button>
+                
+                <div id="cartContainer_mojali" class="cart-container">
+                    <div style="font-size:11px;color:#666;margin-bottom:8px;">✨ Polished Cart</div>
+                    <div class="mode-btns">
+                        <div class="mode-btn active" onclick="setMode('sqm')">📐 SQM</div>
+                        <div class="mode-btn" onclick="setMode('manual')">📏 Manual</div>
+                    </div>
+                    <div class="input-row">
+                        <div class="input-group"><label>Item</label><input type="text" id="itemName_mojali" placeholder="Name"></div>
+                        <div class="input-group"><label>Purchase Price</label><input type="number" id="costPrice_mojali" step="0.01"></div>
+                    </div>
+                    <div id="sqmFields_mojali"><div class="input-row"><div class="input-group"><label>Thick</label><input type="number" id="thick_mojali" value="3"></div><div class="input-group"><label>Width</label><input type="number" id="width_mojali" value="0.40" step="0.01"></div><div class="input-group"><label>Length</label><input type="number" id="length_mojali" value="0.80" step="0.01"></div><div class="input-group"><label>Price/m²</label><input type="number" id="sqmPrice_mojali" step="0.01"></div></div></div>
+                    <div id="manualFields_mojali" style="display:none"><div class="input-row"><div class="input-group"><label>Area(m²)</label><input type="number" id="manualArea_mojali" step="0.01"></div><div class="input-group"><label>Price/m²</label><input type="number" id="manualPrice_mojali" step="0.01"></div></div></div>
+                    <button onclick="addToCart('mojali')" class="btn-success" style="width:100%">➕ Add</button>
+                    <div style="max-height:150px;overflow:auto;margin-top:8px">
+                        <table id="cartTable_mojali">
+                            <thead><tr><th>Item</th><th>Size</th><th>Qty</th><th>Price</th><th>Total</th><th></th></tr></thead>
+                            <tbody id="cartBody_mojali"></tbody>
+                        </table>
+                    </div>
+                    <div class="total-box">
+                        <p><strong>Subtotal:</strong> <span id="subtotal_mojali">SAR 0.00</span></p>
+                        <p><strong>Tax:</strong> <span id="taxAmount_mojali">SAR 0.00</span></p>
+                        <p><strong>Total:</strong> <span id="grandTotal_mojali">SAR 0.00</span></p>
+                        <p id="profitDisplay_mojali" style="font-weight:bold;color:#ffd700;"></p>
+                    </div>
+                </div>
+                
+                <div id="cartContainer_mosnafar" class="cart-container">
+                    <div style="font-size:11px;color:#666;margin-bottom:8px;">🪨 Honed Cart</div>
+                    <div class="mode-btns">
+                        <div class="mode-btn active" onclick="setMode('sqm')">📐 SQM</div>
+                        <div class="mode-btn" onclick="setMode('manual')">📏 Manual</div>
+                    </div>
+                    <div class="input-row">
+                        <div class="input-group"><label>Item</label><input type="text" id="itemName_mosnafar" placeholder="Name"></div>
+                        <div class="input-group"><label>Purchase Price</label><input type="number" id="costPrice_mosnafar" step="0.01"></div>
+                    </div>
+                    <div id="sqmFields_mosnafar"><div class="input-row"><div class="input-group"><label>Thick</label><input type="number" id="thick_mosnafar" value="3"></div><div class="input-group"><label>Width</label><input type="number" id="width_mosnafar" value="0.40" step="0.01"></div><div class="input-group"><label>Length</label><input type="number" id="length_mosnafar" value="0.80" step="0.01"></div><div class="input-group"><label>Price/m²</label><input type="number" id="sqmPrice_mosnafar" step="0.01"></div></div></div>
+                    <div id="manualFields_mosnafar" style="display:none"><div class="input-row"><div class="input-group"><label>Area(m²)</label><input type="number" id="manualArea_mosnafar" step="0.01"></div><div class="input-group"><label>Price/m²</label><input type="number" id="manualPrice_mosnafar" step="0.01"></div></div></div>
+                    <button onclick="addToCart('mosnafar')" class="btn-success" style="width:100%">➕ Add</button>
+                    <div style="max-height:150px;overflow:auto;margin-top:8px">
+                        <table id="cartTable_mosnafar">
+                            <thead><tr><th>Item</th><th>Size</th><th>Qty</th><th>Price</th><th>Total</th><th></th></tr></thead>
+                            <tbody id="cartBody_mosnafar"></tbody>
+                        </table>
+                    </div>
+                    <div class="total-box">
+                        <p><strong>Subtotal:</strong> <span id="subtotal_mosnafar">SAR 0.00</span></p>
+                        <p><strong>Tax:</strong> <span id="taxAmount_mosnafar">SAR 0.00</span></p>
+                        <p><strong>Total:</strong> <span id="grandTotal_mosnafar">SAR 0.00</span></p>
+                        <p id="profitDisplay_mosnafar" style="font-weight:bold;color:#ffd700;"></p>
+                    </div>
+                </div>
+                
+                <div style="margin-top:10px;border-top:2px solid #ffd700;padding-top:10px;">
+                    <div style="display:flex;justify-content:space-between;font-weight:bold;font-size:14px;">
+                        <span>💰 Grand Total</span>
+                        <span id="grandTotalAll">SAR 0.00</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;font-weight:bold;font-size:12px;color:#27ae60;">
+                        <span>📈 Total Profit</span>
+                        <span id="grandProfitAll">SAR 0.00</span>
+                    </div>
+                </div>
+                
                 <div style="margin-top:8px"><label>👤 Customer</label><input type="text" id="customerName" placeholder="Name"></div>
                 <div><label>📞 Phone</label><input type="text" id="customerPhone" placeholder="Phone"></div>
-                <div><label>💰 Received</label><input type="number" id="amountReceived" value="0" step="0.01" oninput="updateTotals()"></div>
+                <div><label>💰 Received</label><input type="number" id="amountReceived" value="0" step="0.01" oninput="updateAllTotals()"></div>
                 <div class="tax-toggle">
-                    <input type="checkbox" id="taxEnable" onchange="updateTotals()">
+                    <input type="checkbox" id="taxEnable" onchange="updateAllTotals()">
                     <label for="taxEnable">Enable Tax (15%)</label>
                 </div>
-                <div style="max-height:200px;overflow:auto;margin-top:8px">
-                    <table id="cartTable">
-                        <thead><tr><th>Item</th><th>Size</th><th>Qty</th><th>Price</th><th>Total</th><th></th></tr></thead>
-                        <tbody id="cartBody"></tbody>
-                    </table>
-                </div>
-                <div class="total-box">
-                    <p><strong>Subtotal:</strong> <span id="subtotal">SAR 0.00</span></p>
-                    <p><strong>Tax:</strong> <span id="taxAmount">SAR 0.00</span></p>
-                    <p><strong>Total:</strong> <span id="grandTotal">SAR 0.00</span></p>
-                    <p><strong>Received:</strong> <span id="received">SAR 0.00</span></p>
-                    <p id="balanceMsg" style="font-weight:bold"></p>
-                    <p id="profitDisplay" style="font-weight:bold;color:#ffd700;"></p>
-                    <div id="stockWarningDisplay" style="margin-top:6px;"></div>
-                </div>
-                <div class="action-btns">
-                    <button onclick="confirmOrder()" class="btn-success">✅ Confirm</button>
-                    <button onclick="clearCart()" class="btn-danger">🗑️ Clear</button>
-                    <button onclick="undoCart()" class="btn-warning">↩️ Undo</button>
+                <div id="stockWarningDisplay" style="margin-top:6px;"></div>
+                <div class="action-btns" style="margin-top:8px;">
+                    <button onclick="confirmAllOrders()" class="btn-success" style="flex:2;">✅ Confirm All</button>
+                    <button onclick="clearAllCarts()" class="btn-danger">🗑️ Clear All</button>
+                    <button onclick="undoAllCarts()" class="btn-warning">↩️ Undo</button>
                 </div>
             </div>
         </div>
@@ -229,7 +298,6 @@
                 <button class="cat-tab" onclick="filterStockCategory('mwad')">🧱 Materials</button>
                 <button class="cat-tab" onclick="filterStockCategory('mojali')">✨ Polished</button>
                 <button class="cat-tab" onclick="filterStockCategory('mosnafar')">🪨 Honed</button>
-                <button class="cat-tab" onclick="filterStockCategory('cornish')">🏗️ Cornish</button>
             </div>
             <div class="search-box"><input type="text" id="inventorySearch" placeholder="🔍 Search..." onkeyup="loadInventory()"></div>
             <button onclick="addNewProduct()" class="btn-success" style="margin-bottom:8px">➕ Add Product</button>
@@ -382,7 +450,29 @@ let currentInvoiceForWhatsApp = null;
 let deletedItems = [];
 let posCategory = 'all';
 let stockCategory = 'all';
+let currentCartTab = 'mwad';
 
+// ==================== CART DATA ====================
+let carts = {
+    mwad: [],
+    mojali: [],
+    mosnafar: []
+};
+let cartHistory = [];
+
+function getCart(category) {
+    return carts[category] || [];
+}
+
+function setCart(category, data) {
+    carts[category] = data;
+}
+
+function clearCart(category) {
+    carts[category] = [];
+}
+
+// ==================== LOGIN ====================
 function loginWithFirebase() {
     const email = document.getElementById('loginEmail').value;
     const password = document.getElementById('loginPassword').value;
@@ -431,8 +521,8 @@ function logout() {
 }
 
 // ==================== DATA ====================
-let products = [], orders = [], customers = [], cart = [], cartHistory = [], expenses = [];
-let currentLang = 'en', currentCurrency = 'SAR', currentMode = 'sqm';
+let products = [], orders = [], customers = [], expenses = [];
+let currentLang = 'en', currentCurrency = 'SAR';
 let taxEnabled = false;
 let company = { name: "WARDA MARBLE", phone: "+966 59 807 4287" };
 
@@ -465,15 +555,6 @@ function buildProducts() {
     let mosnafarSpecial = [["ابیض مصنفر فرزا","3*40*80",65],["پیانو ابیض مصنفر","3*20*50",55]];
     mosnafarSpecial.forEach(m => { prods.push({ id: id++, name: m[0], size: m[1], category: 'mosnafar', selling: m[2], cost: m[2]-10, stock: 50, type: 'sqm' }); });
     
-    // Cornish
-    let cornishItems = [
-        ["کورنیش پروفائل","10*10",100],
-        ["کورنیش پروفائل","10*15",80],
-        ["کورنیش ٹائل","20*20",200],
-        ["کورنیش موزیک","30*30",150]
-    ];
-    cornishItems.forEach(m => { prods.push({ id: id++, name: m[0], size: m[1], category: 'cornish', selling: 0, cost: 0, stock: m[2], type: 'pieces' }); });
-    
     return prods;
 }
 
@@ -492,6 +573,7 @@ function loadData() {
     displayCustomers();
     loadExpenses();
     updateSummary();
+    updateAllCarts();
 }
 
 function saveData() {
@@ -527,12 +609,7 @@ function toggleCurrency() {
 }
 
 function setMode(mode) {
-    currentMode = mode;
-    document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('.mode-btn')[mode === 'sqm' ? 0 : mode === 'manual' ? 1 : 2].classList.add('active');
-    document.getElementById('sqmFields').style.display = mode === 'sqm' ? 'block' : 'none';
-    document.getElementById('manualFields').style.display = mode === 'manual' ? 'block' : 'none';
-    document.getElementById('piecesFields').style.display = mode === 'pieces' ? 'block' : 'none';
+    // This is handled per cart
 }
 
 function showTab(tab) {
@@ -545,6 +622,15 @@ function showTab(tab) {
     if(tab === 'customers') displayCustomers();
     if(tab === 'summary') updateSummary();
     if(tab === 'expenses') loadExpenses();
+}
+
+// ==================== CART TABS ====================
+function switchCartTab(category) {
+    currentCartTab = category;
+    document.querySelectorAll('.cart-tab').forEach(b => b.classList.remove('active'));
+    event.target.classList.add('active');
+    document.querySelectorAll('.cart-container').forEach(c => c.classList.remove('active'));
+    document.getElementById('cartContainer_' + category).classList.add('active');
 }
 
 // ==================== CATEGORY FILTERS ====================
@@ -578,13 +664,24 @@ function displayProducts() {
     filtered.forEach(p => {
         let d = document.createElement('div');
         d.className = 'product-card';
-        let catEmoji = p.category === 'mwad' ? '🧱' : p.category === 'mojali' ? '✨' : p.category === 'mosnafar' ? '🪨' : '🏗️';
+        let catEmoji = p.category === 'mwad' ? '🧱' : p.category === 'mojali' ? '✨' : '🪨';
         d.innerHTML = `<div class="product-name">${catEmoji} ${p.name}</div><div class="product-size">${p.size}</div><div class="product-price">${p.selling > 0 ? formatCurrency(p.selling) : 'Set Price'}${p.type === 'sqm' ? '/m²' : '/pc'}</div><div>Stock: ${p.stock}</div>`;
         d.onclick = () => {
-            document.getElementById('itemName').value = p.name;
-            document.getElementById('costPrice').value = p.cost;
-            if(p.type === 'sqm') { setMode('sqm'); document.getElementById('sqmPrice').value = p.selling; }
-            else { setMode('pieces'); document.getElementById('pieceSize').value = p.size; document.getElementById('piecePrice').value = p.selling; }
+            let cat = p.category;
+            let prefix = cat === 'mwad' ? 'mwad' : cat === 'mojali' ? 'mojali' : 'mosnafar';
+            document.getElementById('itemName_' + prefix).value = p.name;
+            document.getElementById('costPrice_' + prefix).value = p.cost;
+            if(p.type === 'sqm') {
+                document.getElementById('sqmPrice_' + prefix).value = p.selling;
+            } else {
+                document.getElementById('piecePrice_' + prefix).value = p.selling;
+                document.getElementById('pieceSize_' + prefix).value = p.size;
+            }
+            // Switch to correct cart tab
+            document.querySelectorAll('.cart-tab').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.cart-tab')[cat === 'mwad' ? 0 : cat === 'mojali' ? 1 : 2].classList.add('active');
+            document.querySelectorAll('.cart-container').forEach(c => c.classList.remove('active'));
+            document.getElementById('cartContainer_' + cat).classList.add('active');
             showToast(p.name + ' loaded');
         };
         c.appendChild(d);
@@ -605,7 +702,7 @@ function loadInventory() {
     }
     filtered.forEach(p => {
         let r = tb.insertRow();
-        let catName = p.category === 'mwad' ? '🧱 Materials' : p.category === 'mojali' ? '✨ Polished' : p.category === 'mosnafar' ? '🪨 Honed' : '🏗️ Cornish';
+        let catName = p.category === 'mwad' ? '🧱 Materials' : p.category === 'mojali' ? '✨ Polished' : '🪨 Honed';
         r.insertCell(0).innerHTML = catName;
         r.insertCell(1).innerHTML = p.name;
         r.insertCell(2).innerHTML = p.size;
@@ -673,8 +770,8 @@ function updateProduct(id, field, value) {
 function addNewProduct() {
     if(!isAdmin) return showToast('🔒 Login first!');
     let type = confirm('Marble (SQM) - OK, Fitting - Cancel') ? 'sqm' : 'pieces';
-    let cat = prompt('Category: 1-Materials, 2-Polished, 3-Honed, 4-Cornish');
-    let catMap = {'1':'mwad','2':'mojali','3':'mosnafar','4':'cornish'};
+    let cat = prompt('Category: 1-Materials, 2-Polished, 3-Honed');
+    let catMap = {'1':'mwad','2':'mojali','3':'mosnafar'};
     let category = catMap[cat] || 'mwad';
     let name = prompt('Product name:');
     if(!name) return;
@@ -718,78 +815,50 @@ function undoDelete() {
     }
 }
 
-// ==================== STOCK WARNING ====================
-function checkStockWarning(itemName, qty) {
-    let p = products.find(pr => pr.name === itemName);
-    if(p && p.stock < qty) {
-        return `⚠️ Warning: Only ${p.stock} ${p.type === 'sqm' ? 'm²' : 'pcs'} available!`;
-    }
-    return null;
-}
-
-function showStockWarning(msg) {
-    let container = document.getElementById('stockWarningDisplay');
-    if(msg) {
-        container.innerHTML = `<div class="stock-warning">⚠️ <strong>${msg}</strong></div>`;
-    } else {
-        container.innerHTML = '';
-    }
-}
-
-// ==================== CART ====================
-function addToCart() {
-    let name = document.getElementById('itemName').value;
+// ==================== ADD TO CART ====================
+function addToCart(category) {
+    if(!isAdmin) return showToast('🔒 Login first!');
+    let prefix = category === 'mwad' ? 'mwad' : category === 'mojali' ? 'mojali' : 'mosnafar';
+    let name = document.getElementById('itemName_' + prefix).value;
     if(!name) return showToast('Select item first');
-    let cost = parseFloat(document.getElementById('costPrice').value) || 0;
-    let total = 0;
-    let qty = 0;
-    let price = 0;
+    let cost = parseFloat(document.getElementById('costPrice_' + prefix).value) || 0;
+    let total = 0, qty = 0, price = 0;
     
-    // Check stock before adding
-    let stockCheck = checkStockWarning(name, 1);
-    if(stockCheck) {
-        showStockWarning(stockCheck);
-        if(!confirm(stockCheck + ' Still add to cart?')) return;
+    let p = products.find(pr => pr.name === name && pr.category === category);
+    if(p && p.stock <= 0) {
+        showToast('⚠️ Out of stock!');
+        return;
     }
     
-    if(currentMode === 'sqm') {
-        let w = parseFloat(document.getElementById('width').value) || 0.40;
-        let l = parseFloat(document.getElementById('length').value) || 0.80;
-        let p = parseFloat(document.getElementById('sqmPrice').value);
-        if(!p) return showToast('Enter price');
+    if(category === 'mwad') {
+        let q = parseFloat(document.getElementById('pieceQty_' + prefix).value) || 1;
+        let pPrice = parseFloat(document.getElementById('piecePrice_' + prefix).value);
+        if(!pPrice) return showToast('Enter price');
+        qty = q;
+        price = pPrice;
+        total = q * pPrice;
+        carts[category].push({ id: Date.now(), name, size: document.getElementById('pieceSize_' + prefix).value || '-', qty: qty, qtyDisplay: qty + ' pcs', price: price, cost: cost, total: total, category: category });
+    } else {
+        let w = parseFloat(document.getElementById('width_' + prefix).value) || 0.40;
+        let l = parseFloat(document.getElementById('length_' + prefix).value) || 0.80;
+        let pPrice = parseFloat(document.getElementById('sqmPrice_' + prefix).value);
+        if(!pPrice) return showToast('Enter price');
         let area = w * l;
         qty = area;
-        price = p;
-        total = area * p;
-        cart.push({ id: Date.now(), name, size: `${w.toFixed(2)}m x ${l.toFixed(2)}m`, qty: qty, qtyDisplay: qty.toFixed(2) + ' m²', price: price, cost: cost, total: total });
-    } else if(currentMode === 'manual') {
-        let area = parseFloat(document.getElementById('manualArea').value);
-        let p = parseFloat(document.getElementById('manualPrice').value);
-        if(!area || !p) return showToast('Enter area and price');
-        qty = area;
-        price = p;
-        total = area * p;
-        cart.push({ id: Date.now(), name, size: 'Manual', qty: qty, qtyDisplay: qty.toFixed(2) + ' m²', price: price, cost: cost, total: total });
-    } else {
-        let q = parseFloat(document.getElementById('pieceQty').value) || 1;
-        let p = parseFloat(document.getElementById('piecePrice').value);
-        if(!p) return showToast('Enter price');
-        qty = q;
-        price = p;
-        total = q * p;
-        cart.push({ id: Date.now(), name, size: document.getElementById('pieceSize').value, qty: qty, qtyDisplay: qty + ' pcs', price: price, cost: cost, total: total });
+        price = pPrice;
+        total = area * pPrice;
+        carts[category].push({ id: Date.now(), name, size: `${w.toFixed(2)}m x ${l.toFixed(2)}m`, qty: qty, qtyDisplay: qty.toFixed(2) + ' m²', price: price, cost: cost, total: total, category: category });
     }
-    showStockWarning(null);
-    updateCartDisplay();
-    showToast('Added to cart');
+    updateCartDisplay(category);
+    showToast('Added to ' + category + ' cart');
 }
 
-function updateCartDisplay() {
-    let tb = document.getElementById('cartBody');
+function updateCartDisplay(category) {
+    let prefix = category === 'mwad' ? 'mwad' : category === 'mojali' ? 'mojali' : 'mosnafar';
+    let tb = document.getElementById('cartBody_' + prefix);
     tb.innerHTML = '';
-    let sub = 0;
-    let totalCost = 0;
-    cart.forEach((item, idx) => {
+    let sub = 0, totalCost = 0;
+    carts[category].forEach((item, idx) => {
         sub += item.total;
         totalCost += item.qty * (item.cost || 0);
         let r = tb.insertRow();
@@ -801,61 +870,72 @@ function updateCartDisplay() {
         let btn = document.createElement('button');
         btn.innerHTML = '✖';
         btn.className = 'btn-danger';
-        btn.onclick = () => { cart.splice(idx, 1); updateCartDisplay(); };
+        btn.onclick = () => { carts[category].splice(idx, 1); updateCartDisplay(category); updateAllTotals(); };
         r.insertCell(5).appendChild(btn);
     });
-    updateTotals(sub, totalCost);
-}
-
-function updateTotals(sub, totalCost) {
-    if(!sub) {
-        sub = cart.reduce((s, i) => s + i.total, 0);
-        totalCost = cart.reduce((s, i) => s + (i.qty * (i.cost || 0)), 0);
-    }
     let tax = document.getElementById('taxEnable').checked ? sub * 0.15 : 0;
     let total = sub + tax;
     let profit = sub - totalCost;
-    
-    document.getElementById('subtotal').innerHTML = formatCurrency(sub);
-    document.getElementById('taxAmount').innerHTML = formatCurrency(tax);
-    document.getElementById('grandTotal').innerHTML = formatCurrency(total);
+    document.getElementById('subtotal_' + prefix).innerHTML = formatCurrency(sub);
+    document.getElementById('taxAmount_' + prefix).innerHTML = formatCurrency(tax);
+    document.getElementById('grandTotal_' + prefix).innerHTML = formatCurrency(total);
+    document.getElementById('profitDisplay_' + prefix).innerHTML = `Profit: ${formatCurrency(profit)}`;
+    updateAllTotals();
+}
+
+function updateAllTotals() {
+    let grandTotal = 0, grandProfit = 0;
+    ['mwad', 'mojali', 'mosnafar'].forEach(cat => {
+        let sub = carts[cat].reduce((s, i) => s + i.total, 0);
+        let totalCost = carts[cat].reduce((s, i) => s + (i.qty * (i.cost || 0)), 0);
+        grandTotal += sub;
+        grandProfit += sub - totalCost;
+    });
     let rec = parseFloat(document.getElementById('amountReceived').value) || 0;
-    document.getElementById('received').innerHTML = formatCurrency(rec);
-    let bal = total - rec;
+    let tax = document.getElementById('taxEnable').checked ? grandTotal * 0.15 : 0;
+    let totalWithTax = grandTotal + tax;
+    document.getElementById('grandTotalAll').innerHTML = formatCurrency(totalWithTax);
+    document.getElementById('grandProfitAll').innerHTML = formatCurrency(grandProfit);
+    let bal = totalWithTax - rec;
     document.getElementById('balanceMsg').innerHTML = bal > 0 ? `Due: ${formatCurrency(bal)}` : bal < 0 ? `Refund: ${formatCurrency(Math.abs(bal))}` : 'Fully Paid ✓';
-    document.getElementById('profitDisplay').innerHTML = `Profit: ${formatCurrency(profit)}`;
 }
 
-function clearCart() {
-    if(!confirm('Clear cart?')) return;
-    cartHistory.push(JSON.parse(JSON.stringify(cart)));
-    cart = [];
-    updateCartDisplay();
+function clearAllCarts() {
+    if(!confirm('Clear all carts?')) return;
+    ['mwad', 'mojali', 'mosnafar'].forEach(cat => {
+        carts[cat] = [];
+        updateCartDisplay(cat);
+    });
+    updateAllTotals();
 }
 
-function undoCart() {
-    if(cartHistory.length) { cart = cartHistory.pop(); updateCartDisplay(); showToast('Undo'); }
-    else showToast('Nothing to undo');
+function undoAllCarts() {
+    // Simple undo - restore from history
+    showToast('Undo not available for all carts');
 }
 
-// ==================== CONFIRM ORDER ====================
-function confirmOrder() {
+function confirmAllOrders() {
     if(!isAdmin) return showToast('🔒 Login first!');
-    if(!cart.length) return showToast('Cart empty');
+    let allItems = [];
+    ['mwad', 'mojali', 'mosnafar'].forEach(cat => {
+        allItems = allItems.concat(carts[cat]);
+    });
+    if(allItems.length === 0) return showToast('All carts are empty');
+    
     let cust = document.getElementById('customerName').value || 'Walk-in';
     let phone = document.getElementById('customerPhone').value || '';
     let rec = parseFloat(document.getElementById('amountReceived').value) || 0;
-    let sub = cart.reduce((s, i) => s + i.total, 0);
-    let totalCost = cart.reduce((s, i) => s + (i.qty * (i.cost || 0)), 0);
-    let tax = document.getElementById('taxEnable').checked ? sub * 0.15 : 0;
-    let total = sub + tax;
-    let profit = sub - totalCost;
+    let grandTotal = allItems.reduce((s, i) => s + i.total, 0);
+    let totalCost = allItems.reduce((s, i) => s + (i.qty * (i.cost || 0)), 0);
+    let tax = document.getElementById('taxEnable').checked ? grandTotal * 0.15 : 0;
+    let total = grandTotal + tax;
+    let profit = grandTotal - totalCost;
     let invNo = 'INV-' + String(orders.length + 1).padStart(4, '0');
     
-    // Check stock for all items
+    // Check stock
     let stockError = false;
-    cart.forEach(i => {
-        let p = products.find(pr => pr.name === i.name && pr.size === i.size);
+    allItems.forEach(i => {
+        let p = products.find(pr => pr.name === i.name && pr.category === i.category);
         if(p && p.stock < i.qty) {
             showToast(`⚠️ Not enough stock for ${i.name}! Available: ${p.stock}`);
             stockError = true;
@@ -864,8 +944,8 @@ function confirmOrder() {
     if(stockError) return;
     
     // Update stock
-    cart.forEach(i => {
-        let p = products.find(pr => pr.name === i.name && pr.size === i.size);
+    allItems.forEach(i => {
+        let p = products.find(pr => pr.name === i.name && pr.category === i.category);
         if(p && p.stock > 0) {
             p.stock = Math.max(0, p.stock - i.qty);
         }
@@ -873,57 +953,39 @@ function confirmOrder() {
     
     let paid = Math.min(rec, total);
     let status = paid >= total ? 'paid' : (paid > 0 ? 'partial' : 'unpaid');
-    let order = { 
-        invoiceNo: invNo, 
-        date: new Date().toISOString(), 
-        customer: cust, 
-        phone, 
-        items: cart.map(i => ({...i})), 
-        subtotal: sub, 
-        taxAmount: tax, 
-        total, 
-        cost: totalCost, 
-        profit: profit, 
-        status, 
+    let order = {
+        invoiceNo: invNo,
+        date: new Date().toISOString(),
+        customer: cust,
+        phone,
+        items: allItems.map(i => ({...i})),
+        subtotal: grandTotal,
+        taxAmount: tax,
+        total,
+        cost: totalCost,
+        profit: profit,
+        status,
         paid,
         payments: paid > 0 ? [{amount: paid, notes: 'POS Payment', date: new Date().toISOString()}] : []
     };
     orders.push(order);
     
     let custObj = customers.find(c => c.phone === phone);
-    if(!custObj) { 
-        custObj = { name: cust, phone, invoices: [], ledger: [], advance: 0 }; 
-        customers.push(custObj); 
-    }
-    
-    let advanceUsed = 0;
-    if(custObj.advance && custObj.advance > 0) {
-        advanceUsed = Math.min(custObj.advance, total);
-        custObj.advance -= advanceUsed;
-        total = total - advanceUsed;
-        let remaining = total;
-        paid = Math.min(rec, remaining);
+    if(!custObj) {
+        custObj = { name: cust, phone, invoices: [], ledger: [], advance: 0 };
+        customers.push(custObj);
     }
     
     custObj.invoices.push({ invoiceNo: invNo, date: order.date, amount: total, paid: paid, status: status });
     
-    if(!custObj.ledger) custObj.ledger = [];
-    if(paid > 0) {
-        custObj.ledger.push({ date: order.date, type: 'Payment Received', amount: paid });
-    }
-    if(advanceUsed > 0) {
-        custObj.ledger.push({ date: order.date, type: 'Advance Used', amount: advanceUsed });
-    }
-    if(rec > total) {
-        let extra = rec - total;
-        custObj.advance = (custObj.advance || 0) + extra;
-        custObj.ledger.push({ date: order.date, type: 'Advance (Extra)', amount: extra });
-    }
+    // Clear all carts
+    ['mwad', 'mojali', 'mosnafar'].forEach(cat => {
+        carts[cat] = [];
+        updateCartDisplay(cat);
+    });
     
     saveData();
     showToast('✅ Order confirmed! ' + invNo);
-    cart = [];
-    updateCartDisplay();
     displayProducts();
     loadInventory();
     displayInvoices();
@@ -933,7 +995,7 @@ function confirmOrder() {
     document.getElementById('customerName').value = '';
     document.getElementById('customerPhone').value = '';
     document.getElementById('amountReceived').value = '0';
-    showStockWarning(null);
+    updateAllTotals();
 }
 
 // ==================== CUSTOMERS ====================
@@ -1511,6 +1573,7 @@ auth.onAuthStateChanged(user => {
 loadData();
 document.getElementById('companyNameSetting').value = company.name;
 document.getElementById('companyPhoneSetting').value = company.phone;
+updateAllTotals();
 
 setTimeout(() => {
     if(!isAdmin) {
