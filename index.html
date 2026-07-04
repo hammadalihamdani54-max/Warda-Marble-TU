@@ -144,8 +144,12 @@
         .session-item{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);font-size:10px;}
         .session-item .remove-btn{background:#e74c3c;color:white;border:none;border-radius:4px;padding:1px 8px;cursor:pointer;font-size:9px;}
         .summary-share-btn{background:#25d366;color:white;border:none;padding:6px 12px;border-radius:5px;cursor:pointer;font-size:11px;font-weight:bold;}
+        .sold-item-highlight{background:#fff3cd;border-left:3px solid #ffd700;}
         @media(max-width:480px){.product-list{grid-template-columns:1fr 1fr}.header h2{font-size:18px}}
         .keyboard-hint{font-size:9px;color:#a0c4e0;text-align:center;margin-top:4px;}
+        .stock-summary-item{display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr;padding:4px 0;border-bottom:1px solid var(--border);font-size:11px;}
+        .stock-summary-item .sold{color:#f39c12;font-weight:bold;}
+        .stock-summary-item .remaining{color:#27ae60;font-weight:bold;}
     </style>
 </head>
 <body>
@@ -300,20 +304,22 @@
             
             <!-- ===== PROFIT / LOSS ===== -->
             <div style="background:linear-gradient(135deg,#1a2a4a,#2d3b5a);padding:15px;border-radius:10px;margin-bottom:15px;color:white;text-align:center;">
-                <h3 style="color:#ffd700;margin-bottom:8px;">📈 Profit / Loss</h3>
+                <h3 style="color:#ffd700;margin-bottom:8px;">📈 Daily Profit / Loss</h3>
                 <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;font-size:12px;">
-                    <div><span style="color:#a0c4e0;">Opening Stock:</span><br><strong id="plOpeningStock">0</strong></div>
-                    <div><span style="color:#a0c4e0;">Stock In:</span><br><strong id="plStockIn">0</strong></div>
-                    <div><span style="color:#a0c4e0;">Closing Stock:</span><br><strong id="plClosingStock">0</strong></div>
-                    <div><span style="color:#a0c4e0;">Ikhrajat:</span><br><strong id="plIkhrajat">0</strong></div>
+                    <div><span style="color:#a0c4e0;">Total Sales:</span><br><strong id="plTotalSales">0</strong></div>
+                    <div><span style="color:#a0c4e0;">Total Cost:</span><br><strong id="plTotalCost">0</strong></div>
+                    <div><span style="color:#a0c4e0;">Ikhrajat:</span><br><strong id="plIkhrajatDisplay">0</strong></div>
                 </div>
                 <div style="margin-top:10px;font-size:18px;font-weight:bold;border-top:1px solid #ffd700;padding-top:8px;">
-                    <span id="plTotalProfit" style="color:#ffd700;">Profit: 0.00</span>
+                    <span id="plDailyProfit" style="color:#ffd700;">Profit: 0.00</span>
                 </div>
                 <div style="font-size:10px;color:#a0c4e0;margin-top:4px;">
-                    Formula: Sales - (Opening + Stock In - Closing + Ikhrajat)
+                    Formula: Sales - Cost - Ikhrajat = Profit/Loss
                 </div>
             </div>
+            
+            <h3>📦 Recently Sold Items (Top First)</h3>
+            <div id="soldItemsDisplay" style="background:#f8fafc;padding:10px;border-radius:8px;max-height:250px;overflow-y:auto;"></div>
             
             <h3>📦 Opening / Closing Stock</h3>
             <div id="stockSummaryDisplay" style="background:#f8fafc;padding:10px;border-radius:8px;max-height:200px;overflow-y:auto;"></div>
@@ -1464,37 +1470,66 @@ function updateSummary() {
     const previousReceived = previousSales.reduce((s,o) => s + (o.paid||0), 0);
     
     const totalCashJamma = receivedToday + advanceReceived + previousReceived;
-    const paymentMinus = totalCashJamma < todayIkhrajat ? todayIkhrajat - totalCashJamma : 0;
+    const remainingCash = totalCashJamma - todayIkhrajat;
+    const paymentMinus = remainingCash < 0 ? Math.abs(remainingCash) : 0;
     
     document.getElementById('sumTodaySale').textContent = formatCurrency(todayCash + todayUdhar);
     document.getElementById('sumUdharSale').textContent = formatCurrency(todayUdhar);
     document.getElementById('sumIkhrajat').textContent = formatCurrency(todayIkhrajat);
     document.getElementById('sumSabqaWusool').textContent = formatCurrency(previousReceived);
     document.getElementById('sumAdvanceWusool').textContent = formatCurrency(advanceReceived);
-    document.getElementById('sumTotalJamma').textContent = formatCurrency(totalCashJamma);
+    document.getElementById('sumTotalJamma').textContent = formatCurrency(remainingCash >= 0 ? remainingCash : 0);
     document.getElementById('sumPaymentMinus').textContent = formatCurrency(paymentMinus);
     
     const pmBox = document.getElementById('paymentMinusBox');
     pmBox.className = 'summary-box ' + (paymentMinus > 0 ? 'negative' : 'positive');
     
-    const openingStock = products.reduce((sum, p) => sum + (p.stock * p.cost), 0);
-    const stockIn = 0;
-    const closingStock = products.reduce((sum, p) => sum + (p.stock * p.cost), 0);
-    const ikhrajat = todayIkhrajat;
-    const totalSales = todaySales.reduce((s, o) => s + o.total, 0);
-    const totalCost = openingStock + stockIn - closingStock + ikhrajat;
-    const totalProfit = totalSales - totalCost;
+    // ===== DAILY PROFIT / LOSS =====
+    let totalSalesAmount = todaySales.reduce((s, o) => s + o.total, 0);
+    let totalCostAmount = todaySales.reduce((s, o) => s + o.cost, 0);
+    let dailyProfit = totalSalesAmount - totalCostAmount - todayIkhrajat;
     
-    document.getElementById('plOpeningStock').textContent = formatCurrency(openingStock);
-    document.getElementById('plStockIn').textContent = formatCurrency(stockIn);
-    document.getElementById('plClosingStock').textContent = formatCurrency(closingStock);
-    document.getElementById('plIkhrajat').textContent = formatCurrency(ikhrajat);
+    document.getElementById('plTotalSales').textContent = formatCurrency(totalSalesAmount);
+    document.getElementById('plTotalCost').textContent = formatCurrency(totalCostAmount);
+    document.getElementById('plIkhrajatDisplay').textContent = formatCurrency(todayIkhrajat);
     
-    const profitColor = totalProfit >= 0 ? '#4ade80' : '#f87171';
-    document.getElementById('plTotalProfit').innerHTML = 
-        `Profit/Loss: <span style="color:${profitColor};">${formatCurrency(totalProfit)}</span>`;
+    const profitColor = dailyProfit >= 0 ? '#4ade80' : '#f87171';
+    document.getElementById('plDailyProfit').innerHTML = 
+        `Profit/Loss: <span style="color:${profitColor};">${formatCurrency(dailyProfit)}</span>`;
     
-    let stockHtml = '<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;font-weight:bold;border-bottom:2px solid #ccc;padding:4px 0;"><span>Item</span><span>Opening</span><span>Sold</span><span>Closing</span></div>';
+    // ===== RECENTLY SOLD ITEMS (Top First) =====
+    let soldItems = {};
+    todaySales.forEach(o => {
+        o.items.forEach(i => {
+            if(!soldItems[i.name]) {
+                soldItems[i.name] = { total: 0, remaining: 0, qty: 0 };
+            }
+            soldItems[i.name].total += i.qty * i.price;
+            soldItems[i.name].qty += i.qty;
+            // Find remaining stock
+            let p = products.find(pr => pr.name === i.name);
+            soldItems[i.name].remaining = p ? p.stock : 0;
+        });
+    });
+    
+    let soldHtml = '<div class="stock-summary-item" style="font-weight:bold;border-bottom:2px solid #ccc;"><span>Item</span><span>Sold Qty</span><span>Revenue</span><span>Remaining</span><span>Status</span></div>';
+    // Sort by sold quantity (highest first)
+    let sortedItems = Object.keys(soldItems).sort((a, b) => soldItems[b].qty - soldItems[a].qty);
+    sortedItems.forEach(name => {
+        const data = soldItems[name];
+        const status = data.remaining <= 0 ? '⚠️ Out of Stock' : (data.remaining < 10 ? '⚠️ Low' : '✅ Available');
+        soldHtml += `<div class="stock-summary-item" style="${data.remaining <= 0 ? 'background:#fff3cd;' : ''}">
+            <span><strong>${name}</strong></span>
+            <span class="sold">${data.qty}</span>
+            <span>${formatCurrency(data.total)}</span>
+            <span class="remaining">${data.remaining}</span>
+            <span>${status}</span>
+        </div>`;
+    });
+    document.getElementById('soldItemsDisplay').innerHTML = soldHtml || '<div style="padding:10px;color:#666;">No items sold today</div>';
+    
+    // ===== STOCK SUMMARY =====
+    let stockHtml = '<div class="stock-summary-item" style="font-weight:bold;border-bottom:2px solid #ccc;"><span>Item</span><span>Opening</span><span>Sold</span><span>Closing</span></div>';
     products.forEach(item => {
         const sold = orders.filter(o => o.date.substring(0,10) === today).reduce((s,o) => { 
             let t=0; 
@@ -1504,10 +1539,16 @@ function updateSummary() {
             return s+t; 
         }, 0);
         const opening = item.stock + sold;
-        stockHtml += `<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;padding:3px 0;border-bottom:1px solid #eee;font-size:11px;"><span>${item.name} ${item.size}</span><span>${opening}</span><span style="color:#f39c12;">${sold}</span><span style="font-weight:bold;">${item.stock}</span></div>`;
+        stockHtml += `<div class="stock-summary-item">
+            <span>${item.name} ${item.size}</span>
+            <span>${opening}</span>
+            <span class="sold">${sold}</span>
+            <span class="remaining">${item.stock}</span>
+        </div>`;
     });
     document.getElementById('stockSummaryDisplay').innerHTML = stockHtml;
     
+    // ===== MONTHLY SUMMARY =====
     const month = today.substring(0,7);
     const monthSales = orders.filter(o => o.date.substring(0,7) === month);
     const monthExp = expenses.filter(e => e.date.substring(0,7) === month);
