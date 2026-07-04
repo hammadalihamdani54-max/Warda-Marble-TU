@@ -307,8 +307,8 @@
             <h3 id="invTitle">📄 Invoices</h3>
             <div class="search-box"><input type="text" id="invoiceSearch" placeholder="🔍 Search..." onkeyup="displayInvoices()"></div>
             
-            <!-- Profit Box -->
-            <div class="profit-box">
+            <!-- Profit Box - Only for Admin -->
+            <div class="profit-box" id="invoiceProfitBox" style="display:none;">
                 <div class="label" id="profitBoxLabel">📈 Total Invoice Profit</div>
                 <div class="value positive" id="totalInvoiceProfit">SAR 0.00</div>
                 <div class="category-profit">
@@ -649,26 +649,20 @@ function setLanguage(lang) {
         if(el) el.textContent = data[elements[id]] || data[id] || el.textContent;
     });
     
-    // Special cases
     document.getElementById('sumTitle').innerHTML = data.sumTitle + ' - <span id="summaryDate"></span>';
     
-    // Tab labels
     document.querySelectorAll('.tab[data-tab]').forEach(tab => {
         const key = tab.dataset.tab;
-        const map = { 'pos': '🛒 POS', 'customers': '👥 Customers', 'inventory': '📦 Stock',
-                      'invoices': '📄 Invoices', 'summary': '📊 Summary', 'expenses': '💸 Expenses',
-                      'settings': '⚙️ Settings' };
-        const langMap = { 'pos': data.posTitle.replace('📦 ', '🛒 '), 
-                          'customers': data.custTitle, 
-                          'inventory': data.stockTitle,
-                          'invoices': data.invTitle,
-                          'summary': data.sumTitle.replace('📊 ', '📊 '),
-                          'expenses': data.expTitle,
-                          'settings': data.setTitle };
-        if(langMap[key]) tab.innerHTML = tab.innerHTML.replace(/>[^<]*$/, '>' + langMap[key]);
+        const map = { 'pos': data.posTitle.replace('📦 ', '🛒 '), 
+                      'customers': data.custTitle, 
+                      'inventory': data.stockTitle,
+                      'invoices': data.invTitle,
+                      'summary': data.sumTitle.replace('📊 ', '📊 '),
+                      'expenses': data.expTitle,
+                      'settings': data.setTitle };
+        if(map[key]) tab.innerHTML = tab.innerHTML.replace(/>[^<]*$/, '>' + map[key]);
     });
     
-    // Category tabs
     document.querySelectorAll('.cat-tab[data-cat]').forEach(tab => {
         const cat = tab.dataset.cat;
         if(cat === 'all') tab.textContent = '📦 ' + (lang === 'ur' ? 'تمام' : lang === 'ar' ? 'الكل' : 'All');
@@ -679,7 +673,6 @@ function setLanguage(lang) {
     if(lang === 'ar') document.body.classList.add('rtl');
     else document.body.classList.remove('rtl');
     
-    // Re-render data to update language
     displayProducts();
     loadInventory();
     displayInvoices();
@@ -704,6 +697,7 @@ function loginWithFirebase() {
             document.getElementById('logoutBtn').style.display = 'inline-block';
             document.getElementById('logoutAllBtn').style.display = 'inline-block';
             document.getElementById('appContainer').classList.remove('view-only');
+            document.getElementById('invoiceProfitBox').style.display = 'block';
             registerSession();
             showToast('✅ Admin Login Successful!');
             loadData();
@@ -719,6 +713,7 @@ function skipLogin() {
     document.getElementById('roleBadge').textContent = '👁️ Viewer';
     document.getElementById('roleBadge').className = 'viewer-badge';
     document.getElementById('appContainer').classList.add('view-only');
+    document.getElementById('invoiceProfitBox').style.display = 'none';
     showToast('👁️ Viewer Mode');
     loadData();
 }
@@ -736,6 +731,7 @@ function logout() {
         document.getElementById('logoutBtn').style.display = 'none';
         document.getElementById('logoutAllBtn').style.display = 'none';
         document.getElementById('appContainer').classList.add('view-only');
+        document.getElementById('invoiceProfitBox').style.display = 'none';
         removeSession();
         showToast('👁️ Logged out');
     });
@@ -1664,16 +1660,16 @@ function updateSummary() {
     const receivedToday = todaySales.reduce((s,o) => s + (o.paid||0), 0);
     const advanceReceived = customers.reduce((s, c) => s + (c.advance || 0), 0);
     const previousSales = orders.filter(o => o.date.substring(0,10) < today);
-    const previousReceived = previousSales.reduce((s,o) => s + (o.paid||0), 0);
+    const sabqaWusool = previousSales.reduce((s,o) => s + (o.paid||0), 0);
     
-    const totalCashJamma = receivedToday + advanceReceived + previousReceived;
+    const totalCashJamma = receivedToday + sabqaWusool + advanceReceived;
     const remainingCash = totalCashJamma - todayIkhrajat;
     const paymentMinus = remainingCash < 0 ? Math.abs(remainingCash) : 0;
     
     document.getElementById('sumTodaySale').textContent = formatCurrency(todayCash + todayUdhar);
     document.getElementById('sumUdharSale').textContent = formatCurrency(todayUdhar);
     document.getElementById('sumIkhrajat').textContent = formatCurrency(todayIkhrajat);
-    document.getElementById('sumSabqaWusool').textContent = formatCurrency(previousReceived);
+    document.getElementById('sumSabqaWusool').textContent = formatCurrency(sabqaWusool);
     document.getElementById('sumAdvanceWusool').textContent = formatCurrency(advanceReceived);
     document.getElementById('sumTotalJamma').textContent = formatCurrency(remainingCash >= 0 ? remainingCash : 0);
     document.getElementById('sumPaymentMinus').textContent = formatCurrency(paymentMinus);
@@ -1853,6 +1849,7 @@ auth.onAuthStateChanged(user => {
         document.getElementById('logoutBtn').style.display = 'inline-block';
         document.getElementById('logoutAllBtn').style.display = 'inline-block';
         document.getElementById('appContainer').classList.remove('view-only');
+        document.getElementById('invoiceProfitBox').style.display = 'block';
         registerSession();
         loadData();
         listenForUpdates();
@@ -1862,6 +1859,7 @@ auth.onAuthStateChanged(user => {
             setTimeout(() => {
                 document.getElementById('loginModal').style.display = 'flex';
                 document.getElementById('appContainer').classList.add('view-only');
+                document.getElementById('invoiceProfitBox').style.display = 'none';
             }, 1000);
         }
     }
@@ -1877,6 +1875,7 @@ setTimeout(() => {
     if(!isAdmin) {
         document.getElementById('loginModal').style.display = 'flex';
         document.getElementById('appContainer').classList.add('view-only');
+        document.getElementById('invoiceProfitBox').style.display = 'none';
     }
 }, 1500);
 
