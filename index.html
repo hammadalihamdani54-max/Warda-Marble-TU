@@ -53,6 +53,9 @@
         .group-filter{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;}
         .group-btn{padding:5px 14px;background:#e2e8f0;border:none;border-radius:20px;cursor:pointer;font-weight:bold;font-size:11px;}
         .group-btn.active{background:#ffd700;}
+        .cat-tabs{display:flex;gap:4px;margin-bottom:10px;flex-wrap:wrap;}
+        .cat-tab{padding:5px 12px;background:#e2e8f0;border:none;border-radius:20px;cursor:pointer;font-weight:bold;font-size:10px;transition:0.3s;}
+        .cat-tab.active{background:#ffd700;color:#1a1a2e;}
         .search-box input{width:100%;padding:8px 12px;border:1px solid #ddd;border-radius:6px;font-size:12px;margin-bottom:8px;}
         .form-group{margin-bottom:10px;}
         label{display:block;font-size:11px;font-weight:bold;margin-bottom:3px;color:#334155;}
@@ -115,9 +118,9 @@
         .tax-toggle{display:flex;align-items:center;gap:8px;margin:8px 0;}
         .tax-toggle input{width:auto;}
         .customer-invoices .inv-item{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #eee;font-size:11px;align-items:center;}
+        .stock-warning{background:#fff3cd;border:2px solid #ffc107;padding:8px 12px;border-radius:6px;margin:4px 0;font-size:11px;color:#856404;}
+        .stock-warning strong{color:#e74c3c;}
         @media(max-width:480px){.product-list{grid-template-columns:1fr 1fr}.header h2{font-size:18px}}
-        .backup-admin-only{background:linear-gradient(135deg,#1a2a4a,#2d3b5a);padding:10px;border-radius:8px;color:#ffd700;text-align:center;margin-top:10px;}
-        .backup-admin-only .label{font-size:10px;color:#a0c4e0;}
     </style>
 </head>
 <body>
@@ -151,17 +154,19 @@
         <div class="pos-grid">
             <div class="panel">
                 <h3>📦 Products</h3>
-                <div class="group-filter">
-                    <button class="group-btn active" onclick="filterProducts('all')">All</button>
-                    <button class="group-btn" onclick="filterProducts('mwad')">مواد</button>
-                    <button class="group-btn" onclick="filterProducts('mojali')">مجلي</button>
-                    <button class="group-btn" onclick="filterProducts('mosnafar')">مصنفر</button>
+                <div class="cat-tabs" id="posCatTabs">
+                    <button class="cat-tab active" onclick="filterPOSCategory('all')">📦 All</button>
+                    <button class="cat-tab" onclick="filterPOSCategory('mwad')">🧱 Materials</button>
+                    <button class="cat-tab" onclick="filterPOSCategory('mojali')">✨ Polished</button>
+                    <button class="cat-tab" onclick="filterPOSCategory('mosnafar')">🪨 Honed</button>
+                    <button class="cat-tab" onclick="filterPOSCategory('cornish')">🏗️ Cornish</button>
                 </div>
                 <div class="search-box"><input type="text" id="searchProduct" placeholder="🔍 Search..." onkeyup="displayProducts()"></div>
                 <div class="product-list" id="productList"></div>
             </div>
             <div class="panel">
                 <h3>🛒 Cart</h3>
+                <div style="font-size:11px;color:#666;margin-bottom:8px;">All items combine in one cart</div>
                 <div class="mode-btns">
                     <div class="mode-btn active" onclick="setMode('sqm')">📐 SQM</div>
                     <div class="mode-btn" onclick="setMode('manual')">📏 Manual</div>
@@ -195,6 +200,7 @@
                     <p><strong>Received:</strong> <span id="received">SAR 0.00</span></p>
                     <p id="balanceMsg" style="font-weight:bold"></p>
                     <p id="profitDisplay" style="font-weight:bold;color:#ffd700;"></p>
+                    <div id="stockWarningDisplay" style="margin-top:6px;"></div>
                 </div>
                 <div class="action-btns">
                     <button onclick="confirmOrder()" class="btn-success">✅ Confirm</button>
@@ -218,11 +224,18 @@
     <div id="inventoryTab" class="tab-content">
         <div class="panel">
             <h3>📦 Stock Management</h3>
+            <div class="cat-tabs" id="stockCatTabs">
+                <button class="cat-tab active" onclick="filterStockCategory('all')">📦 All</button>
+                <button class="cat-tab" onclick="filterStockCategory('mwad')">🧱 Materials</button>
+                <button class="cat-tab" onclick="filterStockCategory('mojali')">✨ Polished</button>
+                <button class="cat-tab" onclick="filterStockCategory('mosnafar')">🪨 Honed</button>
+                <button class="cat-tab" onclick="filterStockCategory('cornish')">🏗️ Cornish</button>
+            </div>
             <div class="search-box"><input type="text" id="inventorySearch" placeholder="🔍 Search..." onkeyup="loadInventory()"></div>
             <button onclick="addNewProduct()" class="btn-success" style="margin-bottom:8px">➕ Add Product</button>
             <div style="overflow-x:auto;max-height:400px;overflow-y:auto">
                 <table id="inventoryTable">
-                    <thead><tr><th>Name</th><th>Size</th><th>Selling</th><th>Cost</th><th>Stock</th><th>Actions</th></tr></thead>
+                    <thead><tr><th>Category</th><th>Name</th><th>Size</th><th>Selling</th><th>Cost</th><th>Stock</th><th>Actions</th></tr></thead>
                     <tbody id="inventoryBody"></tbody>
                 </table>
             </div>
@@ -313,22 +326,12 @@
                     <button onclick="saveCompanySettings()" class="btn-success">💾 Save</button>
                 </div>
                 <div>
-                    <h4>💾 Data Management</h4>
+                    <h4>💾 Data</h4>
                     <button onclick="backupData()" class="btn-info">📥 Backup</button>
                     <button onclick="document.getElementById('restoreFile').click()" class="btn-warning">📤 Restore</button>
                     <input type="file" id="restoreFile" style="display:none" onchange="restoreData(this)">
                     <button onclick="resetAll()" class="btn-danger">⚠️ Reset</button>
                     <button onclick="syncToCloud()" class="btn-success" style="margin-top:4px;">☁️ Sync</button>
-                    
-                    <!-- ===== EMAIL BACKUP (Admin Only) ===== -->
-                    <div id="emailBackupSection" class="backup-admin-only" style="margin-top:10px;">
-                        <div class="label">📧 Email Backup (Admin Only)</div>
-                        <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;justify-content:center;">
-                            <input type="email" id="backupEmail" placeholder="Enter email..." style="width:180px;padding:4px 8px;border-radius:4px;border:1px solid #ffd700;background:rgba(255,255,255,0.1);color:white;">
-                            <button onclick="sendEmailBackup()" class="btn-success" style="padding:4px 12px;">📧 Send</button>
-                        </div>
-                        <div style="font-size:9px;color:#a0c4e0;margin-top:4px;">Data will be sent as JSON attachment</div>
-                    </div>
                 </div>
             </div>
         </div>
@@ -377,6 +380,8 @@ let currentPayInvoice = null;
 let currentEditInvoiceNo = null;
 let currentInvoiceForWhatsApp = null;
 let deletedItems = [];
+let posCategory = 'all';
+let stockCategory = 'all';
 
 function loginWithFirebase() {
     const email = document.getElementById('loginEmail').value;
@@ -391,7 +396,6 @@ function loginWithFirebase() {
             document.getElementById('loginBtn').style.display = 'none';
             document.getElementById('logoutBtn').style.display = 'inline-block';
             document.getElementById('appContainer').classList.remove('view-only');
-            document.getElementById('emailBackupSection').style.display = 'block';
             showToast('✅ Admin Login Successful!');
             loadData();
         })
@@ -406,7 +410,6 @@ function skipLogin() {
     document.getElementById('roleBadge').textContent = '👁️ Viewer';
     document.getElementById('roleBadge').className = 'viewer-badge';
     document.getElementById('appContainer').classList.add('view-only');
-    document.getElementById('emailBackupSection').style.display = 'none';
     showToast('👁️ Viewer Mode');
     loadData();
 }
@@ -423,7 +426,6 @@ function logout() {
         document.getElementById('loginBtn').style.display = 'inline-block';
         document.getElementById('logoutBtn').style.display = 'none';
         document.getElementById('appContainer').classList.add('view-only');
-        document.getElementById('emailBackupSection').style.display = 'none';
         showToast('👁️ Logged out');
     });
 }
@@ -431,12 +433,12 @@ function logout() {
 // ==================== DATA ====================
 let products = [], orders = [], customers = [], cart = [], cartHistory = [], expenses = [];
 let currentLang = 'en', currentCurrency = 'SAR', currentMode = 'sqm';
-let currentGroup = 'all';
 let taxEnabled = false;
 let company = { name: "WARDA MARBLE", phone: "+966 59 807 4287" };
 
 function buildProducts() {
     let prods = []; let id = 1;
+    // Materials
     let mwad = [
         ["زاویہ اپ ڈاون","4*4*3mm",9200],
         ["زاویہ اپ ڈاون","4*4*2mm",6600],
@@ -447,15 +449,31 @@ function buildProducts() {
         ["جولی ابو جمل","Standard",5],
         ["دسک بوش","9 بوسہ",20]
     ];
-    mwad.forEach(m => { prods.push({ id: id++, name: m[0], size: m[1], group: 'mwad', selling: 0, cost: 0, stock: m[2], type: 'pieces' }); });
+    mwad.forEach(m => { prods.push({ id: id++, name: m[0], size: m[1], category: 'mwad', selling: 0, cost: 0, stock: m[2], type: 'pieces' }); });
     
+    // Polished
     let mojaliSizes = ["3*7","3*10","3*15","3*20","3*30","3*40"];
-    mojaliSizes.forEach(s => { prods.push({ id: id++, name: "ابیض مجلی مبروم", size: s, group: 'mojali', selling: 65, cost: 50, stock: 50, type: 'sqm' }); });
-    mojaliSizes.forEach(s => { prods.push({ id: id++, name: "ابیض مجلی سادہ", size: s, group: 'mojali', selling: 60, cost: 45, stock: 50, type: 'sqm' }); });
+    mojaliSizes.forEach(s => { prods.push({ id: id++, name: "ابیض مجلی مبروم", size: s, category: 'mojali', selling: 65, cost: 50, stock: 50, type: 'sqm' }); });
+    mojaliSizes.forEach(s => { prods.push({ id: id++, name: "ابیض مجلی سادہ", size: s, category: 'mojali', selling: 60, cost: 45, stock: 50, type: 'sqm' }); });
+    let mojaliSpecial = [["(A) ابیض مجلی فرزا","3*40*80",75],["(C) ابیض مجلی فرزا","3*40*60",75],["ابیض مجلی مشطوف","3*30",70]];
+    mojaliSpecial.forEach(m => { prods.push({ id: id++, name: m[0], size: m[1], category: 'mojali', selling: m[2], cost: m[2]-12, stock: 50, type: 'sqm' }); });
     
+    // Honed
     let mosnafarSizes = ["3*7","3*10","3*15","3*20","3*30","3*40"];
-    mosnafarSizes.forEach(s => { prods.push({ id: id++, name: "ابیض مصنفر مبروم", size: s, group: 'mosnafar', selling: 55, cost: 42, stock: 50, type: 'sqm' }); });
-    mosnafarSizes.forEach(s => { prods.push({ id: id++, name: "ابیض مصنفر سادہ", size: s, group: 'mosnafar', selling: 50, cost: 38, stock: 50, type: 'sqm' }); });
+    mosnafarSizes.forEach(s => { prods.push({ id: id++, name: "ابیض مصنفر مبروم", size: s, category: 'mosnafar', selling: 55, cost: 42, stock: 50, type: 'sqm' }); });
+    mosnafarSizes.forEach(s => { prods.push({ id: id++, name: "ابیض مصنفر سادہ", size: s, category: 'mosnafar', selling: 50, cost: 38, stock: 50, type: 'sqm' }); });
+    let mosnafarSpecial = [["ابیض مصنفر فرزا","3*40*80",65],["پیانو ابیض مصنفر","3*20*50",55]];
+    mosnafarSpecial.forEach(m => { prods.push({ id: id++, name: m[0], size: m[1], category: 'mosnafar', selling: m[2], cost: m[2]-10, stock: 50, type: 'sqm' }); });
+    
+    // Cornish
+    let cornishItems = [
+        ["کورنیش پروفائل","10*10",100],
+        ["کورنیش پروفائل","10*15",80],
+        ["کورنیش ٹائل","20*20",200],
+        ["کورنیش موزیک","30*30",150]
+    ];
+    cornishItems.forEach(m => { prods.push({ id: id++, name: m[0], size: m[1], category: 'cornish', selling: 0, cost: 0, stock: m[2], type: 'pieces' }); });
+    
     return prods;
 }
 
@@ -529,16 +547,39 @@ function showTab(tab) {
     if(tab === 'expenses') loadExpenses();
 }
 
+// ==================== CATEGORY FILTERS ====================
+function filterPOSCategory(cat) {
+    posCategory = cat;
+    document.querySelectorAll('#posCatTabs .cat-tab').forEach(b => b.classList.remove('active'));
+    event.target.classList.add('active');
+    displayProducts();
+}
+
+function filterStockCategory(cat) {
+    stockCategory = cat;
+    document.querySelectorAll('#stockCatTabs .cat-tab').forEach(b => b.classList.remove('active'));
+    event.target.classList.add('active');
+    loadInventory();
+}
+
 // ==================== PRODUCTS ====================
 function displayProducts() {
     let search = document.getElementById('searchProduct').value.toLowerCase();
-    let filtered = products.filter(p => (currentGroup === 'all' || p.group === currentGroup) && (p.name.toLowerCase().includes(search) || p.size.toLowerCase().includes(search)));
+    let filtered = products.filter(p => 
+        (posCategory === 'all' || p.category === posCategory) && 
+        (p.name.toLowerCase().includes(search) || p.size.toLowerCase().includes(search))
+    );
     let c = document.getElementById('productList');
     c.innerHTML = '';
+    if(filtered.length === 0) {
+        c.innerHTML = '<div style="text-align:center;padding:20px;color:#666;">No products found</div>';
+        return;
+    }
     filtered.forEach(p => {
         let d = document.createElement('div');
         d.className = 'product-card';
-        d.innerHTML = `<div class="product-name">${p.name}</div><div class="product-size">${p.size}</div><div class="product-price">${p.selling > 0 ? formatCurrency(p.selling) : 'Set Price'}${p.type === 'sqm' ? '/m²' : '/pc'}</div><div>Stock: ${p.stock}</div>`;
+        let catEmoji = p.category === 'mwad' ? '🧱' : p.category === 'mojali' ? '✨' : p.category === 'mosnafar' ? '🪨' : '🏗️';
+        d.innerHTML = `<div class="product-name">${catEmoji} ${p.name}</div><div class="product-size">${p.size}</div><div class="product-price">${p.selling > 0 ? formatCurrency(p.selling) : 'Set Price'}${p.type === 'sqm' ? '/m²' : '/pc'}</div><div>Stock: ${p.stock}</div>`;
         d.onclick = () => {
             document.getElementById('itemName').value = p.name;
             document.getElementById('costPrice').value = p.cost;
@@ -550,26 +591,28 @@ function displayProducts() {
     });
 }
 
-function filterProducts(g) {
-    currentGroup = g;
-    document.querySelectorAll('.group-btn').forEach(b => b.classList.remove('active'));
-    event.target.classList.add('active');
-    displayProducts();
-}
-
 function loadInventory() {
     let search = document.getElementById('inventorySearch').value.toLowerCase();
-    let filtered = products.filter(p => p.name.toLowerCase().includes(search) || p.size.toLowerCase().includes(search));
+    let filtered = products.filter(p => 
+        (stockCategory === 'all' || p.category === stockCategory) &&
+        (p.name.toLowerCase().includes(search) || p.size.toLowerCase().includes(search))
+    );
     let tb = document.getElementById('inventoryBody');
     tb.innerHTML = '';
+    if(filtered.length === 0) {
+        tb.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:20px;color:#666;">No products found</td></tr>';
+        return;
+    }
     filtered.forEach(p => {
         let r = tb.insertRow();
-        r.insertCell(0).innerHTML = p.name;
-        r.insertCell(1).innerHTML = p.size;
-        r.insertCell(2).innerHTML = `<input type="number" value="${p.selling}" onchange="updateProduct(${p.id},'selling',this.value)" style="width:70px;">`;
-        r.insertCell(3).innerHTML = `<input type="number" value="${p.cost}" onchange="updateProduct(${p.id},'cost',this.value)" style="width:70px;">`;
-        r.insertCell(4).innerHTML = `<input type="number" value="${p.stock}" onchange="updateProduct(${p.id},'stock',this.value)" style="width:70px;">`;
-        let c = r.insertCell(5);
+        let catName = p.category === 'mwad' ? '🧱 Materials' : p.category === 'mojali' ? '✨ Polished' : p.category === 'mosnafar' ? '🪨 Honed' : '🏗️ Cornish';
+        r.insertCell(0).innerHTML = catName;
+        r.insertCell(1).innerHTML = p.name;
+        r.insertCell(2).innerHTML = p.size;
+        r.insertCell(3).innerHTML = `<input type="number" value="${p.selling}" onchange="updateProduct(${p.id},'selling',this.value)" style="width:70px;">`;
+        r.insertCell(4).innerHTML = `<input type="number" value="${p.cost}" onchange="updateProduct(${p.id},'cost',this.value)" style="width:70px;">`;
+        r.insertCell(5).innerHTML = `<input type="number" value="${p.stock}" onchange="updateProduct(${p.id},'stock',this.value)" style="width:70px;">`;
+        let c = r.insertCell(6);
         let editBtn = document.createElement('button');
         editBtn.innerHTML = '✏️';
         editBtn.className = 'btn-warning';
@@ -630,10 +673,13 @@ function updateProduct(id, field, value) {
 function addNewProduct() {
     if(!isAdmin) return showToast('🔒 Login first!');
     let type = confirm('Marble (SQM) - OK, Fitting - Cancel') ? 'sqm' : 'pieces';
+    let cat = prompt('Category: 1-Materials, 2-Polished, 3-Honed, 4-Cornish');
+    let catMap = {'1':'mwad','2':'mojali','3':'mosnafar','4':'cornish'};
+    let category = catMap[cat] || 'mwad';
     let name = prompt('Product name:');
     if(!name) return;
     let id = products.length ? Math.max(...products.map(p => p.id)) + 1 : 1;
-    products.push({ id, name, size: prompt('Size:'), group: 'mwad', selling: parseFloat(prompt('Selling price:')) || 0, cost: parseFloat(prompt('Purchase price:')) || 0, stock: parseInt(prompt('Stock:')) || 50, type });
+    products.push({ id, name, size: prompt('Size:'), category, selling: parseFloat(prompt('Selling price:')) || 0, cost: parseFloat(prompt('Purchase price:')) || 0, stock: parseInt(prompt('Stock:')) || 50, type });
     saveData();
     loadInventory();
     displayProducts();
@@ -672,6 +718,24 @@ function undoDelete() {
     }
 }
 
+// ==================== STOCK WARNING ====================
+function checkStockWarning(itemName, qty) {
+    let p = products.find(pr => pr.name === itemName);
+    if(p && p.stock < qty) {
+        return `⚠️ Warning: Only ${p.stock} ${p.type === 'sqm' ? 'm²' : 'pcs'} available!`;
+    }
+    return null;
+}
+
+function showStockWarning(msg) {
+    let container = document.getElementById('stockWarningDisplay');
+    if(msg) {
+        container.innerHTML = `<div class="stock-warning">⚠️ <strong>${msg}</strong></div>`;
+    } else {
+        container.innerHTML = '';
+    }
+}
+
 // ==================== CART ====================
 function addToCart() {
     let name = document.getElementById('itemName').value;
@@ -680,6 +744,13 @@ function addToCart() {
     let total = 0;
     let qty = 0;
     let price = 0;
+    
+    // Check stock before adding
+    let stockCheck = checkStockWarning(name, 1);
+    if(stockCheck) {
+        showStockWarning(stockCheck);
+        if(!confirm(stockCheck + ' Still add to cart?')) return;
+    }
     
     if(currentMode === 'sqm') {
         let w = parseFloat(document.getElementById('width').value) || 0.40;
@@ -708,6 +779,7 @@ function addToCart() {
         total = q * p;
         cart.push({ id: Date.now(), name, size: document.getElementById('pieceSize').value, qty: qty, qtyDisplay: qty + ' pcs', price: price, cost: cost, total: total });
     }
+    showStockWarning(null);
     updateCartDisplay();
     showToast('Added to cart');
 }
@@ -780,11 +852,22 @@ function confirmOrder() {
     let profit = sub - totalCost;
     let invNo = 'INV-' + String(orders.length + 1).padStart(4, '0');
     
+    // Check stock for all items
+    let stockError = false;
+    cart.forEach(i => {
+        let p = products.find(pr => pr.name === i.name && pr.size === i.size);
+        if(p && p.stock < i.qty) {
+            showToast(`⚠️ Not enough stock for ${i.name}! Available: ${p.stock}`);
+            stockError = true;
+        }
+    });
+    if(stockError) return;
+    
+    // Update stock
     cart.forEach(i => {
         let p = products.find(pr => pr.name === i.name && pr.size === i.size);
         if(p && p.stock > 0) {
-            let qtyToSubtract = i.qty;
-            p.stock = Math.max(0, p.stock - qtyToSubtract);
+            p.stock = Math.max(0, p.stock - i.qty);
         }
     });
     
@@ -850,6 +933,7 @@ function confirmOrder() {
     document.getElementById('customerName').value = '';
     document.getElementById('customerPhone').value = '';
     document.getElementById('amountReceived').value = '0';
+    showStockWarning(null);
 }
 
 // ==================== CUSTOMERS ====================
@@ -858,6 +942,10 @@ function displayCustomers() {
     let filtered = customers.filter(c => c.name.toLowerCase().includes(search) || (c.phone && c.phone.includes(search)));
     let container = document.getElementById('customerList');
     container.innerHTML = '';
+    if(filtered.length === 0) {
+        container.innerHTML = '<div style="text-align:center;padding:20px;color:#666;">No customers found</div>';
+        return;
+    }
     filtered.forEach(c => {
         let due = c.invoices.reduce((s, i) => s + (i.amount - i.paid), 0);
         let totalPaid = c.invoices.reduce((s, i) => s + i.paid, 0);
@@ -1045,6 +1133,10 @@ function displayInvoices() {
     let filtered = orders.filter(o => o.invoiceNo.toLowerCase().includes(search) || o.customer.toLowerCase().includes(search)).reverse();
     let tb = document.getElementById('invoicesBody');
     tb.innerHTML = '';
+    if(filtered.length === 0) {
+        tb.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:#666;">No invoices found</td></tr>';
+        return;
+    }
     filtered.forEach(o => {
         let r = tb.insertRow();
         r.insertCell(0).innerHTML = o.invoiceNo;
@@ -1179,7 +1271,6 @@ async function shareInvoiceImage() {
     showToast('Image ready');
 }
 
-// ==================== WHATSAPP DIRECT SHARE ====================
 function sendWhatsAppDirect() {
     let o = orders.find(x => x.invoiceNo === currentInvoiceForWhatsApp);
     if(!o) return;
@@ -1288,6 +1379,7 @@ function updateSummary() {
     const pmBox = document.getElementById('paymentMinusBox');
     pmBox.className = 'summary-box ' + (paymentMinus > 0 ? 'negative' : 'positive');
     
+    // PROFIT / LOSS
     const openingStock = products.reduce((sum, p) => sum + (p.stock * p.cost), 0);
     const stockIn = 0;
     const closingStock = products.reduce((sum, p) => sum + (p.stock * p.cost), 0);
@@ -1305,6 +1397,7 @@ function updateSummary() {
     document.getElementById('plTotalProfit').innerHTML = 
         `Profit/Loss: <span style="color:${profitColor};">${formatCurrency(totalProfit)}</span>`;
     
+    // Stock Summary
     let stockHtml = '<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;font-weight:bold;border-bottom:2px solid #ccc;padding:4px 0;"><span>Item</span><span>Opening</span><span>Sold</span><span>Closing</span></div>';
     products.forEach(item => {
         const sold = orders.filter(o => o.date.substring(0,10) === today).reduce((s,o) => { 
@@ -1319,6 +1412,7 @@ function updateSummary() {
     });
     document.getElementById('stockSummaryDisplay').innerHTML = stockHtml;
     
+    // Monthly Summary
     const month = today.substring(0,7);
     const monthSales = orders.filter(o => o.date.substring(0,7) === month);
     const monthExp = expenses.filter(e => e.date.substring(0,7) === month);
@@ -1340,47 +1434,6 @@ function updateSummary() {
         mhtml += `<tr><td>${d}</td><td>${formatCurrency(data.sale)}</td><td>${formatCurrency(data.udhar)}</td><td>${formatCurrency(data.ikhrajat)}</td><td style="color:${profit >= 0 ? '#27ae60' : '#e74c3c'}">${formatCurrency(profit)}</td><td>${formatCurrency(data.sale - data.ikhrajat)}</td></tr>`;
     });
     document.getElementById('monthlySummaryBody').innerHTML = mhtml || '<tr><td colspan="6">No data</td></tr>';
-}
-
-// ==================== EMAIL BACKUP ====================
-function sendEmailBackup() {
-    if(!isAdmin) return showToast('🔒 Admin only!');
-    let email = document.getElementById('backupEmail').value.trim();
-    if(!email) { showToast('Please enter email address'); return; }
-    
-    // Create backup data
-    let data = { 
-        products, orders, customers, expenses, company,
-        backupDate: new Date().toISOString(),
-        version: '1.0'
-    };
-    let jsonData = JSON.stringify(data, null, 2);
-    let blob = new Blob([jsonData], {type: 'application/json'});
-    let url = URL.createObjectURL(blob);
-    
-    // Open email with attachment
-    let subject = encodeURIComponent(`Warda Marble Backup - ${new Date().toLocaleDateString()}`);
-    let body = encodeURIComponent(`Please find attached backup file.\n\nDate: ${new Date().toLocaleString()}\nCompany: ${company.name}\n\nThis file contains all business data including products, orders, customers, and expenses.`);
-    
-    // Try to open email client
-    let mailtoLink = `mailto:${email}?subject=${subject}&body=${body}`;
-    
-    // Also download the file
-    let a = document.createElement('a');
-    a.href = url;
-    a.download = `warda_backup_${new Date().toISOString().slice(0,10)}.json`;
-    a.click();
-    
-    // Open email
-    setTimeout(() => {
-        window.open(mailtoLink, '_blank');
-        showToast('📧 Email opened with attachment');
-    }, 500);
-    
-    // Clean up
-    setTimeout(() => {
-        URL.revokeObjectURL(url);
-    }, 5000);
 }
 
 // ==================== SETTINGS ====================
@@ -1442,7 +1495,6 @@ auth.onAuthStateChanged(user => {
         document.getElementById('loginBtn').style.display = 'none';
         document.getElementById('logoutBtn').style.display = 'inline-block';
         document.getElementById('appContainer').classList.remove('view-only');
-        document.getElementById('emailBackupSection').style.display = 'block';
         loadData();
     } else {
         isAdmin = false;
@@ -1450,7 +1502,6 @@ auth.onAuthStateChanged(user => {
             setTimeout(() => {
                 document.getElementById('loginModal').style.display = 'flex';
                 document.getElementById('appContainer').classList.add('view-only');
-                document.getElementById('emailBackupSection').style.display = 'none';
             }, 1000);
         }
     }
@@ -1460,7 +1511,6 @@ auth.onAuthStateChanged(user => {
 loadData();
 document.getElementById('companyNameSetting').value = company.name;
 document.getElementById('companyPhoneSetting').value = company.phone;
-document.getElementById('emailBackupSection').style.display = 'none';
 
 setTimeout(() => {
     if(!isAdmin) {
@@ -1479,4 +1529,3 @@ window.sendWhatsAppDirect = sendWhatsAppDirect;
 </script>
 </body>
 </html>
-
