@@ -3,412 +3,348 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Warda Marble - Complete System</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <title>Warda Marble - Premium Management</title>
     <style>
         *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Arial,sans-serif;}
-        :root{--bg:#f0f2f5;--card:white;--text:#1a1a2e;--border:#e2e8f0;--shadow:0 2px 8px rgba(0,0,0,0.06);}
-        .dark-mode{--bg:#1a1a2e;--card:#2d3748;--text:#ffd700;--border:#4a5568;--shadow:0 2px 8px rgba(255,215,0,0.1);}
-        .dark-mode .panel{background:#2d3748;}
-        .dark-mode .product-card{background:#1a1a2e;border-color:#4a5568;}
-        .dark-mode .product-card .product-name{color:#ffd700;}
-        .dark-mode .product-card .product-price{color:#4ade80;}
-        .dark-mode .customer-card{background:#1a1a2e;border-color:#4a5568;}
-        .dark-mode .summary-box{background:#1a1a2e;border-color:#4a5568;}
-        .dark-mode .summary-box .num{color:#ffd700;}
-        .dark-mode .total-box{background:#0f2027;}
-        .dark-mode .form-group label{color:#a0c4e0;}
-        .dark-mode input,.dark-mode select{background:#1a1a2e;border-color:#4a5568;color:white;}
-        .dark-mode .search-box input{background:#1a1a2e;border-color:#4a5568;color:white;}
-        body{background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);padding:10px;min-height:100vh;transition:0.3s;}
-        .container{max-width:1500px;margin:0 auto;background:var(--card);border-radius:20px;overflow:hidden;box-shadow:0 20px 40px rgba(0,0,0,0.3);transition:0.3s;}
-        .header{background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);padding:10px 20px;text-align:center;position:relative;border-bottom:3px solid #ffd700;}
-        .header h2{color:#ffd700;font-size:22px;}
-        .header p{color:#a0c4e0;font-size:11px;margin-top:2px;}
-        .header-controls{position:absolute;top:8px;right:15px;display:flex;gap:5px;flex-wrap:wrap;align-items:center;}
-        .header-controls button{padding:3px 10px;background:rgba(255,255,255,0.12);color:white;border:1px solid #ffd700;border-radius:5px;cursor:pointer;font-weight:bold;font-size:9px;transition:0.3s;}
-        .header-controls button:hover{background:#ffd700;color:#1a1a2e;}
-        .header-controls .logout-all{background:#e74c3c;border-color:#e74c3c;}
-        .header-controls .theme-toggle{background:rgba(255,255,255,0.08);font-size:14px;padding:3px 8px;}
-        .status-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px;}
-        .status-dot.online{background:#27ae60;box-shadow:0 0 8px #27ae60;}
-        .status-dot.offline{background:#e74c3c;box-shadow:0 0 8px #e74c3c;}
-        .status-dot.syncing{background:#f39c12;animation:blink 1s infinite;}
-        @keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
-        .admin-badge{background:#ffd700;color:#1a1a2e;padding:2px 8px;border-radius:12px;font-size:8px;font-weight:bold;display:inline-block;margin-left:5px;}
-        .viewer-badge{background:#6b7a8a;color:white;padding:2px 8px;border-radius:12px;font-size:8px;font-weight:bold;display:inline-block;margin-left:5px;}
-        .login-modal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);display:flex;justify-content:center;align-items:center;z-index:9999;}
-        .login-box{background:white;padding:25px;border-radius:15px;max-width:380px;width:90%;text-align:center;}
-        .login-box h2{color:#1a1a2e;margin-bottom:8px;}
-        .login-box p{color:#666;margin-bottom:12px;font-size:13px;}
-        .login-box input{width:100%;padding:10px;border:2px solid #ddd;border-radius:8px;font-size:14px;margin-bottom:10px;}
-        .login-box input:focus{border-color:#ffd700;outline:none;}
-        .login-box .btn{width:100%;padding:10px;border:none;border-radius:8px;font-size:14px;font-weight:bold;cursor:pointer;color:white;}
-        .login-box .btn-success{background:#27ae60;}
-        .login-box .skip-btn{background:#6b7a8a;}
-        .login-box .error{color:#e74c3c;font-size:12px;margin-top:5px;display:none;}
-        .view-only .btn,.view-only input,.view-only select{opacity:0.5;pointer-events:none;}
-        .view-only .product-card{cursor:default;}
-        .view-only .product-card:hover{transform:none;border-color:#e2e8f0;}
-        .tabs{display:flex;background:#1a1a2e;flex-wrap:wrap;padding:0 5px;}
-        .tab{padding:8px 16px;background:transparent;color:white;border:none;cursor:pointer;font-weight:bold;font-size:12px;transition:0.3s;border-bottom:3px solid transparent;}
-        .tab.active{background:#2c3e50;color:#ffd700;border-bottom-color:#ffd700;}
-        .tab-content{display:none;padding:12px;background:var(--bg);min-height:450px;transition:0.3s;}
+        :root{--primary:#0f2027;--secondary:#203a43;--gold:#ffd700;--success:#27ae60;--danger:#e74c3c;--warning:#f39c12;--info:#3498db;--bg:#f0f2f5;}
+        body{background:var(--primary);padding:10px;min-height:100vh;}
+        .container{max-width:1400px;margin:0 auto;background:white;border-radius:20px;overflow:hidden;padding:15px;box-shadow:0 10px 30px rgba(0,0,0,0.3);}
+        .header{background:linear-gradient(135deg,var(--primary),var(--secondary));color:var(--gold);padding:12px;text-align:center;border-radius:10px;margin-bottom:10px;}
+        .header h1{font-size:20px;}
+        .tabs{display:flex;gap:3px;margin-bottom:8px;flex-wrap:wrap;background:#1a1a2e;padding:4px;border-radius:8px;}
+        .tab{padding:6px 12px;background:transparent;color:white;border:none;border-radius:5px;cursor:pointer;font-weight:bold;font-size:11px;transition:all 0.3s;}
+        .tab:hover{background:rgba(255,215,0,0.2);}
+        .tab.active{background:var(--gold);color:#1a1a2e;}
+        .tab-content{display:none;padding:10px;background:var(--bg);border-radius:8px;min-height:300px;animation:fadeIn 0.3s;}
         .tab-content.active{display:block;}
-        .pos-grid{display:grid;grid-template-columns:1fr 1.2fr;gap:12px;}
-        @media(max-width:900px){.pos-grid{grid-template-columns:1fr;}}
-        .panel{background:var(--card);padding:12px;border-radius:10px;box-shadow:var(--shadow);margin-bottom:12px;transition:0.3s;}
-        .panel h3{margin-bottom:10px;color:var(--text);border-left:4px solid #ffd700;padding-left:10px;font-size:15px;transition:0.3s;}
-        .product-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:6px;max-height:380px;overflow-y:auto;}
-        .product-card{background:white;padding:6px;border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:0.2s;}
-        .product-card:hover{border-color:#ffd700;transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,0.1);}
-        .product-name{font-weight:bold;font-size:12px;color:var(--text);}
-        .product-size{font-size:9px;color:#666;}
-        .product-price{color:#27ae60;font-weight:bold;font-size:10px;}
-        .product-stock-low{color:#e74c3c;font-weight:bold;}
-        .cat-tabs{display:flex;gap:4px;margin-bottom:8px;flex-wrap:wrap;}
-        .cat-tab{padding:4px 10px;background:#e2e8f0;border:none;border-radius:20px;cursor:pointer;font-weight:bold;font-size:9px;transition:0.3s;}
-        .cat-tab.active{background:#ffd700;color:#1a1a2e;}
-        .search-box input{width:100%;padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:11px;margin-bottom:6px;transition:0.3s;}
-        .form-group{margin-bottom:8px;}
-        label{display:block;font-size:10px;font-weight:bold;margin-bottom:2px;color:#334155;transition:0.3s;}
-        input,select{width:100%;padding:5px 8px;border:1px solid #ddd;border-radius:5px;font-size:11px;transition:0.3s;}
-        button{padding:5px 10px;border:none;border-radius:5px;cursor:pointer;font-size:10px;font-weight:bold;transition:0.2s;margin:2px;}
-        .btn-success{background:#27ae60;color:white;}
-        .btn-danger{background:#e74c3c;color:white;}
-        .btn-warning{background:#f39c12;color:white;}
-        .btn-info{background:#3498db;color:white;}
-        .btn-outline{background:transparent;border:2px solid #1a2a4a;color:#1a2a4a;}
-        .btn-whatsapp{background:#25d366;color:white;}
-        .mode-btns{display:flex;gap:4px;margin-bottom:10px;}
-        .mode-btn{flex:1;background:#e2e8f0;padding:5px;text-align:center;border-radius:6px;cursor:pointer;font-weight:bold;font-size:10px;}
-        .mode-btn.active{background:#ffd700;}
-        .input-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px;}
-        .input-group{flex:1;min-width:70px;}
-        .total-box{background:#1a1a2e;color:white;padding:10px;border-radius:8px;margin-top:10px;text-align:right;transition:0.3s;}
-        .total-box p{margin:2px 0;font-size:11px;}
-        .total-box .profit{color:#4ade80;}
-        .total-box .loss{color:#f87171;}
+        @keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+        .panel{background:white;padding:10px;border-radius:8px;margin-bottom:8px;box-shadow:0 2px 4px rgba(0,0,0,0.05);}
+        .panel h3{color:var(--primary);margin-bottom:6px;border-left:3px solid var(--gold);padding-left:8px;font-size:14px;}
+        .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+        .grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;}
+        .grid-4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;}
+        input,select{width:100%;padding:5px 7px;border:1px solid #ddd;border-radius:4px;font-size:11px;margin-bottom:4px;transition:border-color 0.3s;}
+        input:focus,select:focus{outline:none;border-color:var(--gold);}
+        button{padding:5px 10px;border:none;border-radius:4px;cursor:pointer;font-weight:bold;font-size:10px;margin:2px;transition:all 0.3s;}
+        button:hover{transform:translateY(-1px);box-shadow:0 2px 8px rgba(0,0,0,0.2);}
+        button:active{transform:translateY(0);}
+        .btn-success{background:var(--success);color:white;}
+        .btn-danger{background:var(--danger);color:white;}
+        .btn-warning{background:var(--warning);color:white;}
+        .btn-info{background:var(--info);color:white;}
+        .btn-primary{background:var(--primary);color:white;}
         table{width:100%;border-collapse:collapse;font-size:10px;}
-        th,td{padding:5px;text-align:left;border-bottom:1px solid var(--border);}
-        th{background:#1a1a2e;color:#ffd700;font-size:9px;}
-        .badge{padding:2px 8px;border-radius:12px;font-size:8px;font-weight:bold;display:inline-block;}
-        .badge-paid{background:#27ae60;color:white;}
-        .badge-unpaid{background:#e74c3c;color:white;}
-        .badge-partial{background:#f39c12;color:white;}
-        .badge-settled{background:#6b7a8a;color:white;}
-        .badge-advance{background:#3498db;color:white;}
-        .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:12px;}
-        .stat-card{background:linear-gradient(135deg,#1a1a2e,#2c3e50);padding:10px;border-radius:10px;text-align:center;color:white;}
-        .stat-card h4{font-size:11px;margin-bottom:4px;}
-        .stat-card .value{font-size:20px;font-weight:bold;color:#ffd700;}
-        .summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:6px;margin-bottom:10px;}
-        .summary-box{background:var(--card);padding:8px;border-radius:8px;text-align:center;border:1px solid var(--border);transition:0.3s;}
+        th,td{padding:4px;border-bottom:1px solid #ddd;text-align:left;}
+        th{background:var(--primary);color:var(--gold);position:sticky;top:0;z-index:10;}
+        .badge{padding:2px 6px;border-radius:8px;font-size:8px;font-weight:bold;display:inline-block;}
+        .badge-paid{background:var(--success);color:white;}
+        .badge-unpaid{background:var(--danger);color:white;}
+        .badge-partial{background:var(--warning);color:white;}
+        .badge-settled{background:#2c3e50;color:white;}
+        .total-box{background:#1a1a2e;color:white;padding:8px;border-radius:6px;margin-top:6px;text-align:right;}
+        .total-box p{margin:2px 0;font-size:11px;}
+        .summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:5px;margin-bottom:8px;}
+        .summary-box{background:white;padding:6px;border-radius:5px;text-align:center;border:1px solid #ddd;transition:all 0.3s;}
+        .summary-box:hover{transform:scale(1.02);box-shadow:0 2px 8px rgba(0,0,0,0.1);}
         .summary-box .num{font-size:18px;font-weight:bold;}
-        .summary-box .lbl{font-size:9px;color:#666;}
-        .summary-box.positive .num{color:#27ae60;}
-        .summary-box.negative .num{color:#e74c3c;}
-        .summary-box.warning .num{color:#f39c12;}
-        .rtl{direction:rtl;text-align:right;}
-        .rtl .total-box{text-align:left;}
-        .rtl .panel h3{border-left:none;border-right:4px solid #ffd700;padding-left:0;padding-right:10px;}
-        .invoice-box{max-width:600px;margin:auto;border:2px solid #ffd700;border-radius:10px;background:white;overflow:hidden;}
-        .invoice-box .header{background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);color:#ffd700;padding:12px;text-align:center;}
-        .invoice-box .body{padding:15px;}
-        .invoice-box table{width:100%;}
-        .invoice-box th{background:#1a1a2e;color:#ffd700;padding:5px;text-align:center;font-size:10px;}
-        .invoice-box td{padding:5px;text-align:center;border-bottom:1px solid #ddd;font-size:10px;}
-        .action-btns{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;justify-content:center;}
-        .modal{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:1000;justify-content:center;align-items:center;}
-        .modal-content{background:white;padding:20px;border-radius:15px;max-width:600px;width:95%;max-height:85vh;overflow:auto;}
-        .modal-header{display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #eef2f6;padding-bottom:8px;margin-bottom:8px;}
-        .modal-header h3{margin:0;}
-        .modal-close-btn{background:#e74c3c;color:white;border:none;padding:3px 10px;border-radius:5px;cursor:pointer;font-size:11px;}
-        .toast{position:fixed;bottom:20px;right:20px;background:#1a1a2e;color:#ffd700;padding:6px 14px;border-radius:8px;z-index:1000;font-size:11px;}
-        .customer-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:8px;margin-bottom:6px;transition:0.3s;}
-        .customer-card:hover{box-shadow:0 2px 8px rgba(0,0,0,0.1);}
-        .ledger-entry{display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #eee;font-size:10px;}
-        .ledger-entry .amount.credit{color:#27ae60;}
-        .ledger-entry .amount.debit{color:#e74c3c;}
-        .balance-box{background:#1a1a2e;color:#ffd700;padding:6px;border-radius:6px;text-align:center;margin-top:6px;font-size:11px;}
-        .expense-item{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);align-items:center;font-size:10px;}
-        .expense-item .exp-actions{display:flex;gap:3px;}
-        .tax-toggle{display:flex;align-items:center;gap:6px;margin:6px 0;}
-        .tax-toggle input{width:auto;}
-        .customer-invoices .inv-item{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #eee;font-size:10px;align-items:center;}
-        .stock-warning{background:#fff3cd;border:2px solid #ffc107;padding:6px 10px;border-radius:6px;margin:4px 0;font-size:10px;color:#856404;}
-        .stock-warning strong{color:#e74c3c;}
-        .session-item{display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--border);font-size:9px;}
-        .session-item .remove-btn{background:#e74c3c;color:white;border:none;border-radius:4px;padding:1px 8px;cursor:pointer;font-size:8px;}
-        .summary-share-btn{background:#25d366;color:white;border:none;padding:4px 10px;border-radius:5px;cursor:pointer;font-size:10px;font-weight:bold;}
-        .keyboard-hint{font-size:8px;color:#a0c4e0;text-align:center;margin-top:3px;}
-        .stock-summary-item{display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr;padding:3px 0;border-bottom:1px solid var(--border);font-size:10px;}
-        .stock-summary-item .sold{color:#f39c12;font-weight:bold;}
-        .stock-summary-item .remaining{color:#27ae60;font-weight:bold;}
-        .profit-box{background:linear-gradient(135deg,#1a2a4a,#2d3b5a);padding:10px 12px;border-radius:8px;color:white;text-align:center;margin-top:8px;}
-        .profit-box .label{font-size:10px;color:#a0c4e0;}
-        .profit-box .value{font-size:16px;font-weight:bold;color:#ffd700;}
-        .profit-box .value.positive{color:#4ade80;}
-        .profit-box .value.negative{color:#f87171;}
-        .category-profit{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:4px;}
-        .category-profit .cat-box{background:rgba(255,255,255,0.05);padding:6px;border-radius:6px;}
-        .category-profit .cat-box .cat-label{font-size:9px;color:#a0c4e0;}
-        .category-profit .cat-box .cat-value{font-size:12px;font-weight:bold;color:#ffd700;}
-        .stock-in-out{background:#f0f2f5;padding:10px;border-radius:8px;margin-top:8px;}
-        .stock-in-out .row{display:flex;gap:6px;flex-wrap:wrap;}
-        .stock-in-out .row input,.stock-in-out .row select{flex:1;min-width:80px;padding:4px 6px;border:1px solid #ddd;border-radius:4px;font-size:10px;}
-        .lang-selector{display:flex;gap:4px;align-items:center;}
-        .lang-selector button{padding:2px 8px;background:rgba(255,255,255,0.1);color:white;border:1px solid #ffd700;border-radius:4px;cursor:pointer;font-size:8px;font-weight:bold;}
-        .lang-selector button.active{background:#ffd700;color:#1a1a2e;}
-        @media(max-width:480px){.product-list{grid-template-columns:1fr 1fr}.header h2{font-size:18px}.summary-grid{grid-template-columns:1fr 1fr}}
+        .summary-box .lbl{font-size:8px;color:#666;}
+        .summary-box.positive .num{color:var(--success);}
+        .summary-box.negative .num{color:var(--danger);}
+        .action-btns{display:flex;flex-wrap:wrap;gap:3px;margin-top:4px;}
+        .product-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:5px;max-height:300px;overflow-y:auto;padding:2px;}
+        .product-list::-webkit-scrollbar{width:4px;}
+        .product-list::-webkit-scrollbar-thumb{background:var(--gold);border-radius:2px;}
+        .product-card{background:#f7fafc;padding:5px;border:1px solid #ddd;border-radius:5px;cursor:pointer;text-align:center;transition:all 0.3s;}
+        .product-card:hover{border-color:var(--gold);transform:scale(1.02);box-shadow:0 2px 8px rgba(0,0,0,0.1);}
+        .product-card .name{font-weight:bold;font-size:11px;}
+        .product-card .price{color:var(--success);font-size:10px;}
+        .product-card .stock{font-size:8px;color:#666;}
+        .product-card.out-of-stock{opacity:0.5;cursor:not-allowed;}
+        .product-card.out-of-stock:hover{transform:none;box-shadow:none;}
+        .cat-tabs{display:flex;gap:3px;margin-bottom:4px;flex-wrap:wrap;}
+        .cat-tab{padding:2px 8px;background:#e2e8f0;border:none;border-radius:12px;cursor:pointer;font-size:8px;font-weight:bold;transition:all 0.3s;}
+        .cat-tab:hover{background:#cbd5e1;}
+        .cat-tab.active{background:var(--gold);}
+        .stock-in-out{background:#f7fafc;padding:6px;border-radius:5px;margin-top:4px;}
+        .stock-in-out .row{display:flex;gap:4px;flex-wrap:wrap;}
+        .stock-in-out .row select,.stock-in-out .row input{flex:1;min-width:60px;}
+        .toast{position:fixed;bottom:20px;right:20px;background:#1a1a2e;color:var(--gold);padding:8px 16px;border-radius:8px;z-index:9999;font-size:11px;box-shadow:0 4px 12px rgba(0,0,0,0.3);animation:slideUp 0.3s;}
+        @keyframes slideUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+        .login-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);display:flex;justify-content:center;align-items:center;z-index:9999;backdrop-filter:blur(5px);}
+        .login-box{background:white;padding:25px;border-radius:15px;max-width:350px;width:90%;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,0.5);animation:scaleIn 0.3s;}
+        @keyframes scaleIn{from{opacity:0;transform:scale(0.9);}to{opacity:1;transform:scale(1);}}
+        .login-box h2{color:var(--primary);margin-bottom:5px;}
+        .login-box input{width:100%;padding:8px;margin:5px 0;border:1px solid #ddd;border-radius:6px;}
+        .login-box .error{color:var(--danger);font-size:10px;display:none;margin-top:5px;}
+        .view-only .btn:not(.no-disable),.view-only input:not(.no-disable),.view-only select:not(.no-disable){opacity:0.5;pointer-events:none;}
+        .view-only .product-card{cursor:default;}
+        .view-only .product-card:hover{transform:none;box-shadow:none;}
+        .modal{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);justify-content:center;align-items:center;z-index:9998;backdrop-filter:blur(3px);}
+        .modal.active{display:flex;}
+        .modal-content{background:white;padding:20px;border-radius:10px;max-width:500px;width:90%;max-height:80vh;overflow-y:auto;}
+        .chart-container{height:200px;margin:10px 0;}
+        .quick-actions{display:flex;gap:4px;flex-wrap:wrap;margin:4px 0;}
+        .quick-actions button{font-size:8px;padding:2px 8px;}
+        @media(max-width:768px){.grid-2{grid-template-columns:1fr;}.grid-3{grid-template-columns:1fr 1fr;}.grid-4{grid-template-columns:1fr 1fr;}.tabs .tab{font-size:9px;padding:4px 8px;}}
+        @media(max-width:480px){.grid-3{grid-template-columns:1fr;}.grid-4{grid-template-columns:1fr;}}
+        .dark-mode{--bg:#1a1a2e;--primary:#0a0a15;--secondary:#1a1a2e;}
+        .dark-mode .panel{background:#2d2d44;color:#e0e0e0;}
+        .dark-mode .panel h3{color:var(--gold);}
+        .dark-mode .product-card{background:#2d2d44;border-color:#444;}
+        .dark-mode .product-card .name{color:#e0e0e0;}
+        .dark-mode .summary-box{background:#2d2d44;border-color:#444;color:#e0e0e0;}
+        .dark-mode .summary-box .lbl{color:#999;}
+        .dark-mode input,.dark-mode select{background:#2d2d44;color:#e0e0e0;border-color:#444;}
+        .dark-mode input::placeholder{color:#888;}
+        .dark-mode .stock-in-out{background:#2d2d44;}
+        .dark-mode table td{color:#e0e0e0;}
+        .dark-mode .total-box{background:#0a0a15;}
+        .dark-mode .login-box{background:#2d2d44;color:#e0e0e0;}
+        .dark-mode .login-box input{background:#1a1a2e;color:#e0e0e0;border-color:#444;}
+        .dark-mode .modal-content{background:#2d2d44;color:#e0e0e0;}
     </style>
 </head>
 <body>
-<div class="container" id="appContainer">
+
+<div class="container" id="app">
     <!-- Header -->
     <div class="header">
-        <h2 id="companyName">🏢 WARDA MARBLE <span id="roleBadge" class="viewer-badge">👁️ Viewer</span></h2>
-        <p id="companyTagline">Premium Marble Solutions | <span id="statusText"><span class="status-dot online" id="statusDot"></span>Online</span></p>
-        <div class="header-controls">
-            <div class="lang-selector">
-                <button onclick="setLanguage('ur')" id="langUr">اردو</button>
-                <button onclick="setLanguage('ar')" id="langAr">العربية</button>
-                <button onclick="setLanguage('en')" id="langEn" class="active">EN</button>
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;">
+            <div>
+                <h1>🏢 WARDA MARBLE <span id="roleBadge" style="font-size:11px;background:#6b7a8a;padding:2px 8px;border-radius:8px;">👁️ Viewer</span></h1>
+                <p style="font-size:11px;color:#ccc;">Premium Marble Solutions</p>
             </div>
-            <button onclick="toggleTheme()" class="theme-toggle">🌙</button>
-            <button onclick="toggleCurrency()">💱</button>
-            <button id="loginBtn" onclick="showLoginModal()" style="background:#27ae60;border-color:#27ae60;">🔑 Login</button>
-            <button id="logoutBtn" onclick="logout()" style="display:none;background:#e74c3c;border-color:#e74c3c;">🚪 Logout</button>
-            <button id="logoutAllBtn" onclick="logoutAllSessions()" style="display:none;background:#c0392b;border-color:#c0392b;">🚫</button>
+            <div style="display:flex;gap:4px;flex-wrap:wrap;">
+                <button onclick="toggleDarkMode()" style="background:transparent;color:var(--gold);border:1px solid var(--gold);padding:2px 8px;border-radius:4px;cursor:pointer;font-size:10px;">🌓</button>
+                <button onclick="exportData()" style="background:var(--info);color:white;border:none;padding:2px 8px;border-radius:4px;cursor:pointer;font-size:10px;">💾 Backup</button>
+                <button onclick="importData()" style="background:var(--warning);color:white;border:none;padding:2px 8px;border-radius:4px;cursor:pointer;font-size:10px;">📂 Restore</button>
+                <button onclick="showLogin()" id="loginBtn" style="background:var(--success);color:white;border:none;padding:2px 10px;border-radius:4px;cursor:pointer;font-weight:bold;font-size:10px;">🔑 Login</button>
+                <button onclick="logout()" id="logoutBtn" style="display:none;background:var(--danger);color:white;border:none;padding:2px 10px;border-radius:4px;cursor:pointer;font-weight:bold;font-size:10px;">🚪 Logout</button>
+            </div>
         </div>
     </div>
 
     <!-- Tabs -->
-    <div class="tabs" id="tabContainer">
-        <button class="tab active" onclick="showTab('pos')" data-tab="pos">🛒 POS</button>
-        <button class="tab" onclick="showTab('customers')" data-tab="customers">👥 Customers</button>
-        <button class="tab" onclick="showTab('inventory')" data-tab="inventory">📦 Stock</button>
-        <button class="tab" onclick="showTab('invoices')" data-tab="invoices">📄 Invoices</button>
-        <button class="tab" onclick="showTab('summary')" data-tab="summary">📊 Summary</button>
-        <button class="tab" onclick="showTab('expenses')" data-tab="expenses">💸 Expenses</button>
-        <button class="tab" onclick="showTab('settings')" data-tab="settings">⚙️ Settings</button>
+    <div class="tabs">
+        <button class="tab active" onclick="showTab('pos')">🛒 POS</button>
+        <button class="tab" onclick="showTab('stock')">📦 Stock</button>
+        <button class="tab" onclick="showTab('customers')">👥 Customers</button>
+        <button class="tab" onclick="showTab('invoices')">📄 Invoices</button>
+        <button class="tab" onclick="showTab('summary')">📊 Summary</button>
+        <button class="tab" onclick="showTab('expenses')">💸 Expenses</button>
+        <button class="tab" onclick="showTab('reports')">📈 Reports</button>
     </div>
 
     <!-- ===== POS TAB ===== -->
-    <div id="posTab" class="tab-content active">
-        <div class="pos-grid">
+    <div id="tab-pos" class="tab-content active">
+        <div class="grid-2">
             <div class="panel">
-                <h3 id="posTitle">📦 Products</h3>
-                <div class="cat-tabs" id="posCatTabs">
-                    <button class="cat-tab active" onclick="filterPOSCategory('all')" data-cat="all">📦 All</button>
-                    <button class="cat-tab" onclick="filterPOSCategory('mwad')" data-cat="mwad">🧱 Materials</button>
-                    <button class="cat-tab" onclick="filterPOSCategory('stone')" data-cat="stone">🪨 Stone</button>
+                <h3>📦 Products</h3>
+                <div class="cat-tabs">
+                    <button class="cat-tab active" onclick="filterProducts('all')">All</button>
+                    <button class="cat-tab" onclick="filterProducts('mwad')">Materials</button>
+                    <button class="cat-tab" onclick="filterProducts('stone')">Stone</button>
                 </div>
-                <div class="search-box"><input type="text" id="searchProduct" placeholder="🔍 Search..." onkeyup="displayProducts()"></div>
+                <input type="text" id="searchProduct" placeholder="🔍 Search by name or size..." onkeyup="renderProducts()">
                 <div class="product-list" id="productList"></div>
             </div>
             <div class="panel">
-                <h3 id="cartTitle">🛒 Cart</h3>
-                <div class="mode-btns">
-                    <div class="mode-btn active" onclick="setMode('sqm')" data-mode="sqm">📐 SQM</div>
-                    <div class="mode-btn" onclick="setMode('manual')" data-mode="manual">📏 Manual</div>
-                    <div class="mode-btn" onclick="setMode('pieces')" data-mode="pieces">🔧 Pieces</div>
+                <h3>🛒 Cart</h3>
+                <div class="quick-actions">
+                    <button class="btn-success" onclick="setMode('sqm')" style="font-size:9px;padding:3px 8px;">📐 SQM</button>
+                    <button class="btn-info" onclick="setMode('manual')" style="font-size:9px;padding:3px 8px;">📏 Manual</button>
+                    <button class="btn-warning" onclick="setMode('pieces')" style="font-size:9px;padding:3px 8px;">🔧 Pieces</button>
                 </div>
-                <div class="input-row">
-                    <div class="input-group"><label id="lblItem">Item</label><input type="text" id="itemName" placeholder="Name"></div>
-                    <div class="input-group"><label id="lblCost">Purchase Price</label><input type="number" id="costPrice" step="0.01"></div>
+                <div class="grid-2">
+                    <input type="text" id="itemName" placeholder="Item name" list="productSuggest">
+                    <datalist id="productSuggest"></datalist>
+                    <input type="number" id="costPrice" placeholder="Cost" step="0.01">
                 </div>
-                <div id="sqmFields"><div class="input-row"><div class="input-group"><label id="lblThick">Thick</label><input type="number" id="thick" value="3"></div><div class="input-group"><label id="lblWidth">Width</label><input type="number" id="width" value="0.40" step="0.01"></div><div class="input-group"><label id="lblLength">Length</label><input type="number" id="length" value="0.80" step="0.01"></div><div class="input-group"><label id="lblPriceSqm">Price/m²</label><input type="number" id="sqmPrice" step="0.01"></div></div></div>
-                <div id="manualFields" style="display:none"><div class="input-row"><div class="input-group"><label id="lblArea">Area(m²)</label><input type="number" id="manualArea" step="0.01"></div><div class="input-group"><label id="lblPriceManual">Price/m²</label><input type="number" id="manualPrice" step="0.01"></div></div></div>
-                <div id="piecesFields" style="display:none"><div class="input-row"><div class="input-group"><label id="lblSize">Size</label><input type="text" id="pieceSize"></div><div class="input-group"><label id="lblQtyPieces">Qty</label><input type="number" id="pieceQty" value="1"></div><div class="input-group"><label id="lblPricePieces">Price/pc</label><input type="number" id="piecePrice" step="0.01"></div></div></div>
-                <button onclick="addToCart()" class="btn-success" style="width:100%" id="btnAdd">➕ Add</button>
-                <div style="margin-top:6px"><label id="lblCustomer">👤 Customer</label><input type="text" id="customerName" placeholder="Name"></div>
-                <div><label id="lblPhone">📞 Phone</label><input type="text" id="customerPhone" placeholder="Phone"></div>
-                <div><label id="lblReceived">💰 Received</label><input type="number" id="amountReceived" value="0" step="0.01" oninput="updateTotals()"></div>
-                <div class="tax-toggle">
-                    <input type="checkbox" id="taxEnable" onchange="updateTotals()">
-                    <label for="taxEnable" id="lblTaxEnable">Enable Tax (15%)</label>
+                <div id="sqmInputs">
+                    <div class="grid-3">
+                        <input type="number" id="sqmWidth" placeholder="Width (m)" step="0.01" value="0.40">
+                        <input type="number" id="sqmLength" placeholder="Length (m)" step="0.01" value="0.80">
+                        <input type="number" id="sqmPrice" placeholder="Price/m²" step="0.01">
+                    </div>
                 </div>
-                <div style="max-height:180px;overflow:auto;margin-top:6px">
-                    <table id="cartTable">
-                        <thead><tr><th id="thItem">Item</th><th id="thSize">Size</th><th id="thQty">Qty</th><th id="thPrice">Price</th><th id="thTotal">Total</th><th></th></tr></thead>
+                <div id="manualInputs" style="display:none;">
+                    <div class="grid-2">
+                        <input type="number" id="manualArea" placeholder="Area (m²)" step="0.01">
+                        <input type="number" id="manualPrice" placeholder="Price/m²" step="0.01">
+                    </div>
+                </div>
+                <div id="piecesInputs" style="display:none;">
+                    <div class="grid-3">
+                        <input type="text" id="pieceSize" placeholder="Size">
+                        <input type="number" id="pieceQty" placeholder="Qty" value="1">
+                        <input type="number" id="piecePrice" placeholder="Price/pc" step="0.01">
+                    </div>
+                </div>
+                <button class="btn-success" onclick="addToCart()" style="width:100%;padding:4px;font-size:10px;">➕ Add to Cart</button>
+                <div style="margin-top:4px;">
+                    <input type="text" id="custName" placeholder="Customer Name">
+                    <input type="text" id="custPhone" placeholder="Phone">
+                    <input type="number" id="amountReceived" placeholder="Received" value="0" step="0.01" oninput="updateTotals()">
+                </div>
+                <div style="max-height:150px;overflow:auto;margin-top:4px;">
+                    <table>
+                        <thead><tr><th>Item</th><th>Qty</th><th>Price</th><th>Total</th><th></th></tr></thead>
                         <tbody id="cartBody"></tbody>
                     </table>
                 </div>
                 <div class="total-box">
-                    <p><strong id="lblSubtotal">Subtotal:</strong> <span id="subtotal">SAR 0.00</span></p>
-                    <p><strong id="lblTax">Tax:</strong> <span id="taxAmount">SAR 0.00</span></p>
-                    <p><strong id="lblGrandTotal">Total:</strong> <span id="grandTotal">SAR 0.00</span></p>
-                    <p><strong id="lblReceivedDisplay">Received:</strong> <span id="received">SAR 0.00</span></p>
-                    <p id="balanceMsg" style="font-weight:bold"></p>
-                    <p id="profitDisplay" style="font-weight:bold;color:#ffd700;"></p>
+                    <p><strong>Total:</strong> <span id="cartTotal">SAR 0.00</span></p>
+                    <p id="balanceMsg"></p>
                 </div>
-                <div class="action-btns">
-                    <button onclick="confirmOrder()" class="btn-success" id="btnConfirm">✅ Confirm</button>
-                    <button onclick="clearCart()" class="btn-danger" id="btnClear">🗑️ Clear</button>
-                    <button onclick="undoCart()" class="btn-warning" id="btnUndo">↩️ Undo</button>
+                <button class="btn-primary" onclick="confirmOrder()" style="width:100%;padding:4px;font-size:10px;">✅ Confirm Order</button>
+                <button class="btn-danger" onclick="clearCart()" style="width:100%;padding:4px;font-size:10px;margin-top:2px;">🗑️ Clear</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== STOCK TAB ===== -->
+    <div id="tab-stock" class="tab-content">
+        <div class="panel">
+            <h3>📦 Stock Management</h3>
+            <div class="cat-tabs">
+                <button class="cat-tab active" onclick="filterStock('all')">All</button>
+                <button class="cat-tab" onclick="filterStock('mwad')">Materials</button>
+                <button class="cat-tab" onclick="filterStock('stone')">Stone</button>
+            </div>
+            <input type="text" id="searchStock" placeholder="🔍 Search..." onkeyup="renderStock()">
+            <div style="display:flex;gap:4px;flex-wrap:wrap;margin:4px 0;">
+                <button class="btn-success" onclick="addProduct()" style="padding:3px 8px;font-size:9px;">➕ Add Product</button>
+                <button class="btn-info" onclick="showLowStock()" style="padding:3px 8px;font-size:9px;">⚠️ Low Stock</button>
+                <button class="btn-warning" onclick="showStockAudit()" style="padding:3px 8px;font-size:9px;">📋 Audit Trail</button>
+            </div>
+            <div style="overflow-x:auto;max-height:250px;overflow-y:auto;">
+                <table>
+                    <thead><tr><th>Category</th><th>Name</th><th>Size</th><th>Price</th><th>Cost</th><th>Stock</th><th>Actions</th></tr></thead>
+                    <tbody id="stockBody"></tbody>
+                </table>
+            </div>
+            
+            <div class="stock-in-out">
+                <h4 style="font-size:11px;margin-bottom:3px;">📦 Stock In / Out</h4>
+                <div class="row">
+                    <select id="stockSelect"><option value="">Select Item</option></select>
+                    <input type="number" id="stockQty" placeholder="Qty">
+                    <input type="number" id="stockPriceIn" placeholder="Price">
+                </div>
+                <div class="row" style="margin-top:3px;">
+                    <button class="btn-success" onclick="stockIn()" style="flex:1;padding:3px;font-size:9px;">➕ In</button>
+                    <button class="btn-danger" onclick="stockOut()" style="flex:1;padding:3px;font-size:9px;">➖ Out</button>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- ===== CUSTOMERS TAB ===== -->
-    <div id="customersTab" class="tab-content">
+    <div id="tab-customers" class="tab-content">
         <div class="panel">
-            <h3 id="custTitle">👥 Customers</h3>
-            <div class="search-box"><input type="text" id="customerSearch" placeholder="🔍 Search..." onkeyup="displayCustomers()"></div>
-            <div id="customerList" style="max-height:450px;overflow-y:auto;"></div>
-        </div>
-    </div>
-
-    <!-- ===== INVENTORY TAB ===== -->
-    <div id="inventoryTab" class="tab-content">
-        <div class="panel">
-            <h3 id="stockTitle">📦 Stock Management</h3>
-            <div class="cat-tabs" id="stockCatTabs">
-                <button class="cat-tab active" onclick="filterStockCategory('all')" data-cat="all">📦 All</button>
-                <button class="cat-tab" onclick="filterStockCategory('mwad')" data-cat="mwad">🧱 Materials</button>
-                <button class="cat-tab" onclick="filterStockCategory('stone')" data-cat="stone">🪨 Stone</button>
-            </div>
-            <div class="search-box"><input type="text" id="inventorySearch" placeholder="🔍 Search..." onkeyup="loadInventory()"></div>
-            <button onclick="addNewProduct()" class="btn-success" style="margin-bottom:6px" id="btnAddProduct">➕ Add Product</button>
-            <div style="overflow-x:auto;max-height:300px;overflow-y:auto">
-                <table id="inventoryTable">
-                    <thead><tr><th id="thCategory">Category</th><th id="thName">Name</th><th id="thSizeInv">Size</th><th id="thSelling">Selling</th><th id="thCost">Cost</th><th id="thStock">Stock</th><th id="thActions">Actions</th></tr></thead>
-                    <tbody id="inventoryBody"></tbody>
-                </table>
-            </div>
-            
-            <!-- Stock In/Out -->
-            <div class="stock-in-out">
-                <h4 style="font-size:12px;margin-bottom:4px;color:#0f2027;" id="stockInOutTitle">📦 Stock In / Out</h4>
-                <div class="row">
-                    <select id="stockSelect" style="flex:2;">
-                        <option value="" id="selStockItem">Select Item</option>
-                    </select>
-                    <input type="number" id="stockQty" placeholder="Qty" style="flex:1;">
-                    <input type="number" id="stockPrice" placeholder="Price" style="flex:1;">
-                </div>
-                <div class="row" style="margin-top:4px;">
-                    <button onclick="stockIn()" class="btn-success" style="flex:1;" id="btnStockIn">➕ Stock In</button>
-                    <button onclick="stockOut()" class="btn-danger" style="flex:1;" id="btnStockOut">➖ Stock Out</button>
-                </div>
-            </div>
+            <h3>👥 Customers</h3>
+            <input type="text" id="searchCustomer" placeholder="🔍 Search by name or phone..." onkeyup="renderCustomers()">
+            <div id="customerList" style="max-height:400px;overflow-y:auto;"></div>
         </div>
     </div>
 
     <!-- ===== INVOICES TAB ===== -->
-    <div id="invoicesTab" class="tab-content">
+    <div id="tab-invoices" class="tab-content">
         <div class="panel">
-            <h3 id="invTitle">📄 Invoices</h3>
-            <div class="search-box"><input type="text" id="invoiceSearch" placeholder="🔍 Search..." onkeyup="displayInvoices()"></div>
-            
-            <!-- Profit Box - Only for Admin -->
-            <div class="profit-box" id="invoiceProfitBox" style="display:none;">
-                <div class="label" id="profitBoxLabel">📈 Total Invoice Profit</div>
-                <div class="value positive" id="totalInvoiceProfit">SAR 0.00</div>
-                <div class="category-profit">
-                    <div class="cat-box"><div class="cat-label" id="matProfitLabel">🧱 Materials Profit</div><div class="cat-value" id="materialProfit">SAR 0.00</div></div>
-                    <div class="cat-box"><div class="cat-label" id="stoneProfitLabel">🪨 Stone Profit</div><div class="cat-value" id="stoneProfit">SAR 0.00</div></div>
-                </div>
-            </div>
-            
-            <div style="overflow-x:auto;max-height:350px;overflow-y:auto;margin-top:8px;">
-                <table id="invoicesTable">
-                    <thead><tr><th id="thInvNo">Invoice</th><th id="thInvDate">Date</th><th id="thInvCust">Customer</th><th id="thInvTotal">Total</th><th id="thInvStatus">Status</th><th id="thInvActions">Actions</th></tr></thead>
-                    <tbody id="invoicesBody"></tbody>
+            <h3>📄 Invoices</h3>
+            <input type="text" id="searchInvoice" placeholder="🔍 Search by invoice or customer..." onkeyup="renderInvoices()">
+            <div style="overflow-x:auto;max-height:350px;overflow-y:auto;">
+                <table>
+                    <thead><tr><th>Invoice</th><th>Date</th><th>Customer</th><th>Total</th><th>Status</th><th>Actions</th></tr></thead>
+                    <tbody id="invoiceBody"></tbody>
                 </table>
             </div>
         </div>
     </div>
 
     <!-- ===== SUMMARY TAB ===== -->
-    <div id="summaryTab" class="tab-content">
+    <div id="tab-summary" class="tab-content">
         <div class="panel">
-            <h3 id="sumTitle">📊 Daily Summary - <span id="summaryDate"></span>
-                <button onclick="shareSummaryImage()" class="summary-share-btn" id="shareSummaryBtn">📷 Share</button>
-            </h3>
-            <div class="summary-grid">
-                <div class="summary-box positive"><div class="num" id="sumTodaySale">0.00</div><div class="lbl" id="sumTodaySaleLbl">Today's Sale</div></div>
-                <div class="summary-box warning"><div class="num" id="sumUdharSale">0.00</div><div class="lbl" id="sumUdharLbl">Udhar Sale</div></div>
-                <div class="summary-box negative"><div class="num" id="sumIkhrajat">0.00</div><div class="lbl" id="sumIkhrajatLbl">Ikhrajat</div></div>
-                <div class="summary-box positive"><div class="num" id="sumSabqaWusool">0.00</div><div class="lbl" id="sumSabqaLbl">Sabqa Wusool</div></div>
-                <div class="summary-box positive"><div class="num" id="sumAdvanceWusool">0.00</div><div class="lbl" id="sumAdvanceLbl">Advance Wusool</div></div>
-                <div class="summary-box positive"><div class="num" id="sumTotalJamma">0.00</div><div class="lbl" id="sumTotalJammaLbl">Total Cash Jamma</div></div>
-                <div class="summary-box" id="paymentMinusBox"><div class="num" id="sumPaymentMinus">0.00</div><div class="lbl" id="sumPaymentMinusLbl">Payment Minus</div></div>
+            <h3>📊 Daily Summary</h3>
+            <div class="summary-grid" id="summaryGrid">
+                <div class="summary-box positive"><div class="num" id="sumTodaySale">0.00</div><div class="lbl">Today's Sale</div></div>
+                <div class="summary-box warning"><div class="num" id="sumUdharSale">0.00</div><div class="lbl">Udhar</div></div>
+                <div class="summary-box negative"><div class="num" id="sumIkhrajat">0.00</div><div class="lbl">Ikhrajat</div></div>
+                <div class="summary-box positive"><div class="num" id="sumSabqaWusool">0.00</div><div class="lbl">Sabqa Wusool</div></div>
+                <div class="summary-box positive"><div class="num" id="sumAdvanceWusool">0.00</div><div class="lbl">Advance</div></div>
+                <div class="summary-box positive"><div class="num" id="sumTotalJamma">0.00</div><div class="lbl">Total Cash</div></div>
+                <div class="summary-box" id="paymentMinusBox"><div class="num" id="sumPaymentMinus">0.00</div><div class="lbl">Payment Minus</div></div>
             </div>
             
-            <!-- Net Profit -->
-            <div style="background:linear-gradient(135deg,#1a2a4a,#2d3b5a);padding:12px;border-radius:10px;margin-bottom:12px;color:white;text-align:center;">
-                <h3 style="color:#ffd700;font-size:14px;margin-bottom:6px;" id="netProfitTitle">📈 Net Profit / Loss</h3>
-                <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;font-size:11px;">
-                    <div><span style="color:#a0c4e0;" id="plOpeningLabel">Opening Stock:</span><br><strong id="plOpeningStock">0</strong></div>
-                    <div><span style="color:#a0c4e0;" id="plStockInLabel">Stock In:</span><br><strong id="plStockIn">0</strong></div>
-                    <div><span style="color:#a0c4e0;" id="plClosingLabel">Closing Stock:</span><br><strong id="plClosingStock">0</strong></div>
-                    <div><span style="color:#a0c4e0;" id="plIkhrajatLabel">Ikhrajat:</span><br><strong id="plIkhrajat">0</strong></div>
+            <div style="background:#1a2a4a;padding:10px;border-radius:6px;color:white;text-align:center;">
+                <h4 style="color:var(--gold);font-size:13px;">📈 Net Profit / Loss</h4>
+                <div class="grid-4" style="font-size:10px;margin:4px 0;">
+                    <div><span style="color:#a0c4e0;">Opening:</span><br><strong id="plOpening">0</strong></div>
+                    <div><span style="color:#a0c4e0;">Stock In:</span><br><strong id="plStockIn">0</strong></div>
+                    <div><span style="color:#a0c4e0;">Closing:</span><br><strong id="plClosing">0</strong></div>
+                    <div><span style="color:#a0c4e0;">Ikhrajat:</span><br><strong id="plIkhrajat">0</strong></div>
                 </div>
-                <div style="margin-top:8px;font-size:16px;font-weight:bold;border-top:1px solid #ffd700;padding-top:6px;">
-                    <span id="plTotalProfit" style="color:#ffd700;">Profit: 0.00</span>
+                <div style="font-size:14px;font-weight:bold;border-top:1px solid var(--gold);padding-top:4px;">
+                    <span id="plTotalProfit" style="color:var(--gold);">Profit: 0.00</span>
                 </div>
             </div>
             
-            <h3 style="font-size:13px;" id="soldItemsTitle">📦 Recently Sold Items</h3>
-            <div id="soldItemsDisplay" style="background:#f8fafc;padding:8px;border-radius:8px;max-height:200px;overflow-y:auto;"></div>
+            <h4 style="font-size:12px;margin-top:6px;">📦 Recently Sold</h4>
+            <div id="soldItems" style="background:#f8fafc;padding:6px;border-radius:5px;max-height:150px;overflow-y:auto;"></div>
             
-            <h3 style="font-size:13px;margin-top:8px;" id="stockSummaryTitle">📦 Opening / Closing Stock</h3>
-            <div id="stockSummaryDisplay" style="background:#f8fafc;padding:8px;border-radius:8px;max-height:180px;overflow-y:auto;"></div>
-            
-            <h3 style="font-size:13px;margin-top:8px;" id="monthlyTitle">📅 Monthly Summary</h3>
-            <div style="overflow-x:auto;max-height:180px;overflow-y:auto">
-                <table id="monthlySummaryTable">
-                    <thead><tr><th id="mDate">Date</th><th id="mSale">Sale</th><th id="mUdhar">Udhar</th><th id="mIkhrajat">Ikhrajat</th><th id="mProfit">Profit</th><th id="mJamma">Jamma</th></tr></thead>
-                    <tbody id="monthlySummaryBody"></tbody>
+            <h4 style="font-size:12px;margin-top:6px;">📅 Monthly Summary</h4>
+            <div style="overflow-x:auto;max-height:150px;overflow-y:auto;">
+                <table>
+                    <thead><tr><th>Date</th><th>Sale</th><th>Udhar</th><th>Ikhrajat</th><th>Profit</th></tr></thead>
+                    <tbody id="monthlyBody"></tbody>
                 </table>
             </div>
         </div>
     </div>
 
     <!-- ===== EXPENSES TAB ===== -->
-    <div id="expensesTab" class="tab-content">
+    <div id="tab-expenses" class="tab-content">
         <div class="panel">
-            <h3 id="expTitle">💸 Expenses</h3>
-            <div class="form-group"><label id="lblExpHead">Expense Head</label><input type="text" id="expenseHead" placeholder="e.g. Petrol"></div>
-            <div class="form-group"><label id="lblExpAmount">Amount</label><input type="number" id="expenseAmount" step="0.01"></div>
-            <div class="form-group"><label id="lblExpNote">Note</label><input type="text" id="expenseNote" placeholder="Optional"></div>
-            <button onclick="addExpense()" class="btn-success" style="width:100%" id="btnAddExpense">➕ Add Expense</button>
+            <h3>💸 Expenses</h3>
+            <div class="grid-2">
+                <input type="text" id="expenseHead" placeholder="Expense Head">
+                <input type="number" id="expenseAmount" placeholder="Amount" step="0.01">
+            </div>
+            <input type="text" id="expenseNote" placeholder="Note (optional)">
+            <button class="btn-success" onclick="addExpense()" style="width:100%;padding:4px;font-size:10px;">➕ Add Expense</button>
             
-            <h3 style="font-size:13px;margin-top:10px;" id="todayExpTitle">📋 Today's Expenses</h3>
-            <div id="expenseList" style="max-height:300px;overflow-y:auto;"></div>
+            <h4 style="font-size:12px;margin-top:6px;">📋 Today's Expenses</h4>
+            <div id="expenseList" style="max-height:250px;overflow-y:auto;"></div>
+            
+            <h4 style="font-size:12px;margin-top:6px;">📊 Expense Categories</h4>
+            <div id="expenseCategories" style="max-height:150px;overflow-y:auto;"></div>
         </div>
     </div>
 
-    <!-- ===== SETTINGS TAB ===== -->
-    <div id="settingsTab" class="tab-content">
+    <!-- ===== REPORTS TAB ===== -->
+    <div id="tab-reports" class="tab-content">
         <div class="panel">
-            <h3 id="setTitle">⚙️ Settings</h3>
-            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px">
-                <div>
-                    <h4 id="setCompany">🏢 Company</h4>
-                    <div class="form-group"><label id="setCompName">Name</label><input type="text" id="companyNameSetting"></div>
-                    <div class="form-group"><label id="setCompPhone">Phone</label><input type="text" id="companyPhoneSetting"></div>
-                    <button onclick="saveCompanySettings()" class="btn-success" id="setSaveBtn">💾 Save</button>
+            <h3>📈 Reports & Analytics</h3>
+            <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px;">
+                <select id="reportPeriod" style="width:auto;flex:1;min-width:100px;">
+                    <option value="today">Today</option>
+                    <option value="week">This Week</option>
+                    <option value="month" selected>This Month</option>
+                    <option value="quarter">This Quarter</option>
+                    <option value="year">This Year</option>
+                </select>
+                <button class="btn-info" onclick="generateReport()" style="padding:3px 12px;">📊 Generate</button>
+            </div>
+            <div id="reportContent">
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin:8px 0;">
+                    <div class="summary-box positive"><div class="num" id="reportRevenue">0</div><div class="lbl">Revenue</div></div>
+                    <div class="summary-box"><div class="num" id="reportOrders">0</div><div class="lbl">Orders</div></div>
+                    <div class="summary-box positive"><div class="num" id="reportProfit">0</div><div class="lbl">Profit</div></div>
+                    <div class="summary-box negative"><div class="num" id="reportExpenses">0</div><div class="lbl">Expenses</div></div>
                 </div>
-                <div>
-                    <h4 id="setData">💾 Data</h4>
-                    <button onclick="backupData()" class="btn-info" id="setBackup">📥 Backup</button>
-                    <button onclick="document.getElementById('restoreFile').click()" class="btn-warning" id="setRestore">📤 Restore</button>
-                    <input type="file" id="restoreFile" style="display:none" onchange="restoreData(this)">
-                    <button onclick="resetAll()" class="btn-danger" id="setReset">⚠️ Reset</button>
-                    <button onclick="syncToCloud()" class="btn-success" style="margin-top:4px;" id="setSync">☁️ Sync</button>
-                </div>
-                <div>
-                    <h4 id="setSessions">👥 Active Sessions</h4>
-                    <div id="sessionsList" style="max-height:180px;overflow-y:auto;"></div>
-                    <button onclick="logoutAllSessions()" class="btn-danger" style="margin-top:4px;width:100%;" id="setLogoutAll">🚫 Logout All</button>
+                <div style="background:#f8fafc;padding:10px;border-radius:6px;max-height:300px;overflow-y:auto;">
+                    <h4 style="font-size:11px;margin-bottom:4px;">📋 Detailed Report</h4>
+                    <div id="reportDetails"></div>
                 </div>
             </div>
         </div>
@@ -416,1477 +352,1482 @@
 </div>
 
 <!-- ===== MODALS ===== -->
-<div id="invoiceModal" class="modal"><div class="modal-content"><div class="modal-header"><h3 id="invModalTitle">📄 Invoice</h3><button class="modal-close-btn" onclick="closeModal()">✕ Close</button></div><div id="invoiceDetails"></div><div style="text-align:center;margin-top:12px;display:flex;flex-wrap:wrap;justify-content:center;gap:5px"><button onclick="printInvoice()" id="modalPrint">🖨️ Print</button><button onclick="shareInvoiceImage()" class="btn-whatsapp" id="modalShare">📷 Share</button><button onclick="sendWhatsAppDirect()" class="btn-whatsapp" id="modalWhatsApp">📱 WhatsApp</button><button onclick="openEditInvoiceFromModal()" class="btn-warning" id="modalEdit">✏️ Edit</button></div></div></div>
-<div id="editInvoiceModal" class="modal"><div class="modal-content"><div class="modal-header"><h3 id="editModalTitle">✏️ Edit Invoice</h3><button class="modal-close-btn" onclick="closeEditInvoice()">✕ Close</button></div><div class="form-group"><label id="editCustLabel">Customer Name</label><input type="text" id="editCustName"></div><div class="form-group"><label id="editPhoneLabel">Phone</label><input type="text" id="editCustPhone"></div><div class="form-group"><label id="editTotalLabel">Total</label><input type="number" id="editTotal" step="0.01"></div><div class="form-group"><label id="editPaidLabel">Paid</label><input type="number" id="editPaid" step="0.01"></div><button onclick="saveEditInvoice()" class="btn-success" id="editSaveBtn">💾 Save</button><button onclick="closeEditInvoice()" class="btn-danger" id="editCancelBtn">Cancel</button></div></div>
-<div id="paymentModal" class="modal"><div class="modal-content"><div class="modal-header"><h3 id="payModalTitle">💰 Receive Payment</h3><button class="modal-close-btn" onclick="closePaymentModal()">✕ Close</button></div><input type="number" id="paymentAmount" step="0.01" placeholder="Amount" id="payAmountInput"><br><br><input type="text" id="paymentNotes" placeholder="Notes" id="payNotesInput"><br><br><button onclick="confirmPayment()" class="btn-success" id="payConfirmBtn">Confirm</button><button onclick="closePaymentModal()" class="btn-danger" id="payCancelBtn">Cancel</button></div></div>
-<div id="customerLedgerModal" class="modal"><div class="modal-content"><div class="modal-header"><h3 id="ledgerModalTitle">📊 Customer Ledger</h3><button class="modal-close-btn" onclick="closeLedgerModal()">✕ Close</button></div><div id="ledgerContent"></div></div></div>
-<div id="customerInvoicesModal" class="modal"><div class="modal-content"><div class="modal-header"><h3 id="custInvModalTitle">📄 Customer Invoices</h3><button class="modal-close-btn" onclick="closeCustomerInvoicesModal()">✕ Close</button></div><div id="customerInvoicesContent"></div></div></div>
+<div id="stockAuditModal" class="modal">
+    <div class="modal-content">
+        <h3 style="color:var(--primary);margin-bottom:10px;">📋 Stock Audit Trail</h3>
+        <div id="auditContent" style="max-height:400px;overflow-y:auto;"></div>
+        <button onclick="closeModal('stockAuditModal')" style="margin-top:10px;width:100%;">Close</button>
+    </div>
+</div>
 
-<!-- ===== LOGIN MODAL ===== -->
-<div id="loginModal" class="login-modal">
+<div id="lowStockModal" class="modal">
+    <div class="modal-content">
+        <h3 style="color:var(--warning);margin-bottom:10px;">⚠️ Low Stock Items</h3>
+        <div id="lowStockContent" style="max-height:400px;overflow-y:auto;"></div>
+        <button onclick="closeModal('lowStockModal')" style="margin-top:10px;width:100%;">Close</button>
+    </div>
+</div>
+
+<!-- ===== LOGIN OVERLAY ===== -->
+<div id="loginOverlay" class="login-overlay">
     <div class="login-box">
-        <h2 id="loginTitle">🔐 Admin Login</h2>
-        <p id="loginDesc">Login to manage system</p>
+        <h2>🔐 Admin Login</h2>
+        <p style="color:#666;font-size:12px;">Secure access to Warda Marble system</p>
         <input type="email" id="loginEmail" placeholder="Email" value="admin@warda.com">
         <input type="password" id="loginPassword" placeholder="Password">
-        <button onclick="loginWithFirebase()" class="btn btn-success" id="loginBtnModal">🔓 Login</button>
-        <button onclick="skipLogin()" class="btn skip-btn" style="margin-top:6px;" id="loginSkipBtn">👁️ Continue as Viewer</button>
-        <div id="loginError" class="error">❌ Invalid credentials!</div>
-        <div style="margin-top:8px;font-size:11px;color:#999;">Email: admin@warda.com | Pass: Hamdani5</div>
+        <button onclick="login()" style="background:var(--success);color:white;border:none;padding:8px;border-radius:6px;cursor:pointer;font-weight:bold;width:100%;">🔓 Login</button>
+        <button onclick="skipLogin()" style="background:#6b7a8a;color:white;border:none;padding:7px;border-radius:6px;cursor:pointer;font-weight:bold;width:100%;margin-top:3px;">👁️ Continue as Viewer</button>
+        <div id="loginError" class="error">❌ Invalid credentials! Please try again.</div>
+        <div style="margin-top:8px;font-size:10px;color:#999;">Email: admin@warda.com | Pass: Hamdani5</div>
     </div>
 </div>
 
 <script>
-// ==================== LANGUAGE DATA ====================
-const langData = {
-    en: {
-        posTitle: '📦 Products', cartTitle: '🛒 Cart', custTitle: '👥 Customers',
-        stockTitle: '📦 Stock Management', invTitle: '📄 Invoices', 
-        sumTitle: '📊 Daily Summary', expTitle: '💸 Expenses', setTitle: '⚙️ Settings',
-        lblItem: 'Item', lblCost: 'Purchase Price', lblCustomer: '👤 Customer',
-        lblPhone: '📞 Phone', lblReceived: '💰 Received', lblSubtotal: 'Subtotal:',
-        lblTax: 'Tax:', lblGrandTotal: 'Total:', lblReceivedDisplay: 'Received:',
-        lblExpHead: 'Expense Head', lblExpAmount: 'Amount', lblExpNote: 'Note',
-        lblThick: 'Thick', lblWidth: 'Width', lblLength: 'Length', lblPriceSqm: 'Price/m²',
-        lblArea: 'Area(m²)', lblPriceManual: 'Price/m²', lblSize: 'Size',
-        lblQtyPieces: 'Qty', lblPricePieces: 'Price/pc', lblTaxEnable: 'Enable Tax (15%)',
-        thItem: 'Item', thSize: 'Size', thQty: 'Qty', thPrice: 'Price', thTotal: 'Total',
-        thCategory: 'Category', thName: 'Name', thSizeInv: 'Size', thSelling: 'Selling',
-        thCost: 'Cost', thStock: 'Stock', thActions: 'Actions', thInvNo: 'Invoice',
-        thInvDate: 'Date', thInvCust: 'Customer', thInvTotal: 'Total', thInvStatus: 'Status',
-        thInvActions: 'Actions', mDate: 'Date', mSale: 'Sale', mUdhar: 'Udhar',
-        mIkhrajat: 'Ikhrajat', mProfit: 'Profit', mJamma: 'Jamma',
-        sumTodaySaleLbl: "Today's Sale", sumUdharLbl: 'Udhar Sale', sumIkhrajatLbl: 'Ikhrajat',
-        sumSabqaLbl: 'Sabqa Wusool', sumAdvanceLbl: 'Advance Wusool',
-        sumTotalJammaLbl: 'Total Cash Jamma', sumPaymentMinusLbl: 'Payment Minus',
-        netProfitTitle: '📈 Net Profit / Loss', plOpeningLabel: 'Opening Stock:',
-        plStockInLabel: 'Stock In:', plClosingLabel: 'Closing Stock:', plIkhrajatLabel: 'Ikhrajat:',
-        soldItemsTitle: '📦 Recently Sold Items', stockSummaryTitle: '📦 Opening / Closing Stock',
-        monthlyTitle: '📅 Monthly Summary', stockInOutTitle: '📦 Stock In / Out',
-        profitBoxLabel: '📈 Total Invoice Profit', matProfitLabel: '🧱 Materials Profit',
-        stoneProfitLabel: '🪨 Stone Profit', setCompany: '🏢 Company',
-        setCompName: 'Name', setCompPhone: 'Phone', setSaveBtn: '💾 Save',
-        setData: '💾 Data', setBackup: '📥 Backup', setRestore: '📤 Restore',
-        setReset: '⚠️ Reset', setSync: '☁️ Sync', setSessions: '👥 Active Sessions',
-        setLogoutAll: '🚫 Logout All', todayExpTitle: "📋 Today's Expenses",
-        btnAdd: '➕ Add', btnConfirm: '✅ Confirm', btnClear: '🗑️ Clear',
-        btnUndo: '↩️ Undo', btnAddProduct: '➕ Add Product', btnStockIn: '➕ Stock In',
-        btnStockOut: '➖ Stock Out', selStockItem: 'Select Item', shareSummaryBtn: '📷 Share',
-        modalPrint: '🖨️ Print', modalShare: '📷 Share', modalWhatsApp: '📱 WhatsApp',
-        modalEdit: '✏️ Edit', editModalTitle: '✏️ Edit Invoice', editCustLabel: 'Customer Name',
-        editPhoneLabel: 'Phone', editTotalLabel: 'Total', editPaidLabel: 'Paid',
-        editSaveBtn: '💾 Save', editCancelBtn: 'Cancel', payModalTitle: '💰 Receive Payment',
-        payConfirmBtn: 'Confirm', payCancelBtn: 'Cancel', ledgerModalTitle: '📊 Customer Ledger',
-        custInvModalTitle: '📄 Customer Invoices', loginTitle: '🔐 Admin Login',
-        loginDesc: 'Login to manage system', loginSkipBtn: '👁️ Continue as Viewer',
-        btnAddExpense: '➕ Add Expense', invModalTitle: '📄 Invoice'
-    },
-    ur: {
-        posTitle: '📦 مصنوعات', cartTitle: '🛒 کارٹ', custTitle: '👥 گاہک',
-        stockTitle: '📦 اسٹاک مینجمنٹ', invTitle: '📄 بل', 
-        sumTitle: '📊 روزانہ خلاصہ', expTitle: '💸 اخراجات', setTitle: '⚙️ ترتیبات',
-        lblItem: 'آئٹم', lblCost: 'خرید قیمت', lblCustomer: '👤 گاہک',
-        lblPhone: '📞 فون', lblReceived: '💰 وصول شدہ', lblSubtotal: 'ذیلی کل:',
-        lblTax: 'ٹیکس:', lblGrandTotal: 'کل:', lblReceivedDisplay: 'وصول شدہ:',
-        lblExpHead: 'خرچ کا عنوان', lblExpAmount: 'رقم', lblExpNote: 'تفصیل',
-        lblThick: 'موٹائی', lblWidth: 'چوڑائی', lblLength: 'لمبائی', lblPriceSqm: 'قیمت/m²',
-        lblArea: 'رقبہ(m²)', lblPriceManual: 'قیمت/m²', lblSize: 'سائز',
-        lblQtyPieces: 'مقدار', lblPricePieces: 'قیمت/ٹکڑا', lblTaxEnable: 'ٹیکس فعال کریں (15%)',
-        thItem: 'آئٹم', thSize: 'سائز', thQty: 'مقدار', thPrice: 'قیمت', thTotal: 'کل',
-        thCategory: 'قسم', thName: 'نام', thSizeInv: 'سائز', thSelling: 'فروخت',
-        thCost: 'لاگت', thStock: 'اسٹاک', thActions: 'عمل', thInvNo: 'بل نمبر',
-        thInvDate: 'تاریخ', thInvCust: 'گاہک', thInvTotal: 'کل', thInvStatus: 'حالت',
-        thInvActions: 'عمل', mDate: 'تاریخ', mSale: 'فروخت', mUdhar: 'ادھار',
-        mIkhrajat: 'اخراجات', mProfit: 'منافع', mJamma: 'جمع',
-        sumTodaySaleLbl: "آج کی فروخت", sumUdharLbl: 'ادھار فروخت', sumIkhrajatLbl: 'اخراجات',
-        sumSabqaLbl: 'سابقہ وصول', sumAdvanceLbl: 'ایڈوانس وصول',
-        sumTotalJammaLbl: 'کل نقد جمع', sumPaymentMinusLbl: 'ادائیگی منفی',
-        netProfitTitle: '📈 خالص منافع / نقصان', plOpeningLabel: 'ابتدائی اسٹاک:',
-        plStockInLabel: 'اسٹاک اندر:', plClosingLabel: 'اختتامی اسٹاک:', plIkhrajatLabel: 'اخراجات:',
-        soldItemsTitle: '📦 حالیہ فروخت شدہ اشیاء', stockSummaryTitle: '📦 ابتدائی / اختتامی اسٹاک',
-        monthlyTitle: '📅 ماہانہ خلاصہ', stockInOutTitle: '📦 اسٹاک اندر / باہر',
-        profitBoxLabel: '📈 کل بل منافع', matProfitLabel: '🧱 مواد کا منافع',
-        stoneProfitLabel: '🪨 پتھر کا منافع', setCompany: '🏢 کمپنی',
-        setCompName: 'نام', setCompPhone: 'فون', setSaveBtn: '💾 محفوظ کریں',
-        setData: '💾 ڈیٹا', setBackup: '📥 بیک اپ', setRestore: '📤 بحال کریں',
-        setReset: '⚠️ ری سیٹ', setSync: '☁️ مطابقت', setSessions: '👥 فعال سیشنز',
-        setLogoutAll: '🚫 سب کو لاگ آؤٹ کریں', todayExpTitle: "📋 آج کے اخراجات",
-        btnAdd: '➕ شامل کریں', btnConfirm: '✅ تصدیق کریں', btnClear: '🗑️ صاف کریں',
-        btnUndo: '↩️ واپس کریں', btnAddProduct: '➕ مصنوعہ شامل کریں', btnStockIn: '➕ اسٹاک اندر',
-        btnStockOut: '➖ اسٹاک باہر', selStockItem: 'آئٹم منتخب کریں', shareSummaryBtn: '📷 شیئر کریں',
-        modalPrint: '🖨️ پرنٹ', modalShare: '📷 شیئر', modalWhatsApp: '📱 واٹس ایپ',
-        modalEdit: '✏️ ترمیم', editModalTitle: '✏️ بل میں ترمیم', editCustLabel: 'گاہک کا نام',
-        editPhoneLabel: 'فون', editTotalLabel: 'کل', editPaidLabel: 'ادا کردہ',
-        editSaveBtn: '💾 محفوظ کریں', editCancelBtn: 'منسوخ', payModalTitle: '💰 ادائیگی وصول کریں',
-        payConfirmBtn: 'تصدیق', payCancelBtn: 'منسوخ', ledgerModalTitle: '📊 گاہک لیجر',
-        custInvModalTitle: '📄 گاہک کے بل', loginTitle: '🔐 ایڈمن لاگ ان',
-        loginDesc: 'سسٹم کا نظم کرنے کے لیے لاگ ان کریں', loginSkipBtn: '👁️ بطور ناظر جاری رکھیں',
-        btnAddExpense: '➕ خرچ شامل کریں', invModalTitle: '📄 بل'
-    },
-    ar: {
-        posTitle: '📦 المنتجات', cartTitle: '🛒 السلة', custTitle: '👥 العملاء',
-        stockTitle: '📦 إدارة المخزون', invTitle: '📄 الفواتير', 
-        sumTitle: '📊 الملخص اليومي', expTitle: '💸 المصروفات', setTitle: '⚙️ الإعدادات',
-        lblItem: 'المنتج', lblCost: 'سعر الشراء', lblCustomer: '👤 العميل',
-        lblPhone: '📞 الهاتف', lblReceived: '💰 المستلم', lblSubtotal: 'المجموع الفرعي:',
-        lblTax: 'الضريبة:', lblGrandTotal: 'المجموع:', lblReceivedDisplay: 'المستلم:',
-        lblExpHead: 'عنوان المصروف', lblExpAmount: 'المبلغ', lblExpNote: 'ملاحظة',
-        lblThick: 'السماكة', lblWidth: 'العرض', lblLength: 'الطول', lblPriceSqm: 'السعر/m²',
-        lblArea: 'المساحة(m²)', lblPriceManual: 'السعر/m²', lblSize: 'الحجم',
-        lblQtyPieces: 'الكمية', lblPricePieces: 'السعر/قطعة', lblTaxEnable: 'تفعيل الضريبة (15%)',
-        thItem: 'المنتج', thSize: 'الحجم', thQty: 'الكمية', thPrice: 'السعر', thTotal: 'المجموع',
-        thCategory: 'الفئة', thName: 'الاسم', thSizeInv: 'الحجم', thSelling: 'البيع',
-        thCost: 'التكلفة', thStock: 'المخزون', thActions: 'الإجراءات', thInvNo: 'الفاتورة',
-        thInvDate: 'التاريخ', thInvCust: 'العميل', thInvTotal: 'المجموع', thInvStatus: 'الحالة',
-        thInvActions: 'الإجراءات', mDate: 'التاريخ', mSale: 'البيع', mUdhar: 'الآجل',
-        mIkhrajat: 'المصروفات', mProfit: 'الربح', mJamma: 'الإيداع',
-        sumTodaySaleLbl: "مبيعات اليوم", sumUdharLbl: 'مبيعات آجلة', sumIkhrajatLbl: 'المصروفات',
-        sumSabqaLbl: 'تحصيل سابق', sumAdvanceLbl: 'تحصيل مقدم',
-        sumTotalJammaLbl: 'إجمالي النقد', sumPaymentMinusLbl: 'دفع ناقص',
-        netProfitTitle: '📈 صافي الربح / الخسارة', plOpeningLabel: 'مخزون الافتتاح:',
-        plStockInLabel: 'مخزون وارد:', plClosingLabel: 'مخزون الإغلاق:', plIkhrajatLabel: 'المصروفات:',
-        soldItemsTitle: '📦 العناصر المباعة مؤخراً', stockSummaryTitle: '📦 مخزون الافتتاح / الإغلاق',
-        monthlyTitle: '📅 الملخص الشهري', stockInOutTitle: '📦 مخزون وارد / صادر',
-        profitBoxLabel: '📈 إجمالي ربح الفواتير', matProfitLabel: '🧱 ربح المواد',
-        stoneProfitLabel: '🪨 ربح الحجر', setCompany: '🏢 الشركة',
-        setCompName: 'الاسم', setCompPhone: 'الهاتف', setSaveBtn: '💾 حفظ',
-        setData: '💾 البيانات', setBackup: '📥 نسخ احتياطي', setRestore: '📤 استعادة',
-        setReset: '⚠️ إعادة تعيين', setSync: '☁️ مزامنة', setSessions: '👥 الجلسات النشطة',
-        setLogoutAll: '🚫 تسجيل خروج الجميع', todayExpTitle: "📋 مصروفات اليوم",
-        btnAdd: '➕ إضافة', btnConfirm: '✅ تأكيد', btnClear: '🗑️ مسح',
-        btnUndo: '↩️ تراجع', btnAddProduct: '➕ إضافة منتج', btnStockIn: '➕ مخزون وارد',
-        btnStockOut: '➖ مخزون صادر', selStockItem: 'اختر المنتج', shareSummaryBtn: '📷 مشاركة',
-        modalPrint: '🖨️ طباعة', modalShare: '📷 مشاركة', modalWhatsApp: '📱 واتساب',
-        modalEdit: '✏️ تعديل', editModalTitle: '✏️ تعديل الفاتورة', editCustLabel: 'اسم العميل',
-        editPhoneLabel: 'الهاتف', editTotalLabel: 'المجموع', editPaidLabel: 'المدفوع',
-        editSaveBtn: '💾 حفظ', editCancelBtn: 'إلغاء', payModalTitle: '💰 استلام الدفع',
-        payConfirmBtn: 'تأكيد', payCancelBtn: 'إلغاء', ledgerModalTitle: '📊 دفتر العميل',
-        custInvModalTitle: '📄 فواتير العميل', loginTitle: '🔐 تسجيل الدخول',
-        loginDesc: 'تسجيل الدخول لإدارة النظام', loginSkipBtn: '👁️ متابعة كعارض',
-        btnAddExpense: '➕ إضافة مصروف', invModalTitle: '📄 فاتورة'
-    }
+// ==================== CONFIGURATION ====================
+const CONFIG = {
+    LOW_STOCK_THRESHOLD: 10,
+    SESSION_TIMEOUT: 3600000, // 1 hour
+    CURRENCY: 'SAR',
+    COMPANY: 'Warda Marble'
 };
 
-// ==================== FIREBASE ====================
-const firebaseConfig = {
-    apiKey: "AIzaSyBacJhHOK-xZ9TgQfbN8swRNYIhmsIh0nk",
-    authDomain: "warda-marble.firebaseapp.com",
-    databaseURL: "https://warda-marble-default-rtdb.firebaseio.com",
-    projectId: "warda-marble",
-    storageBucket: "warda-marble.firebasestorage.app",
-    messagingSenderId: "696018619200",
-    appId: "1:696018619200:web:a4239b1f35ea7a98ad08a5"
+// ==================== STATE ====================
+let state = {
+    products: [],
+    orders: [],
+    customers: [],
+    expenses: [],
+    stockHistory: [],
+    cart: [],
+    isAdmin: false,
+    currentFilter: 'all',
+    stockFilter: 'all',
+    currentMode: 'sqm',
+    sessionStart: Date.now(),
+    darkMode: false
 };
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const database = firebase.database();
 
-// ==================== AUTH ====================
-let isAdmin = false;
-let currentPayInvoice = null;
-let currentEditInvoiceNo = null;
-let currentInvoiceForWhatsApp = null;
-let deletedItems = [];
-let posCategory = 'all';
-let stockCategory = 'all';
-let sessionId = localStorage.getItem('sessionId') || 'session_' + Date.now();
-if(!localStorage.getItem('sessionId')) localStorage.setItem('sessionId', sessionId);
-let currentLang = 'en';
-
-// ==================== LANGUAGE FUNCTION ====================
-function setLanguage(lang) {
-    currentLang = lang;
-    document.querySelectorAll('.lang-selector button').forEach(b => b.classList.remove('active'));
-    document.getElementById('lang' + (lang === 'ur' ? 'Ur' : lang === 'ar' ? 'Ar' : 'En')).classList.add('active');
-    
-    const data = langData[lang];
-    const elements = {
-        'posTitle': 'posTitle', 'cartTitle': 'cartTitle', 'custTitle': 'custTitle',
-        'stockTitle': 'stockTitle', 'invTitle': 'invTitle', 'expTitle': 'expTitle',
-        'setTitle': 'setTitle', 'lblItem': 'lblItem', 'lblCost': 'lblCost',
-        'lblCustomer': 'lblCustomer', 'lblPhone': 'lblPhone', 'lblReceived': 'lblReceived',
-        'lblSubtotal': 'lblSubtotal', 'lblTax': 'lblTax', 'lblGrandTotal': 'lblGrandTotal',
-        'lblReceivedDisplay': 'lblReceivedDisplay', 'lblExpHead': 'lblExpHead',
-        'lblExpAmount': 'lblExpAmount', 'lblExpNote': 'lblExpNote', 'lblThick': 'lblThick',
-        'lblWidth': 'lblWidth', 'lblLength': 'lblLength', 'lblPriceSqm': 'lblPriceSqm',
-        'lblArea': 'lblArea', 'lblPriceManual': 'lblPriceManual', 'lblSize': 'lblSize',
-        'lblQtyPieces': 'lblQtyPieces', 'lblPricePieces': 'lblPricePieces',
-        'lblTaxEnable': 'lblTaxEnable', 'thItem': 'thItem', 'thSize': 'thSize',
-        'thQty': 'thQty', 'thPrice': 'thPrice', 'thTotal': 'thTotal',
-        'sumTodaySaleLbl': 'sumTodaySaleLbl', 'sumUdharLbl': 'sumUdharLbl',
-        'sumIkhrajatLbl': 'sumIkhrajatLbl', 'sumSabqaLbl': 'sumSabqaLbl',
-        'sumAdvanceLbl': 'sumAdvanceLbl', 'sumTotalJammaLbl': 'sumTotalJammaLbl',
-        'sumPaymentMinusLbl': 'sumPaymentMinusLbl', 'netProfitTitle': 'netProfitTitle',
-        'plOpeningLabel': 'plOpeningLabel', 'plStockInLabel': 'plStockInLabel',
-        'plClosingLabel': 'plClosingLabel', 'plIkhrajatLabel': 'plIkhrajatLabel',
-        'soldItemsTitle': 'soldItemsTitle', 'stockSummaryTitle': 'stockSummaryTitle',
-        'monthlyTitle': 'monthlyTitle', 'stockInOutTitle': 'stockInOutTitle',
-        'profitBoxLabel': 'profitBoxLabel', 'matProfitLabel': 'matProfitLabel',
-        'stoneProfitLabel': 'stoneProfitLabel', 'todayExpTitle': 'todayExpTitle',
-        'btnAdd': 'btnAdd', 'btnConfirm': 'btnConfirm', 'btnClear': 'btnClear',
-        'btnUndo': 'btnUndo', 'btnAddProduct': 'btnAddProduct', 'btnStockIn': 'btnStockIn',
-        'btnStockOut': 'btnStockOut', 'selStockItem': 'selStockItem',
-        'shareSummaryBtn': 'shareSummaryBtn', 'setCompany': 'setCompany',
-        'setCompName': 'setCompName', 'setCompPhone': 'setCompPhone',
-        'setSaveBtn': 'setSaveBtn', 'setData': 'setData', 'setBackup': 'setBackup',
-        'setRestore': 'setRestore', 'setReset': 'setReset', 'setSync': 'setSync',
-        'setSessions': 'setSessions', 'setLogoutAll': 'setLogoutAll',
-        'btnAddExpense': 'btnAddExpense', 'editModalTitle': 'editModalTitle',
-        'editCustLabel': 'editCustLabel', 'editPhoneLabel': 'editPhoneLabel',
-        'editTotalLabel': 'editTotalLabel', 'editPaidLabel': 'editPaidLabel',
-        'editSaveBtn': 'editSaveBtn', 'editCancelBtn': 'editCancelBtn',
-        'payModalTitle': 'payModalTitle', 'payConfirmBtn': 'payConfirmBtn',
-        'payCancelBtn': 'payCancelBtn', 'ledgerModalTitle': 'ledgerModalTitle',
-        'custInvModalTitle': 'custInvModalTitle', 'loginTitle': 'loginTitle',
-        'loginDesc': 'loginDesc', 'loginSkipBtn': 'loginSkipBtn',
-        'modalPrint': 'modalPrint', 'modalShare': 'modalShare',
-        'modalWhatsApp': 'modalWhatsApp', 'modalEdit': 'modalEdit',
-        'invModalTitle': 'invModalTitle'
-    };
-    
-    Object.keys(elements).forEach(id => {
-        const el = document.getElementById(id);
-        if(el) el.textContent = data[elements[id]] || data[id] || el.textContent;
-    });
-    
-    document.getElementById('sumTitle').innerHTML = data.sumTitle + ' - <span id="summaryDate"></span>';
-    
-    document.querySelectorAll('.tab[data-tab]').forEach(tab => {
-        const key = tab.dataset.tab;
-        const map = { 'pos': data.posTitle.replace('📦 ', '🛒 '), 
-                      'customers': data.custTitle, 
-                      'inventory': data.stockTitle,
-                      'invoices': data.invTitle,
-                      'summary': data.sumTitle.replace('📊 ', '📊 '),
-                      'expenses': data.expTitle,
-                      'settings': data.setTitle };
-        if(map[key]) tab.innerHTML = tab.innerHTML.replace(/>[^<]*$/, '>' + map[key]);
-    });
-    
-    document.querySelectorAll('.cat-tab[data-cat]').forEach(tab => {
-        const cat = tab.dataset.cat;
-        if(cat === 'all') tab.textContent = '📦 ' + (lang === 'ur' ? 'تمام' : lang === 'ar' ? 'الكل' : 'All');
-        else if(cat === 'mwad') tab.textContent = '🧱 ' + (lang === 'ur' ? 'مواد' : lang === 'ar' ? 'مواد' : 'Materials');
-        else if(cat === 'stone') tab.textContent = '🪨 ' + (lang === 'ur' ? 'پتھر' : lang === 'ar' ? 'حجر' : 'Stone');
-    });
-    
-    if(lang === 'ar') document.body.classList.add('rtl');
-    else document.body.classList.remove('rtl');
-    
-    displayProducts();
-    loadInventory();
-    displayInvoices();
-    displayCustomers();
-    loadExpenses();
-    updateSummary();
-    updateCartDisplay();
-}
-
-// ==================== AUTH FUNCTIONS ====================
-function loginWithFirebase() {
-    const email = document.getElementById('loginEmail').value;
-    const password = document.getElementById('loginPassword').value;
-    const error = document.getElementById('loginError');
-    auth.signInWithEmailAndPassword(email, password)
-        .then(() => {
-            isAdmin = true;
-            document.getElementById('loginModal').style.display = 'none';
-            document.getElementById('roleBadge').textContent = '👑 Admin';
-            document.getElementById('roleBadge').className = 'admin-badge';
-            document.getElementById('loginBtn').style.display = 'none';
-            document.getElementById('logoutBtn').style.display = 'inline-block';
-            document.getElementById('logoutAllBtn').style.display = 'inline-block';
-            document.getElementById('appContainer').classList.remove('view-only');
-            document.getElementById('invoiceProfitBox').style.display = 'block';
-            registerSession();
-            showToast('✅ Admin Login Successful!');
-            loadData();
-        })
-        .catch(() => {
-            error.style.display = 'block';
-            setTimeout(() => error.style.display = 'none', 3000);
-        });
-}
-
-function skipLogin() {
-    document.getElementById('loginModal').style.display = 'none';
-    document.getElementById('roleBadge').textContent = '👁️ Viewer';
-    document.getElementById('roleBadge').className = 'viewer-badge';
-    document.getElementById('appContainer').classList.add('view-only');
-    document.getElementById('invoiceProfitBox').style.display = 'none';
-    showToast('👁️ Viewer Mode');
+// ==================== INIT ====================
+function init() {
     loadData();
-}
-
-function showLoginModal() {
-    document.getElementById('loginModal').style.display = 'flex';
-}
-
-function logout() {
-    auth.signOut().then(() => {
-        isAdmin = false;
-        document.getElementById('roleBadge').textContent = '👁️ Viewer';
-        document.getElementById('roleBadge').className = 'viewer-badge';
-        document.getElementById('loginBtn').style.display = 'inline-block';
-        document.getElementById('logoutBtn').style.display = 'none';
-        document.getElementById('logoutAllBtn').style.display = 'none';
-        document.getElementById('appContainer').classList.add('view-only');
-        document.getElementById('invoiceProfitBox').style.display = 'none';
-        removeSession();
-        showToast('👁️ Logged out');
-    });
-}
-
-// ==================== SESSIONS ====================
-function registerSession() {
-    database.ref('sessions').child(sessionId).set({ id: sessionId, device: navigator.userAgent, time: new Date().toISOString(), active: true });
-}
-function removeSession() { database.ref('sessions').child(sessionId).update({ active: false }); }
-function logoutAllSessions() {
-    if(!isAdmin) return showToast('🔒 Admin only!');
-    if(!confirm('Logout all other devices?')) return;
-    database.ref('sessions').once('value').then(snapshot => {
-        const data = snapshot.val();
-        if(data) Object.keys(data).forEach(key => { if(key !== sessionId) database.ref('sessions').child(key).update({ active: false }); });
-        showToast('✅ All other devices logged out!');
-        loadSessions();
-    });
-}
-function loadSessions() {
-    database.ref('sessions').once('value').then(snapshot => {
-        const data = snapshot.val();
-        const container = document.getElementById('sessionsList');
-        container.innerHTML = '';
-        if(!data) { container.innerHTML = '<div style="color:#666;padding:8px;font-size:10px;">No active sessions</div>'; return; }
-        Object.keys(data).forEach(key => {
-            const session = data[key];
-            if(session.active) {
-                const isCurrent = key === sessionId;
-                const div = document.createElement('div');
-                div.className = 'session-item';
-                div.innerHTML = `<span>${isCurrent ? '👑 ' : ''}${session.device || 'Unknown'} ${isCurrent ? '(You)' : ''}</span>
-                    <span>${isCurrent ? '<span class="badge badge-paid">Active</span>' : `<button onclick="removeSession('${key}')" class="remove-btn">Remove</button>`}</span>`;
-                container.appendChild(div);
-            }
-        });
-    });
-}
-function removeSession(key) {
-    if(!isAdmin) return showToast('🔒 Admin only!');
-    if(confirm('Remove this session?')) { database.ref('sessions').child(key).update({ active: false }); showToast('✅ Session removed!'); loadSessions(); }
-}
-
-// ==================== THEME ====================
-let darkMode = localStorage.getItem('darkMode') === 'true';
-function toggleTheme() {
-    darkMode = !darkMode;
-    localStorage.setItem('darkMode', darkMode);
-    document.body.classList.toggle('dark-mode', darkMode);
-    document.getElementById('appContainer').classList.toggle('dark-mode', darkMode);
-    document.querySelector('.theme-toggle').textContent = darkMode ? '☀️' : '🌙';
-}
-if(darkMode) { document.body.classList.add('dark-mode'); document.getElementById('appContainer').classList.add('dark-mode'); document.querySelector('.theme-toggle').textContent = '☀️'; }
-
-// ==================== DATA ====================
-let products = [], orders = [], customers = [], cart = [], cartHistory = [], expenses = [], stockHistory = [];
-let currentCurrency = 'SAR', currentMode = 'sqm';
-let taxEnabled = false;
-let company = { name: "WARDA MARBLE", phone: "+966 59 807 4287" };
-
-function buildProducts() {
-    let prods = []; let id = 1;
-    let mwad = [
-        ["زاویہ اپ ڈاون","4*4*3mm",9200],
-        ["زاویہ اپ ڈاون","4*4*2mm",6600],
-        ["مسمار مغلوب","10*40",4800],
-        ["مسمار مغلوب","10*50",4800],
-        ["براغی سقف","10*72",2200],
-        ["براغی سقف","10*92",2100],
-        ["جولی ابو جمل","Standard",5],
-        ["دسک بوش","9 بوسہ",20]
-    ];
-    mwad.forEach(m => { prods.push({ id: id++, name: m[0], size: m[1], category: 'mwad', selling: 0, cost: 0, stock: m[2], type: 'pieces' }); });
+    renderAll();
+    checkSession();
+    setupAutoSave();
     
-    let stoneSizes = ["3*7","3*10","3*15","3*20","3*30","3*40"];
-    stoneSizes.forEach(s => { prods.push({ id: id++, name: "ابیض مجلی مبروم", size: s, category: 'stone', selling: 65, cost: 50, stock: 50, type: 'sqm' }); });
-    stoneSizes.forEach(s => { prods.push({ id: id++, name: "ابیض مجلی سادہ", size: s, category: 'stone', selling: 60, cost: 45, stock: 50, type: 'sqm' }); });
-    stoneSizes.forEach(s => { prods.push({ id: id++, name: "ابیض مصنفر مبروم", size: s, category: 'stone', selling: 55, cost: 42, stock: 50, type: 'sqm' }); });
-    stoneSizes.forEach(s => { prods.push({ id: id++, name: "ابیض مصنفر سادہ", size: s, category: 'stone', selling: 50, cost: 38, stock: 50, type: 'sqm' }); });
-    let stoneSpecial = [
-        ["(A) ابیض مجلی فرزا","3*40*80",75],
-        ["(C) ابیض مجلی فرزا","3*40*60",75],
-        ["ابیض مجلی مشطوف","3*30",70],
-        ["ابیض مصنفر فرزا","3*40*80",65],
-        ["پیانو ابیض مصنفر","3*20*50",55]
-    ];
-    stoneSpecial.forEach(m => { prods.push({ id: id++, name: m[0], size: m[1], category: 'stone', selling: m[2], cost: m[2]-12, stock: 50, type: 'sqm' }); });
-    return prods;
+    // Show login if not admin
+    setTimeout(() => {
+        if(!state.isAdmin) {
+            document.getElementById('loginOverlay').style.display = 'flex';
+            document.querySelector('.container').classList.add('view-only');
+        }
+    }, 500);
+    
+    console.log('✅ Warda Marble System Loaded!');
+    console.log('📦 Products:', state.products.length);
+    console.log('📄 Orders:', state.orders.length);
+    console.log('👥 Customers:', state.customers.length);
+}
+
+// ==================== DATA PERSISTENCE ====================
+function saveData() {
+    try {
+        const data = {
+            products: state.products,
+            orders: state.orders,
+            customers: state.customers,
+            expenses: state.expenses,
+            stockHistory: state.stockHistory,
+            timestamp: Date.now()
+        };
+        localStorage.setItem('warda_data', JSON.stringify(data));
+        localStorage.setItem('warda_products', JSON.stringify(state.products));
+        localStorage.setItem('warda_orders', JSON.stringify(state.orders));
+        localStorage.setItem('warda_customers', JSON.stringify(state.customers));
+        localStorage.setItem('warda_expenses', JSON.stringify(state.expenses));
+        localStorage.setItem('warda_stockHistory', JSON.stringify(state.stockHistory));
+    } catch(e) {
+        console.error('Save error:', e);
+        showToast('⚠️ Error saving data');
+    }
 }
 
 function loadData() {
-    let p = localStorage.getItem('products');
-    products = p ? JSON.parse(p) : buildProducts();
-    let o = localStorage.getItem('orders');
-    orders = o ? JSON.parse(o) : [];
-    let c = localStorage.getItem('customers');
-    customers = c ? JSON.parse(c) : [];
-    let e = localStorage.getItem('expenses');
-    expenses = e ? JSON.parse(e) : [];
-    let sh = localStorage.getItem('stockHistory');
-    stockHistory = sh ? JSON.parse(sh) : [];
-    displayProducts();
-    loadInventory();
-    displayInvoices();
-    displayCustomers();
-    loadExpenses();
-    updateSummary();
-    updateCartDisplay();
-    loadSessions();
-    populateStockSelect();
+    try {
+        // Try loading combined data first
+        const combined = localStorage.getItem('warda_data');
+        if(combined) {
+            const data = JSON.parse(combined);
+            state.products = data.products || [];
+            state.orders = data.orders || [];
+            state.customers = data.customers || [];
+            state.expenses = data.expenses || [];
+            state.stockHistory = data.stockHistory || [];
+        }
+        
+        // Fallback to individual storage
+        if(!state.products || state.products.length === 0) {
+            const p = localStorage.getItem('warda_products');
+            if(p) state.products = JSON.parse(p);
+        }
+        if(state.orders.length === 0) {
+            const o = localStorage.getItem('warda_orders');
+            if(o) state.orders = JSON.parse(o);
+        }
+        if(state.customers.length === 0) {
+            const c = localStorage.getItem('warda_customers');
+            if(c) state.customers = JSON.parse(c);
+        }
+        if(state.expenses.length === 0) {
+            const e = localStorage.getItem('warda_expenses');
+            if(e) state.expenses = JSON.parse(e);
+        }
+        if(state.stockHistory.length === 0) {
+            const sh = localStorage.getItem('warda_stockHistory');
+            if(sh) state.stockHistory = JSON.parse(sh);
+        }
+        
+        // Initialize with default products if empty
+        if(state.products.length === 0) {
+            initDefaultProducts();
+        }
+    } catch(e) {
+        console.error('Load error:', e);
+        initDefaultProducts();
+    }
 }
 
-function saveData() {
-    localStorage.setItem('products', JSON.stringify(products));
-    localStorage.setItem('orders', JSON.stringify(orders));
-    localStorage.setItem('customers', JSON.stringify(customers));
-    localStorage.setItem('expenses', JSON.stringify(expenses));
-    localStorage.setItem('stockHistory', JSON.stringify(stockHistory));
+function initDefaultProducts() {
+    state.products = [
+        { id: 1, name: 'زاویہ اپ ڈاون', size: '4*4*3mm', category: 'mwad', selling: 0, cost: 0, stock: 9200, type: 'pieces' },
+        { id: 2, name: 'زاویہ اپ ڈاون', size: '4*4*2mm', category: 'mwad', selling: 0, cost: 0, stock: 6600, type: 'pieces' },
+        { id: 3, name: 'مسمار مغلوب', size: '10*40', category: 'mwad', selling: 0, cost: 0, stock: 4800, type: 'pieces' },
+        { id: 4, name: 'مسمار مغلوب', size: '10*50', category: 'mwad', selling: 0, cost: 0, stock: 4800, type: 'pieces' },
+        { id: 5, name: 'ابیض مجلی مبروم', size: '3*7', category: 'stone', selling: 65, cost: 50, stock: 50, type: 'sqm' },
+        { id: 6, name: 'ابیض مجلی مبروم', size: '3*10', category: 'stone', selling: 65, cost: 50, stock: 50, type: 'sqm' },
+        { id: 7, name: 'ابیض مجلی سادہ', size: '3*7', category: 'stone', selling: 60, cost: 45, stock: 50, type: 'sqm' },
+        { id: 8, name: 'ابیض مصنفر مبروم', size: '3*7', category: 'stone', selling: 55, cost: 42, stock: 50, type: 'sqm' },
+        { id: 9, name: 'ابیض مصنفر سادہ', size: '3*7', category: 'stone', selling: 50, cost: 38, stock: 50, type: 'sqm' },
+        { id: 10, name: '(A) ابیض مجلی فرزا', size: '3*40*80', category: 'stone', selling: 75, cost: 63, stock: 50, type: 'sqm' }
+    ];
+    saveData();
 }
 
-function showToast(msg) {
-    let t = document.createElement('div');
-    t.className = 'toast';
-    t.innerText = msg;
-    document.body.appendChild(t);
-    setTimeout(() => t.remove(), 2500);
+function exportData() {
+    const data = {
+        products: state.products,
+        orders: state.orders,
+        customers: state.customers,
+        expenses: state.expenses,
+        stockHistory: state.stockHistory,
+        exportDate: new Date().toISOString(),
+        version: '1.0'
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `warda_backup_${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('✅ Data exported successfully');
 }
 
+function importData() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    input.onchange = (e) => {
+        const file = e.target.files[0];
+        if(!file) return;
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            try {
+                const data = JSON.parse(event.target.result);
+                if(confirm('This will replace all current data. Are you sure?')) {
+                    state.products = data.products || [];
+                    state.orders = data.orders || [];
+                    state.customers = data.customers || [];
+                    state.expenses = data.expenses || [];
+                    state.stockHistory = data.stockHistory || [];
+                    saveData();
+                    renderAll();
+                    showToast('✅ Data restored successfully');
+                }
+            } catch(err) {
+                showToast('⚠️ Invalid file format');
+            }
+        };
+        reader.readAsText(file);
+    };
+    input.click();
+}
+
+function setupAutoSave() {
+    setInterval(saveData, 30000); // Auto-save every 30 seconds
+}
+
+function checkSession() {
+    if(state.isAdmin) {
+        const elapsed = Date.now() - state.sessionStart;
+        if(elapsed > CONFIG.SESSION_TIMEOUT) {
+            logout();
+            showToast('⏰ Session expired. Please login again.');
+        }
+    }
+}
+
+// ==================== HELPERS ====================
 function formatCurrency(amt) {
-    let s = currentCurrency === 'SAR' ? 'SAR ' : '$ ';
-    return s + amt.toFixed(2);
+    return CONFIG.CURRENCY + ' ' + (amt || 0).toFixed(2);
 }
 
-function toggleCurrency() {
-    currentCurrency = currentCurrency === 'SAR' ? 'USD' : 'SAR';
-    displayProducts();
-    displayInvoices();
-    updateSummary();
-    updateCartDisplay();
-    showToast(currentCurrency);
+function getToday() {
+    return new Date().toISOString().split('T')[0];
 }
 
-function setMode(mode) {
-    currentMode = mode;
-    document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('.mode-btn')[mode === 'sqm' ? 0 : mode === 'manual' ? 1 : 2].classList.add('active');
-    document.getElementById('sqmFields').style.display = mode === 'sqm' ? 'block' : 'none';
-    document.getElementById('manualFields').style.display = mode === 'manual' ? 'block' : 'none';
-    document.getElementById('piecesFields').style.display = mode === 'pieces' ? 'block' : 'none';
+function getDateRange(period) {
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    let start = new Date(today);
+    
+    switch(period) {
+        case 'today':
+            start = today;
+            break;
+        case 'week':
+            start.setDate(today.getDate() - 7);
+            break;
+        case 'month':
+            start.setMonth(today.getMonth() - 1);
+            break;
+        case 'quarter':
+            start.setMonth(today.getMonth() - 3);
+            break;
+        case 'year':
+            start.setFullYear(today.getFullYear() - 1);
+            break;
+        default:
+            start = today;
+    }
+    return { start, end: today };
 }
 
+function showToast(msg, type = 'info') {
+    const colors = {
+        success: '#27ae60',
+        error: '#e74c3c',
+        warning: '#f39c12',
+        info: '#3498db'
+    };
+    const t = document.createElement('div');
+    t.className = 'toast';
+    t.textContent = msg;
+    t.style.borderLeft = `3px solid ${colors[type] || colors.info}`;
+    document.body.appendChild(t);
+    setTimeout(() => {
+        t.style.opacity = '0';
+        t.style.transform = 'translateY(20px)';
+        setTimeout(() => t.remove(), 300);
+    }, 3000);
+}
+
+function closeModal(id) {
+    document.getElementById(id).classList.remove('active');
+}
+
+function generateId() {
+    return Date.now() + '_' + Math.random().toString(36).substr(2, 6);
+}
+
+// ==================== DARK MODE ====================
+function toggleDarkMode() {
+    state.darkMode = !state.darkMode;
+    document.body.classList.toggle('dark-mode', state.darkMode);
+    document.querySelector('.container').classList.toggle('dark-mode', state.darkMode);
+    localStorage.setItem('warda_darkmode', state.darkMode);
+}
+
+// ==================== LOGIN ====================
+function login() {
+    const email = document.getElementById('loginEmail').value.trim();
+    const pass = document.getElementById('loginPassword').value.trim();
+    const error = document.getElementById('loginError');
+    
+    // Hash password in production
+    if(email === 'admin@warda.com' && pass === 'Hamdani5') {
+        state.isAdmin = true;
+        state.sessionStart = Date.now();
+        document.getElementById('loginOverlay').style.display = 'none';
+        document.getElementById('roleBadge').textContent = '👑 Admin';
+        document.getElementById('roleBadge').style.background = '#ffd700';
+        document.getElementById('roleBadge').style.color = '#1a1a2e';
+        document.getElementById('loginBtn').style.display = 'none';
+        document.getElementById('logoutBtn').style.display = 'inline-block';
+        document.querySelector('.container').classList.remove('view-only');
+        showToast('✅ Admin Login Successful!', 'success');
+        renderAll();
+    } else {
+        error.style.display = 'block';
+        setTimeout(() => error.style.display = 'none', 3000);
+        showToast('❌ Invalid credentials!', 'error');
+    }
+}
+
+function skipLogin() {
+    document.getElementById('loginOverlay').style.display = 'none';
+    document.getElementById('roleBadge').textContent = '👁️ Viewer';
+    document.getElementById('roleBadge').style.background = '#6b7a8a';
+    document.getElementById('roleBadge').style.color = 'white';
+    document.querySelector('.container').classList.add('view-only');
+    showToast('👁️ Viewer Mode', 'info');
+    renderAll();
+}
+
+function showLogin() {
+    document.getElementById('loginOverlay').style.display = 'flex';
+}
+
+function logout() {
+    state.isAdmin = false;
+    document.getElementById('roleBadge').textContent = '👁️ Viewer';
+    document.getElementById('roleBadge').style.background = '#6b7a8a';
+    document.getElementById('roleBadge').style.color = 'white';
+    document.getElementById('loginBtn').style.display = 'inline-block';
+    document.getElementById('logoutBtn').style.display = 'none';
+    document.querySelector('.container').classList.add('view-only');
+    showToast('👁️ Viewer Mode', 'info');
+    renderAll();
+}
+
+// ==================== TABS ====================
 function showTab(tab) {
     document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-    document.getElementById(tab + 'Tab').classList.add('active');
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('tab-' + tab).classList.add('active');
     event.target.classList.add('active');
-    if(tab === 'inventory') { loadInventory(); populateStockSelect(); }
-    if(tab === 'invoices') displayInvoices();
-    if(tab === 'customers') displayCustomers();
-    if(tab === 'summary') updateSummary();
-    if(tab === 'expenses') loadExpenses();
-    if(tab === 'settings') loadSessions();
+    
+    switch(tab) {
+        case 'pos': renderProducts(); renderCart(); break;
+        case 'stock': renderStock(); populateStockSelect(); break;
+        case 'customers': renderCustomers(); break;
+        case 'invoices': renderInvoices(); break;
+        case 'summary': updateSummary(); break;
+        case 'expenses': renderExpenses(); break;
+        case 'reports': generateReport(); break;
+    }
 }
 
-// ==================== CATEGORY FILTERS ====================
-function filterPOSCategory(cat) {
-    posCategory = cat;
-    document.querySelectorAll('#posCatTabs .cat-tab').forEach(b => b.classList.remove('active'));
-    event.target.classList.add('active');
-    displayProducts();
-}
-function filterStockCategory(cat) {
-    stockCategory = cat;
-    document.querySelectorAll('#stockCatTabs .cat-tab').forEach(b => b.classList.remove('active'));
-    event.target.classList.add('active');
-    loadInventory();
+// ==================== MODE ====================
+function setMode(mode) {
+    state.currentMode = mode;
+    document.getElementById('sqmInputs').style.display = mode === 'sqm' ? 'block' : 'none';
+    document.getElementById('manualInputs').style.display = mode === 'manual' ? 'block' : 'none';
+    document.getElementById('piecesInputs').style.display = mode === 'pieces' ? 'block' : 'none';
 }
 
 // ==================== PRODUCTS ====================
-function displayProducts() {
-    let search = document.getElementById('searchProduct').value.toLowerCase();
-    let filtered = products.filter(p => 
-        (posCategory === 'all' || p.category === posCategory) && 
+function filterProducts(cat) {
+    state.currentFilter = cat;
+    document.querySelectorAll('#tab-pos .cat-tab').forEach(b => b.classList.remove('active'));
+    event.target.classList.add('active');
+    renderProducts();
+}
+
+function renderProducts() {
+    const search = document.getElementById('searchProduct').value.toLowerCase();
+    const filtered = state.products.filter(p => 
+        (state.currentFilter === 'all' || p.category === state.currentFilter) &&
         (p.name.toLowerCase().includes(search) || p.size.toLowerCase().includes(search))
     );
-    let c = document.getElementById('productList');
-    c.innerHTML = '';
+    
+    const container = document.getElementById('productList');
+    container.innerHTML = '';
+    
     if(filtered.length === 0) {
-        c.innerHTML = '<div style="text-align:center;padding:15px;color:#666;font-size:11px;">No products found</div>';
+        container.innerHTML = '<div style="text-align:center;padding:20px;color:#666;font-size:11px;">No products found</div>';
         return;
     }
+    
     filtered.forEach(p => {
-        let d = document.createElement('div');
-        d.className = 'product-card';
-        let catEmoji = p.category === 'mwad' ? '🧱' : '🪨';
-        let stockClass = p.stock < 10 ? 'product-stock-low' : '';
-        d.innerHTML = `<div class="product-name">${catEmoji} ${p.name}</div><div class="product-size">${p.size}</div><div class="product-price">${p.selling > 0 ? formatCurrency(p.selling) : 'Set Price'}${p.type === 'sqm' ? '/m²' : '/pc'}</div><div class="${stockClass}">Stock: ${p.stock} ${p.stock < 10 ? '⚠️' : ''}</div>`;
-        d.onclick = () => {
-            document.getElementById('itemName').value = p.name;
-            document.getElementById('costPrice').value = p.cost;
-            if(p.type === 'sqm') { setMode('sqm'); document.getElementById('sqmPrice').value = p.selling; }
-            else { setMode('pieces'); document.getElementById('pieceSize').value = p.size; document.getElementById('piecePrice').value = p.selling; }
-            showToast(p.name + ' loaded');
-        };
-        c.appendChild(d);
+        const div = document.createElement('div');
+        div.className = 'product-card' + (p.stock <= 0 ? ' out-of-stock' : '');
+        const catEmoji = p.category === 'mwad' ? '🧱' : '🪨';
+        div.innerHTML = `
+            <div class="name">${catEmoji} ${p.name}</div>
+            <div class="price">${p.selling > 0 ? formatCurrency(p.selling) : 'Set Price'}</div>
+            <div class="stock">Stock: ${p.stock} ${p.type === 'sqm' ? 'm²' : 'pcs'}</div>
+            ${p.stock <= 0 ? '<div style="color:#e74c3c;font-size:7px;">⚠️ Out of Stock</div>' : ''}
+        `;
+        
+        if(p.stock > 0) {
+            div.onclick = () => {
+                document.getElementById('itemName').value = p.name;
+                document.getElementById('costPrice').value = p.cost;
+                updateProductSuggestions();
+                if(p.type === 'sqm') {
+                    setMode('sqm');
+                    document.getElementById('sqmPrice').value = p.selling;
+                } else {
+                    setMode('pieces');
+                    document.getElementById('pieceSize').value = p.size;
+                    document.getElementById('piecePrice').value = p.selling;
+                }
+                showToast(p.name + ' loaded', 'info');
+            };
+        }
+        container.appendChild(div);
     });
 }
 
-function loadInventory() {
-    let search = document.getElementById('inventorySearch').value.toLowerCase();
-    let filtered = products.filter(p => 
-        (stockCategory === 'all' || p.category === stockCategory) &&
+function updateProductSuggestions() {
+    const datalist = document.getElementById('productSuggest');
+    datalist.innerHTML = '';
+    state.products.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p.name;
+        datalist.appendChild(opt);
+    });
+}
+
+function addProduct() {
+    if(!state.isAdmin) return showToast('🔒 Admin only!', 'error');
+    
+    const type = confirm('Marble (SQM) - OK, Fitting (Pieces) - Cancel') ? 'sqm' : 'pieces';
+    const cat = prompt('Category: 1-Materials, 2-Stone');
+    const catMap = {'1':'mwad','2':'stone'};
+    const category = catMap[cat] || 'mwad';
+    const name = prompt('Product name:');
+    if(!name || !name.trim()) return;
+    
+    const id = state.products.length ? Math.max(...state.products.map(p => p.id)) + 1 : 1;
+    state.products.push({
+        id,
+        name: name.trim(),
+        size: prompt('Size:') || 'N/A',
+        category,
+        selling: parseFloat(prompt('Selling price:')) || 0,
+        cost: parseFloat(prompt('Purchase price:')) || 0,
+        stock: parseInt(prompt('Stock:')) || 0,
+        type
+    });
+    
+    saveData();
+    renderAll();
+    populateStockSelect();
+    showToast('✅ Product added successfully', 'success');
+}
+
+function editProduct(id) {
+    if(!state.isAdmin) return showToast('🔒 Admin only!', 'error');
+    
+    const p = state.products.find(x => x.id === id);
+    if(!p) return;
+    
+    const name = prompt('Name:', p.name);
+    if(name !== null && name.trim() !== '') p.name = name.trim();
+    
+    const size = prompt('Size:', p.size);
+    if(size !== null) p.size = size;
+    
+    const selling = prompt('Selling Price:', p.selling);
+    if(selling !== null && !isNaN(selling)) p.selling = parseFloat(selling);
+    
+    const cost = prompt('Purchase Price:', p.cost);
+    if(cost !== null && !isNaN(cost)) p.cost = parseFloat(cost);
+    
+    const stock = prompt('Stock:', p.stock);
+    if(stock !== null && !isNaN(stock)) p.stock = parseFloat(stock);
+    
+    saveData();
+    renderAll();
+    showToast('✅ Product updated', 'success');
+}
+
+function deleteProduct(id) {
+    if(!state.isAdmin) return showToast('🔒 Admin only!', 'error');
+    if(!confirm('Are you sure you want to delete this product?')) return;
+    
+    state.products = state.products.filter(x => x.id !== id);
+    saveData();
+    renderAll();
+    populateStockSelect();
+    showToast('✅ Product deleted', 'success');
+}
+
+// ==================== STOCK ====================
+function filterStock(cat) {
+    state.stockFilter = cat;
+    document.querySelectorAll('#tab-stock .cat-tab').forEach(b => b.classList.remove('active'));
+    event.target.classList.add('active');
+    renderStock();
+}
+
+function renderStock() {
+    const search = document.getElementById('searchStock').value.toLowerCase();
+    const filtered = state.products.filter(p => 
+        (state.stockFilter === 'all' || p.category === state.stockFilter) &&
         (p.name.toLowerCase().includes(search) || p.size.toLowerCase().includes(search))
     );
-    let tb = document.getElementById('inventoryBody');
+    
+    const tb = document.getElementById('stockBody');
     tb.innerHTML = '';
+    
     if(filtered.length === 0) {
-        tb.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:15px;color:#666;">No products found</td></tr>';
+        tb.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:20px;color:#666;">No products found</td></tr>';
         return;
     }
+    
     filtered.forEach(p => {
-        let r = tb.insertRow();
-        let catName = p.category === 'mwad' ? '🧱 Materials' : '🪨 Stone';
-        r.insertCell(0).innerHTML = catName;
-        r.insertCell(1).innerHTML = p.name;
-        r.insertCell(2).innerHTML = p.size;
-        r.insertCell(3).innerHTML = `<input type="number" value="${p.selling}" onchange="updateProduct(${p.id},'selling',this.value)" style="width:60px;font-size:9px;">`;
-        r.insertCell(4).innerHTML = `<input type="number" value="${p.cost}" onchange="updateProduct(${p.id},'cost',this.value)" style="width:60px;font-size:9px;">`;
-        r.insertCell(5).innerHTML = `<input type="number" value="${p.stock}" onchange="updateProduct(${p.id},'stock',this.value)" style="width:60px;font-size:9px;">`;
-        let c = r.insertCell(6);
-        let editBtn = document.createElement('button');
-        editBtn.innerHTML = '✏️';
+        const r = tb.insertRow();
+        const catName = p.category === 'mwad' ? '🧱 Materials' : '🪨 Stone';
+        r.insertCell(0).textContent = catName;
+        r.insertCell(1).textContent = p.name;
+        r.insertCell(2).textContent = p.size;
+        r.insertCell(3).textContent = p.selling;
+        r.insertCell(4).textContent = p.cost;
+        r.insertCell(5).textContent = p.stock + (p.stock <= CONFIG.LOW_STOCK_THRESHOLD && p.stock > 0 ? ' ⚠️' : '');
+        
+        const c = r.insertCell(6);
+        const editBtn = document.createElement('button');
+        editBtn.textContent = '✏️';
         editBtn.className = 'btn-warning';
-        editBtn.style.fontSize = '8px';
-        editBtn.style.padding = '2px 6px';
-        editBtn.onclick = () => { editProduct(p.id); };
+        editBtn.style.fontSize = '7px';
+        editBtn.style.padding = '1px 5px';
+        editBtn.onclick = () => editProduct(p.id);
         c.appendChild(editBtn);
-        let delBtn = document.createElement('button');
-        delBtn.innerHTML = '✕';
+        
+        const delBtn = document.createElement('button');
+        delBtn.textContent = '✕';
         delBtn.className = 'btn-danger';
-        delBtn.style.fontSize = '8px';
-        delBtn.style.padding = '2px 6px';
-        delBtn.onclick = () => {
-            if(!isAdmin) return showToast('🔒 Login first!');
-            if(confirm('Delete this product?')) {
-                deletedItems.push({ type: 'product', data: p });
-                products = products.filter(x => x.id !== p.id);
-                saveData();
-                loadInventory();
-                displayProducts();
-                showToast('Deleted - Use Undo');
-            }
-        };
+        delBtn.style.fontSize = '7px';
+        delBtn.style.padding = '1px 5px';
+        delBtn.onclick = () => deleteProduct(p.id);
         c.appendChild(delBtn);
-        let undoBtn = document.createElement('button');
-        undoBtn.innerHTML = '↩️';
-        undoBtn.className = 'btn-success';
-        undoBtn.style.fontSize = '8px';
-        undoBtn.style.padding = '2px 6px';
-        undoBtn.onclick = () => { undoDelete(); };
-        c.appendChild(undoBtn);
     });
-    populateStockSelect();
 }
 
 function populateStockSelect() {
-    let sel = document.getElementById('stockSelect');
+    const sel = document.getElementById('stockSelect');
     sel.innerHTML = '<option value="">Select Item</option>';
-    products.forEach(p => {
-        let opt = document.createElement('option');
+    state.products.forEach(p => {
+        const opt = document.createElement('option');
         opt.value = p.id;
         opt.textContent = p.name + ' (' + p.size + ') - Stock: ' + p.stock;
         sel.appendChild(opt);
     });
 }
 
-function editProduct(id) {
-    if(!isAdmin) return showToast('🔒 Login first!');
-    let p = products.find(x => x.id === id);
-    if(!p) return;
-    let name = prompt('Name:', p.name);
-    if(name !== null && name.trim() !== '') p.name = name.trim();
-    let size = prompt('Size:', p.size);
-    if(size !== null) p.size = size;
-    let selling = prompt('Selling Price:', p.selling);
-    if(selling !== null && !isNaN(selling)) p.selling = parseFloat(selling);
-    let cost = prompt('Purchase Price:', p.cost);
-    if(cost !== null && !isNaN(cost)) p.cost = parseFloat(cost);
-    let stock = prompt('Stock:', p.stock);
-    if(stock !== null && !isNaN(stock)) p.stock = parseFloat(stock);
-    saveData();
-    loadInventory();
-    displayProducts();
-    showToast('✅ Product updated');
-}
-
-function updateProduct(id, field, value) {
-    if(!isAdmin) return showToast('🔒 Login first!');
-    let p = products.find(x => x.id === id);
-    if(p) { p[field] = parseFloat(value) || 0; saveData(); }
-}
-
-function addNewProduct() {
-    if(!isAdmin) return showToast('🔒 Login first!');
-    let type = confirm('Marble (SQM) - OK, Fitting - Cancel') ? 'sqm' : 'pieces';
-    let cat = prompt('Category: 1-Materials, 2-Stone');
-    let catMap = {'1':'mwad','2':'stone'};
-    let category = catMap[cat] || 'mwad';
-    let name = prompt('Product name:');
-    if(!name) return;
-    let id = products.length ? Math.max(...products.map(p => p.id)) + 1 : 1;
-    products.push({ id, name, size: prompt('Size:'), category, selling: parseFloat(prompt('Selling price:')) || 0, cost: parseFloat(prompt('Purchase price:')) || 0, stock: parseInt(prompt('Stock:')) || 50, type });
-    saveData();
-    loadInventory();
-    displayProducts();
-    showToast('✅ Product added');
-}
-
-function undoDelete() {
-    if(deletedItems.length === 0) return showToast('Nothing to undo');
-    let last = deletedItems.pop();
-    if(last.type === 'product') { products.push(last.data); saveData(); loadInventory(); displayProducts(); showToast('✅ Product restored'); }
-    else if(last.type === 'invoice') { orders.push(last.data); let cust = customers.find(c => c.phone === last.data.phone); if(cust) cust.invoices.push({ invoiceNo: last.data.invoiceNo, date: last.data.date, amount: last.data.total, paid: last.data.paid, status: last.data.status }); saveData(); displayInvoices(); displayCustomers(); showToast('✅ Invoice restored'); }
-    else if(last.type === 'customer') { customers.push(last.data); saveData(); displayCustomers(); showToast('✅ Customer restored'); }
-    else if(last.type === 'expense') { expenses.push(last.data); saveData(); loadExpenses(); showToast('✅ Expense restored'); }
-}
-
-// ==================== STOCK IN/OUT ====================
 function stockIn() {
-    if(!isAdmin) return showToast('🔒 Login first!');
-    let id = parseInt(document.getElementById('stockSelect').value);
-    let qty = parseFloat(document.getElementById('stockQty').value);
-    let price = parseFloat(document.getElementById('stockPrice').value) || 0;
-    if(!id || !qty || qty <= 0) return showToast('Select item and quantity');
-    let p = products.find(x => x.id === id);
-    if(!p) return showToast('Item not found');
+    if(!state.isAdmin) return showToast('🔒 Admin only!', 'error');
+    
+    const id = parseInt(document.getElementById('stockSelect').value);
+    const qty = parseFloat(document.getElementById('stockQty').value);
+    const price = parseFloat(document.getElementById('stockPriceIn').value) || 0;
+    
+    if(!id || !qty || qty <= 0) {
+        showToast('Please select item and enter quantity', 'warning');
+        return;
+    }
+    
+    const p = state.products.find(x => x.id === id);
+    if(!p) {
+        showToast('Item not found', 'error');
+        return;
+    }
+    
+    // Update stock with weighted average cost
+    const totalCost = (p.stock * p.cost) + (qty * price);
     p.stock += qty;
-    if(price > 0) p.cost = (p.cost * (p.stock - qty) + price * qty) / p.stock;
-    stockHistory.push({ date: new Date().toISOString().split('T')[0], item: p.name, qty: qty, type: 'In', price: price });
+    p.cost = p.stock > 0 ? totalCost / p.stock : 0;
+    
+    state.stockHistory.push({
+        id: generateId(),
+        date: new Date().toISOString(),
+        item: p.name,
+        qty: qty,
+        type: 'In',
+        price: price,
+        notes: 'Stock In'
+    });
+    
     saveData();
-    loadInventory();
-    updateSummary();
+    renderAll();
+    populateStockSelect();
     document.getElementById('stockQty').value = '';
-    document.getElementById('stockPrice').value = '';
-    showToast('✅ Stock added: +' + qty);
+    document.getElementById('stockPriceIn').value = '';
+    showToast(`✅ Stock added: +${qty} ${p.type === 'sqm' ? 'm²' : 'pcs'}`, 'success');
 }
 
 function stockOut() {
-    if(!isAdmin) return showToast('🔒 Login first!');
-    let id = parseInt(document.getElementById('stockSelect').value);
-    let qty = parseFloat(document.getElementById('stockQty').value);
-    if(!id || !qty || qty <= 0) return showToast('Select item and quantity');
-    let p = products.find(x => x.id === id);
-    if(!p) return showToast('Item not found');
-    if(p.stock < qty) return showToast('⚠️ Not enough stock! Available: ' + p.stock);
+    if(!state.isAdmin) return showToast('🔒 Admin only!', 'error');
+    
+    const id = parseInt(document.getElementById('stockSelect').value);
+    const qty = parseFloat(document.getElementById('stockQty').value);
+    
+    if(!id || !qty || qty <= 0) {
+        showToast('Please select item and enter quantity', 'warning');
+        return;
+    }
+    
+    const p = state.products.find(x => x.id === id);
+    if(!p) {
+        showToast('Item not found', 'error');
+        return;
+    }
+    
+    if(p.stock < qty) {
+        showToast(`⚠️ Not enough stock! Available: ${p.stock}`, 'error');
+        return;
+    }
+    
     p.stock -= qty;
-    stockHistory.push({ date: new Date().toISOString().split('T')[0], item: p.name, qty: qty, type: 'Out', price: 0 });
+    
+    state.stockHistory.push({
+        id: generateId(),
+        date: new Date().toISOString(),
+        item: p.name,
+        qty: qty,
+        type: 'Out',
+        price: p.cost,
+        notes: 'Stock Out'
+    });
+    
     saveData();
-    loadInventory();
-    updateSummary();
+    renderAll();
+    populateStockSelect();
     document.getElementById('stockQty').value = '';
-    document.getElementById('stockPrice').value = '';
-    showToast('✅ Stock removed: -' + qty);
+    document.getElementById('stockPriceIn').value = '';
+    showToast(`✅ Stock removed: -${qty} ${p.type === 'sqm' ? 'm²' : 'pcs'}`, 'success');
+}
+
+function showLowStock() {
+    const lowItems = state.products.filter(p => p.stock <= CONFIG.LOW_STOCK_THRESHOLD && p.stock > 0);
+    const container = document.getElementById('lowStockContent');
+    container.innerHTML = '';
+    
+    if(lowItems.length === 0) {
+        container.innerHTML = '<div style="padding:20px;text-align:center;color:#666;">✅ All items have sufficient stock</div>';
+    } else {
+        lowItems.forEach(p => {
+            const div = document.createElement('div');
+            div.style.cssText = 'display:flex;justify-content:space-between;padding:8px;border-bottom:1px solid #eee;';
+            div.innerHTML = `
+                <span><strong>${p.name}</strong> (${p.size})</span>
+                <span style="color:#e74c3c;font-weight:bold;">${p.stock} ${p.type === 'sqm' ? 'm²' : 'pcs'}</span>
+            `;
+            container.appendChild(div);
+        });
+    }
+    
+    document.getElementById('lowStockModal').classList.add('active');
+}
+
+function showStockAudit() {
+    const container = document.getElementById('auditContent');
+    container.innerHTML = '';
+    
+    if(state.stockHistory.length === 0) {
+        container.innerHTML = '<div style="padding:20px;text-align:center;color:#666;">No stock history available</div>';
+        return;
+    }
+    
+    // Show last 50 entries
+    const entries = state.stockHistory.slice(-50).reverse();
+    entries.forEach(h => {
+        const div = document.createElement('div');
+        div.style.cssText = 'display:flex;justify-content:space-between;padding:6px;border-bottom:1px solid #eee;font-size:10px;';
+        const typeColor = h.type === 'In' ? '#27ae60' : '#e74c3c';
+        div.innerHTML = `
+            <span>${new Date(h.date).toLocaleString()}</span>
+            <span><strong>${h.item}</strong></span>
+            <span style="color:${typeColor};">${h.type}: ${h.qty}</span>
+            <span>${h.price > 0 ? formatCurrency(h.price) : 'N/A'}</span>
+        `;
+        container.appendChild(div);
+    });
+    
+    document.getElementById('stockAuditModal').classList.add('active');
 }
 
 // ==================== CART ====================
 function addToCart() {
-    let name = document.getElementById('itemName').value;
-    if(!name) return showToast('Select item first');
-    let cost = parseFloat(document.getElementById('costPrice').value) || 0;
-    let p = products.find(pr => pr.name === name);
-    if(p && p.stock <= 0) { showToast('⚠️ Out of stock!'); return; }
-    if(currentMode === 'sqm') {
-        let w = parseFloat(document.getElementById('width').value) || 0.40;
-        let l = parseFloat(document.getElementById('length').value) || 0.80;
-        let price = parseFloat(document.getElementById('sqmPrice').value);
-        if(!price) return showToast('Enter price');
-        let area = w * l;
-        cart.push({ id: Date.now(), name, size: `${w.toFixed(2)}m x ${l.toFixed(2)}m`, qty: area, qtyDisplay: area.toFixed(2) + ' m²', price: price, cost: cost, total: area * price });
-    } else if(currentMode === 'manual') {
-        let area = parseFloat(document.getElementById('manualArea').value);
-        let price = parseFloat(document.getElementById('manualPrice').value);
-        if(!area || !price) return showToast('Enter area and price');
-        cart.push({ id: Date.now(), name, size: 'Manual', qty: area, qtyDisplay: area.toFixed(2) + ' m²', price: price, cost: cost, total: area * price });
-    } else {
-        let qty = parseFloat(document.getElementById('pieceQty').value) || 1;
-        let price = parseFloat(document.getElementById('piecePrice').value);
-        if(!price) return showToast('Enter price');
-        cart.push({ id: Date.now(), name, size: document.getElementById('pieceSize').value, qty: qty, qtyDisplay: qty + ' pcs', price: price, cost: cost, total: qty * price });
+    const name = document.getElementById('itemName').value.trim();
+    if(!name) {
+        showToast('Please select an item first', 'warning');
+        return;
     }
-    updateCartDisplay();
-    showToast('Added to cart');
+    
+    const cost = parseFloat(document.getElementById('costPrice').value) || 0;
+    const p = state.products.find(pr => pr.name === name);
+    
+    let qty, price, total;
+    
+    if(state.currentMode === 'sqm') {
+        const w = parseFloat(document.getElementById('sqmWidth').value) || 0.40;
+        const l = parseFloat(document.getElementById('sqmLength').value) || 0.80;
+        price = parseFloat(document.getElementById('sqmPrice').value);
+        if(!price) {
+            showToast('Please enter price', 'warning');
+            return;
+        }
+        qty = w * l;
+        total = qty * price;
+        
+        if(p && p.stock < qty) {
+            showToast(`⚠️ Not enough stock! Available: ${p.stock} m²`, 'error');
+            return;
+        }
+        
+        state.cart.push({
+            id: generateId(),
+            name,
+            size: w.toFixed(2) + 'm x ' + l.toFixed(2) + 'm',
+            qty: qty,
+            qtyDisplay: qty.toFixed(2) + ' m²',
+            price: price,
+            cost: cost,
+            total: total,
+            productId: p ? p.id : null
+        });
+        
+    } else if(state.currentMode === 'manual') {
+        qty = parseFloat(document.getElementById('manualArea').value);
+        price = parseFloat(document.getElementById('manualPrice').value);
+        if(!qty || !price) {
+            showToast('Please enter area and price', 'warning');
+            return;
+        }
+        total = qty * price;
+        state.cart.push({
+            id: generateId(),
+            name,
+            size: 'Manual',
+            qty: qty,
+            qtyDisplay: qty.toFixed(2) + ' m²',
+            price: price,
+            cost: cost,
+            total: total,
+            productId: p ? p.id : null
+        });
+        
+    } else {
+        qty = parseFloat(document.getElementById('pieceQty').value) || 1;
+        price = parseFloat(document.getElementById('piecePrice').value);
+        if(!price) {
+            showToast('Please enter price', 'warning');
+            return;
+        }
+        total = qty * price;
+        
+        if(p && p.stock < qty) {
+            showToast(`⚠️ Not enough stock! Available: ${p.stock} pcs`, 'error');
+            return;
+        }
+        
+        state.cart.push({
+            id: generateId(),
+            name,
+            size: document.getElementById('pieceSize').value || 'N/A',
+            qty: qty,
+            qtyDisplay: qty + ' pcs',
+            price: price,
+            cost: cost,
+            total: total,
+            productId: p ? p.id : null
+        });
+    }
+    
+    renderCart();
+    showToast('✅ Added to cart', 'success');
 }
 
-function updateCartDisplay() {
-    let tb = document.getElementById('cartBody');
+function renderCart() {
+    const tb = document.getElementById('cartBody');
     tb.innerHTML = '';
-    let sub = 0, totalCost = 0;
-    cart.forEach((item, idx) => {
-        sub += item.total;
-        totalCost += item.qty * (item.cost || 0);
-        let r = tb.insertRow();
-        r.insertCell(0).innerHTML = item.name;
-        r.insertCell(1).innerHTML = item.size;
-        r.insertCell(2).innerHTML = item.qtyDisplay;
-        r.insertCell(3).innerHTML = formatCurrency(item.price);
-        r.insertCell(4).innerHTML = formatCurrency(item.total);
-        let btn = document.createElement('button');
-        btn.innerHTML = '✖';
+    let total = 0;
+    
+    state.cart.forEach((item, idx) => {
+        total += item.total;
+        const r = tb.insertRow();
+        r.insertCell(0).textContent = item.name;
+        r.insertCell(1).textContent = item.qtyDisplay;
+        r.insertCell(2).textContent = formatCurrency(item.price);
+        r.insertCell(3).textContent = formatCurrency(item.total);
+        
+        const btn = document.createElement('button');
+        btn.textContent = '✖';
         btn.className = 'btn-danger';
-        btn.style.fontSize = '8px';
-        btn.style.padding = '2px 6px';
-        btn.onclick = () => { cart.splice(idx, 1); updateCartDisplay(); };
-        r.insertCell(5).appendChild(btn);
+        btn.style.fontSize = '7px';
+        btn.style.padding = '1px 5px';
+        btn.onclick = () => {
+            state.cart.splice(idx, 1);
+            renderCart();
+            updateTotals();
+        };
+        r.insertCell(4).appendChild(btn);
     });
-    updateTotals(sub, totalCost);
+    
+    document.getElementById('cartTotal').textContent = formatCurrency(total);
+    updateTotals();
 }
 
-function updateTotals(sub, totalCost) {
-    if(!sub) { sub = cart.reduce((s, i) => s + i.total, 0); totalCost = cart.reduce((s, i) => s + (i.qty * (i.cost || 0)), 0); }
-    let tax = document.getElementById('taxEnable').checked ? sub * 0.15 : 0;
-    let total = sub + tax;
-    let profit = sub - totalCost;
-    document.getElementById('subtotal').innerHTML = formatCurrency(sub);
-    document.getElementById('taxAmount').innerHTML = formatCurrency(tax);
-    document.getElementById('grandTotal').innerHTML = formatCurrency(total);
-    let rec = parseFloat(document.getElementById('amountReceived').value) || 0;
-    document.getElementById('received').innerHTML = formatCurrency(rec);
-    let bal = total - rec;
-    document.getElementById('balanceMsg').innerHTML = bal > 0 ? 'Due: ' + formatCurrency(bal) : bal < 0 ? 'Refund: ' + formatCurrency(Math.abs(bal)) : 'Fully Paid ✓';
-    document.getElementById('profitDisplay').innerHTML = 'Profit: ' + formatCurrency(profit);
-    document.getElementById('profitDisplay').className = profit >= 0 ? 'profit' : 'loss';
+function updateTotals() {
+    const total = state.cart.reduce((s, i) => s + i.total, 0);
+    const rec = parseFloat(document.getElementById('amountReceived').value) || 0;
+    const bal = total - rec;
+    
+    document.getElementById('cartTotal').textContent = formatCurrency(total);
+    const msg = document.getElementById('balanceMsg');
+    if(bal > 0) {
+        msg.textContent = 'Due: ' + formatCurrency(bal);
+        msg.style.color = '#e74c3c';
+    } else if(bal < 0) {
+        msg.textContent = 'Refund: ' + formatCurrency(Math.abs(bal));
+        msg.style.color = '#27ae60';
+    } else {
+        msg.textContent = '✅ Fully Paid';
+        msg.style.color = '#27ae60';
+    }
 }
 
 function clearCart() {
     if(!confirm('Clear cart?')) return;
-    cartHistory.push(JSON.parse(JSON.stringify(cart)));
-    cart = [];
-    updateCartDisplay();
-}
-
-function undoCart() {
-    if(cartHistory.length) { cart = cartHistory.pop(); updateCartDisplay(); showToast('Undo'); }
-    else showToast('Nothing to undo');
+    state.cart = [];
+    renderCart();
+    showToast('🛒 Cart cleared', 'info');
 }
 
 // ==================== CONFIRM ORDER ====================
 function confirmOrder() {
-    if(!isAdmin) return showToast('🔒 Login first!');
-    if(!cart.length) return showToast('Cart empty');
-    let cust = document.getElementById('customerName').value || 'Walk-in';
-    let phone = document.getElementById('customerPhone').value || '';
-    let rec = parseFloat(document.getElementById('amountReceived').value) || 0;
-    let sub = cart.reduce((s, i) => s + i.total, 0);
-    let totalCost = cart.reduce((s, i) => s + (i.qty * (i.cost || 0)), 0);
-    let tax = document.getElementById('taxEnable').checked ? sub * 0.15 : 0;
-    let total = sub + tax;
-    let profit = sub - totalCost;
-    let invNo = 'INV-' + String(orders.length + 1).padStart(4, '0');
-    let stockError = false;
-    cart.forEach(i => {
-        let p = products.find(pr => pr.name === i.name);
-        if(p && p.stock < i.qty) { showToast('⚠️ Not enough stock for ' + i.name + '! Available: ' + p.stock); stockError = true; }
-    });
-    if(stockError) return;
-    cart.forEach(i => {
-        let p = products.find(pr => pr.name === i.name);
-        if(p && p.stock > 0) p.stock = Math.max(0, p.stock - i.qty);
-    });
-    let paid = Math.min(rec, total);
-    let status = paid >= total ? 'paid' : (paid > 0 ? 'partial' : 'unpaid');
-    let order = {
+    if(!state.isAdmin) return showToast('🔒 Admin only!', 'error');
+    if(state.cart.length === 0) {
+        showToast('Cart is empty', 'warning');
+        return;
+    }
+    
+    const custName = document.getElementById('custName').value.trim() || 'Walk-in';
+    const custPhone = document.getElementById('custPhone').value.trim();
+    const rec = parseFloat(document.getElementById('amountReceived').value) || 0;
+    const total = state.cart.reduce((s, i) => s + i.total, 0);
+    const totalCost = state.cart.reduce((s, i) => s + (i.qty * (i.cost || 0)), 0);
+    const profit = total - totalCost;
+    const invNo = 'INV-' + String(state.orders.length + 1).padStart(4, '0');
+    
+    // Validate stock
+    for(const item of state.cart) {
+        if(item.productId) {
+            const p = state.products.find(pr => pr.id === item.productId);
+            if(p && p.stock < item.qty) {
+                showToast(`⚠️ Not enough stock for ${item.name}! Available: ${p.stock}`, 'error');
+                return;
+            }
+        }
+    }
+    
+    // Update stock
+    for(const item of state.cart) {
+        if(item.productId) {
+            const p = state.products.find(pr => pr.id === item.productId);
+            if(p) p.stock -= item.qty;
+        }
+    }
+    
+    const paid = Math.min(rec, total);
+    const status = paid >= total ? 'paid' : (paid > 0 ? 'partial' : 'unpaid');
+    
+    const order = {
         invoiceNo: invNo,
         date: new Date().toISOString(),
-        customer: cust,
-        phone,
-        items: cart.map(i => ({...i})),
-        subtotal: sub,
-        taxAmount: tax,
+        customer: custName,
+        phone: custPhone,
+        items: state.cart.map(i => ({...i})),
         total,
         cost: totalCost,
         profit: profit,
         status,
         paid,
-        payments: paid > 0 ? [{amount: paid, notes: 'POS Payment', date: new Date().toISOString()}] : []
+        payments: paid > 0 ? [{
+            id: generateId(),
+            amount: paid,
+            notes: 'POS Payment',
+            date: new Date().toISOString()
+        }] : []
     };
-    orders.push(order);
-    let custObj = customers.find(c => c.phone === phone);
-    if(!custObj) { custObj = { name: cust, phone, invoices: [], ledger: [], advance: 0 }; customers.push(custObj); }
-    let advanceAmount = 0;
-    if(rec > total) { advanceAmount = rec - total; custObj.advance = (custObj.advance || 0) + advanceAmount; if(!custObj.ledger) custObj.ledger = []; custObj.ledger.push({ date: new Date().toISOString(), type: 'Advance (Extra)', amount: advanceAmount }); }
-    custObj.invoices.push({ invoiceNo: invNo, date: order.date, amount: total, paid: paid, status: status });
-    if(!custObj.ledger) custObj.ledger = [];
-    if(paid > 0) custObj.ledger.push({ date: order.date, type: 'Payment Received', amount: paid });
+    
+    state.orders.push(order);
+    
+    // Update customer
+    let custObj = state.customers.find(c => c.phone === custPhone);
+    if(!custObj) {
+        custObj = {
+            id: generateId(),
+            name: custName,
+            phone: custPhone,
+            invoices: [],
+            advance: 0,
+            totalPaid: 0
+        };
+        state.customers.push(custObj);
+    }
+    
+    custObj.invoices.push({
+        invoiceNo: invNo,
+        date: order.date,
+        amount: total,
+        paid: paid,
+        status: status
+    });
+    custObj.totalPaid = (custObj.totalPaid || 0) + paid;
+    
+    if(rec > total) {
+        custObj.advance = (custObj.advance || 0) + (rec - total);
+    }
+    
+    // Record stock movement
+    for(const item of state.cart) {
+        if(item.productId) {
+            state.stockHistory.push({
+                id: generateId(),
+                date: new Date().toISOString(),
+                item: item.name,
+                qty: item.qty,
+                type: 'Out',
+                price: item.cost,
+                notes: `Order ${invNo}`
+            });
+        }
+    }
+    
     saveData();
-    showToast('✅ Order confirmed! ' + invNo);
-    cart = [];
-    updateCartDisplay();
-    displayProducts();
-    loadInventory();
-    displayInvoices();
-    displayCustomers();
-    loadExpenses();
-    updateSummary();
-    document.getElementById('customerName').value = '';
-    document.getElementById('customerPhone').value = '';
+    showToast(`✅ Order confirmed! ${invNo}`, 'success');
+    
+    state.cart = [];
+    renderAll();
+    document.getElementById('custName').value = '';
+    document.getElementById('custPhone').value = '';
     document.getElementById('amountReceived').value = '0';
 }
 
 // ==================== CUSTOMERS ====================
-function displayCustomers() {
-    let search = document.getElementById('customerSearch').value.toLowerCase();
-    let filtered = customers.filter(c => c.name.toLowerCase().includes(search) || (c.phone && c.phone.includes(search)));
-    let container = document.getElementById('customerList');
+function renderCustomers() {
+    const search = document.getElementById('searchCustomer').value.toLowerCase();
+    const filtered = state.customers.filter(c => 
+        c.name.toLowerCase().includes(search) || 
+        (c.phone && c.phone.includes(search))
+    );
+    
+    const container = document.getElementById('customerList');
     container.innerHTML = '';
-    if(filtered.length === 0) { container.innerHTML = '<div style="text-align:center;padding:15px;color:#666;">No customers found</div>'; return; }
+    
+    if(filtered.length === 0) {
+        container.innerHTML = '<div style="text-align:center;padding:20px;color:#666;">No customers found</div>';
+        return;
+    }
+    
     filtered.forEach(c => {
-        let due = c.invoices.reduce((s, i) => s + (i.amount - i.paid), 0);
-        let totalPaid = c.invoices.reduce((s, i) => s + i.paid, 0);
-        let statusClass, statusText;
-        if(due > 0) { statusClass = 'badge-unpaid'; statusText = 'Due: ' + formatCurrency(due); }
-        else if(due === 0 && (c.advance || 0) > 0) { statusClass = 'badge-advance'; statusText = 'Advance: ' + formatCurrency(c.advance); }
-        else { statusClass = 'badge-settled'; statusText = 'Settled'; }
-        let div = document.createElement('div');
-        div.className = 'customer-card';
-        div.innerHTML = `<div style="display:flex;justify-content:space-between;flex-wrap:wrap;margin-bottom:4px">
-            <div><strong>${c.name}</strong> ${c.phone ? '📞 ' + c.phone : ''}</div>
-            <div><span class="badge ${statusClass}">${statusText}</span></div>
-        </div>
-        <div style="font-size:9px;color:#666;">Total Paid: ${formatCurrency(totalPaid)}</div>
-        <div class="action-btns">
-            <button onclick="viewCustomerInvoices('${c.phone}')" class="btn-info" style="padding:2px 6px;font-size:8px;">📄 Invoices</button>
-            <button onclick="viewCustomerLedger('${c.phone}')" class="btn-primary" style="padding:2px 6px;font-size:8px;">📊 Ledger</button>
-            <button onclick="addCustomerPayment('${c.phone}')" class="btn-success" style="padding:2px 6px;font-size:8px;">💰 Pay</button>
-            <button onclick="deleteCustomer('${c.phone}')" class="btn-danger" style="padding:2px 6px;font-size:8px;">🗑️ Delete</button>
-            <button onclick="undoDelete()" class="btn-success" style="padding:2px 6px;font-size:8px;">↩️ Undo</button>
-        </div>`;
+        const due = c.invoices.reduce((s, i) => s + (i.amount - i.paid), 0);
+        const div = document.createElement('div');
+        div.style.cssText = 'background:white;border:1px solid #ddd;border-radius:6px;padding:8px;margin-bottom:4px;';
+        const status = due > 0 ? 'Due: ' + formatCurrency(due) : (c.advance > 0 ? 'Advance: ' + formatCurrency(c.advance) : 'Settled');
+        const statusClass = due > 0 ? 'badge-unpaid' : (c.advance > 0 ? 'badge-partial' : 'badge-settled');
+        
+        div.innerHTML = `
+            <div style="display:flex;justify-content:space-between;flex-wrap:wrap;">
+                <strong>${c.name}</strong>
+                <span class="badge ${statusClass}">${status}</span>
+            </div>
+            <div style="font-size:9px;color:#666;">
+                ${c.phone || 'N/A'} | Total: ${formatCurrency(c.invoices.reduce((s,i) => s + i.amount, 0))}
+            </div>
+            <div class="action-btns">
+                <button class="btn-info" style="font-size:8px;padding:1px 6px;" onclick="viewCustomerInvoices('${c.phone}')">📄</button>
+                <button class="btn-success" style="font-size:8px;padding:1px 6px;" onclick="payCustomer('${c.phone}')">💰</button>
+            </div>
+        `;
         container.appendChild(div);
     });
 }
 
-function deleteCustomer(phone) {
-    if(!isAdmin) return showToast('🔒 Login first!');
-    let cust = customers.find(c => c.phone === phone);
-    if(!cust) { showToast('Customer not found'); return; }
-    let due = cust.invoices.reduce((s, i) => s + (i.amount - i.paid), 0);
-    if(due > 0 && !confirm('⚠️ This customer has due amount ' + formatCurrency(due) + '. Are you sure?')) return;
-    if(!confirm('Delete customer "' + cust.name + '"?')) return;
-    deletedItems.push({ type: 'customer', data: JSON.parse(JSON.stringify(cust)) });
-    customers = customers.filter(c => c.phone !== phone);
-    orders = orders.filter(o => o.phone !== phone);
-    saveData();
-    displayCustomers();
-    displayInvoices();
-    updateSummary();
-    showToast('✅ Customer "' + cust.name + '" deleted!');
-}
-
 function viewCustomerInvoices(phone) {
-    let cust = customers.find(c => c.phone === phone);
-    if(!cust) { showToast('Customer not found'); return; }
-    document.getElementById('customerInvoicesTitle').textContent = '📄 ' + cust.name + ' - Invoices';
-    let html = '';
-    if(cust.invoices.length === 0) { html = '<div style="color:#666;padding:10px;">No invoices found</div>'; } else {
-        html = '<div style="max-height:350px;overflow-y:auto;">';
-        cust.invoices.forEach((i) => {
-            let bal = i.amount - i.paid;
-            let status = bal <= 0 ? 'Paid' : (i.paid > 0 ? 'Partial' : 'Unpaid');
-            html += `<div class="inv-item">
-                <span><strong>${i.invoiceNo}</strong> | ${new Date(i.date).toLocaleDateString()} | ${formatCurrency(i.amount)} | <span class="badge ${bal <= 0 ? 'badge-paid' : (i.paid > 0 ? 'badge-partial' : 'badge-unpaid')}">${status}</span></span>
-                <span>
-                    <button onclick="viewInvoice('${i.invoiceNo}')" class="btn-info" style="padding:2px 6px;font-size:8px;">👁️</button>
-                    <button onclick="openEditInvoice('${i.invoiceNo}')" class="btn-warning" style="padding:2px 6px;font-size:8px;">✏️</button>
-                    <button onclick="deleteInvoiceFromCustomer('${i.invoiceNo}')" class="btn-danger" style="padding:2px 6px;font-size:8px;">✕</button>
-                    <button onclick="undoDelete()" class="btn-success" style="padding:2px 6px;font-size:8px;">↩️</button>
-                </span>
-            </div>`;
-        });
-        html += '</div>';
-    }
-    document.getElementById('customerInvoicesContent').innerHTML = html;
-    document.getElementById('customerInvoicesModal').style.display = 'flex';
-}
-
-function closeCustomerInvoicesModal() { document.getElementById('customerInvoicesModal').style.display = 'none'; }
-function deleteInvoiceFromCustomer(invNo) {
-    if(!isAdmin) return showToast('🔒 Login first!');
-    if(confirm('Delete this invoice?')) {
-        let order = orders.find(o => o.invoiceNo === invNo);
-        if(order) {
-            deletedItems.push({ type: 'invoice', data: order });
-            orders = orders.filter(x => x.invoiceNo !== invNo);
-            customers.forEach(c => { c.invoices = c.invoices.filter(i => i.invoiceNo !== invNo); });
-            saveData();
-            displayInvoices();
-            displayCustomers();
-            let phone = document.getElementById('customerInvoicesTitle').textContent.split(' - ')[1];
-            if(phone) viewCustomerInvoices(phone);
-            showToast('Deleted - Use Undo');
-        }
-    }
-}
-
-function viewCustomerLedger(phone) {
-    let cust = customers.find(c => c.phone === phone);
-    if(!cust) { showToast('Customer not found'); return; }
-    document.getElementById('ledgerTitle').textContent = '📊 ' + cust.name + ' - Ledger';
-    let due = cust.invoices.reduce((s, i) => s + (i.amount - i.paid), 0);
-    let html = `<div style="margin-bottom:6px;"><strong>Balance: ${due > 0 ? 'Due ' + formatCurrency(due) : 'Settled'}</strong> | Advance: ${formatCurrency(cust.advance || 0)}</div>`;
-    html += '<div style="max-height:300px;overflow-y:auto;">';
-    cust.invoices.forEach(i => {
-        let bal = i.amount - i.paid;
-        html += `<div class="ledger-entry"><span>${new Date(i.date).toLocaleDateString()}</span><span>${i.invoiceNo}</span><span class="amount ${bal > 0 ? 'debit' : 'credit'}">${formatCurrency(i.amount)}</span></div>`;
-    });
-    if(cust.ledger) {
-        cust.ledger.forEach(l => {
-            html += `<div class="ledger-entry"><span>${new Date(l.date).toLocaleDateString()}</span><span>${l.type}</span><span class="amount credit">${formatCurrency(l.amount)}</span></div>`;
-        });
-    }
-    html += '</div><div class="balance-box">Net Balance: ' + (due > 0 ? 'Due ' + formatCurrency(due) : 'Settled') + '</div>';
-    document.getElementById('ledgerContent').innerHTML = html;
-    document.getElementById('customerLedgerModal').style.display = 'flex';
-}
-
-function closeLedgerModal() { document.getElementById('customerLedgerModal').style.display = 'none'; }
-
-function addCustomerPayment(phone) {
-    if(!isAdmin) return showToast('🔒 Login first!');
-    currentPayInvoice = phone;
-    document.getElementById('paymentModal').style.display = 'flex';
-    document.getElementById('paymentAmount').value = '';
-    document.getElementById('paymentNotes').value = '';
-}
-
-function closePaymentModal() { document.getElementById('paymentModal').style.display = 'none'; }
-
-function confirmPayment() {
-    if(!isAdmin) return showToast('🔒 Login first!');
-    let amt = parseFloat(document.getElementById('paymentAmount').value);
-    let notes = document.getElementById('paymentNotes').value || 'Payment';
-    if(isNaN(amt) || amt <= 0) { showToast('Enter valid amount'); return; }
-    let cust = customers.find(c => c.phone === currentPayInvoice);
-    if(!cust) { showToast('Customer not found'); return; }
-    let unpaid = cust.invoices.find(i => i.amount - i.paid > 0);
-    if(!unpaid) {
-        cust.advance = (cust.advance || 0) + amt;
-        if(!cust.ledger) cust.ledger = [];
-        cust.ledger.push({ date: new Date().toISOString(), type: 'Advance Payment', amount: amt });
-        saveData();
-        displayCustomers();
-        updateSummary();
-        showToast('✅ Advance added: ' + formatCurrency(amt));
-        closePaymentModal();
+    const cust = state.customers.find(c => c.phone === phone);
+    if(!cust) {
+        showToast('Customer not found', 'error');
         return;
     }
-    let payAmt = Math.min(amt, unpaid.amount - unpaid.paid);
+    
+    let msg = `📄 Invoices for ${cust.name}\n━━━━━━━━━━━━━━━\n`;
+    cust.invoices.forEach(i => {
+        const bal = i.amount - i.paid;
+        msg += `${i.invoiceNo} | ${new Date(i.date).toLocaleDateString()} | ${formatCurrency(i.amount)} | ${bal > 0 ? 'Due: ' + formatCurrency(bal) : 'Paid'}\n`;
+    });
+    msg += '━━━━━━━━━━━━━━━\n';
+    msg += `Advance: ${formatCurrency(cust.advance || 0)}\n`;
+    msg += `Total Paid: ${formatCurrency(cust.totalPaid || 0)}`;
+    alert(msg);
+}
+
+function payCustomer(phone) {
+    if(!state.isAdmin) return showToast('🔒 Admin only!', 'error');
+    
+    const cust = state.customers.find(c => c.phone === phone);
+    if(!cust) {
+        showToast('Customer not found', 'error');
+        return;
+    }
+    
+    const amt = prompt(`Enter payment amount for ${cust.name}:`, '0');
+    if(!amt || isNaN(amt) || parseFloat(amt) <= 0) return;
+    
+    const amount = parseFloat(amt);
+    const unpaid = cust.invoices.find(i => i.amount - i.paid > 0);
+    
+    if(!unpaid) {
+        cust.advance = (cust.advance || 0) + amount;
+        showToast(`✅ Advance added: ${formatCurrency(amount)}`, 'success');
+        saveData();
+        renderCustomers();
+        updateSummary();
+        return;
+    }
+    
+    const payAmt = Math.min(amount, unpaid.amount - unpaid.paid);
     unpaid.paid += payAmt;
     unpaid.status = unpaid.paid >= unpaid.amount ? 'paid' : 'partial';
-    let order = orders.find(o => o.invoiceNo === unpaid.invoiceNo);
-    if(order) { order.paid = unpaid.paid; order.status = unpaid.status; }
-    if(!cust.ledger) cust.ledger = [];
-    cust.ledger.push({ date: new Date().toISOString(), type: 'Payment - ' + notes, amount: payAmt });
-    if(amt > payAmt) {
-        let extra = amt - payAmt;
-        cust.advance = (cust.advance || 0) + extra;
-        cust.ledger.push({ date: new Date().toISOString(), type: 'Advance (Extra)', amount: extra });
+    
+    const order = state.orders.find(o => o.invoiceNo === unpaid.invoiceNo);
+    if(order) {
+        order.paid = unpaid.paid;
+        order.status = unpaid.status;
     }
+    
+    if(amount > payAmt) {
+        cust.advance = (cust.advance || 0) + (amount - payAmt);
+    }
+    
+    cust.totalPaid = (cust.totalPaid || 0) + payAmt;
+    
     saveData();
-    displayCustomers();
-    displayInvoices();
+    renderCustomers();
+    renderInvoices();
     updateSummary();
-    showToast('✅ Received ' + formatCurrency(payAmt));
-    closePaymentModal();
+    showToast(`✅ Received ${formatCurrency(payAmt)}`, 'success');
 }
 
 // ==================== INVOICES ====================
-function displayInvoices() {
-    let search = document.getElementById('invoiceSearch').value.toLowerCase();
-    let filtered = orders.filter(o => o.invoiceNo.toLowerCase().includes(search) || o.customer.toLowerCase().includes(search)).reverse();
-    let tb = document.getElementById('invoicesBody');
+function renderInvoices() {
+    const search = document.getElementById('searchInvoice').value.toLowerCase();
+    const filtered = state.orders
+        .filter(o => 
+            o.invoiceNo.toLowerCase().includes(search) || 
+            o.customer.toLowerCase().includes(search)
+        )
+        .reverse()
+        .slice(0, 100);
+    
+    const tb = document.getElementById('invoiceBody');
     tb.innerHTML = '';
     
-    let totalProfit = 0, materialProfit = 0, stoneProfit = 0;
+    if(filtered.length === 0) {
+        tb.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:#666;">No invoices found</td></tr>';
+        return;
+    }
     
     filtered.forEach(o => {
-        totalProfit += o.profit || 0;
-        o.items.forEach(item => {
-            let p = products.find(pr => pr.name === item.name);
-            if(p) {
-                let profit = (item.price - (item.cost || 0)) * item.qty;
-                if(p.category === 'mwad') materialProfit += profit;
-                else if(p.category === 'stone') stoneProfit += profit;
-            }
-        });
-        let r = tb.insertRow();
-        r.insertCell(0).innerHTML = o.invoiceNo;
-        r.insertCell(1).innerHTML = new Date(o.date).toLocaleDateString();
-        r.insertCell(2).innerHTML = o.customer;
-        r.insertCell(3).innerHTML = formatCurrency(o.total);
+        const r = tb.insertRow();
+        r.insertCell(0).textContent = o.invoiceNo;
+        r.insertCell(1).textContent = new Date(o.date).toLocaleDateString();
+        r.insertCell(2).textContent = o.customer;
+        r.insertCell(3).textContent = formatCurrency(o.total);
         r.insertCell(4).innerHTML = `<span class="badge badge-${o.status}">${o.status}</span>`;
-        let c = r.insertCell(5);
-        let viewBtn = document.createElement('button');
-        viewBtn.innerHTML = '👁️';
-        viewBtn.className = 'btn-info';
-        viewBtn.style.fontSize = '8px';
-        viewBtn.style.padding = '2px 6px';
-        viewBtn.onclick = () => viewInvoice(o.invoiceNo);
-        c.appendChild(viewBtn);
-        let editBtn = document.createElement('button');
-        editBtn.innerHTML = '✏️';
-        editBtn.className = 'btn-warning';
-        editBtn.style.fontSize = '8px';
-        editBtn.style.padding = '2px 6px';
-        editBtn.onclick = () => { openEditInvoice(o.invoiceNo); };
-        c.appendChild(editBtn);
-        let delBtn = document.createElement('button');
-        delBtn.innerHTML = '✕';
-        delBtn.className = 'btn-danger';
-        delBtn.style.fontSize = '8px';
-        delBtn.style.padding = '2px 6px';
-        delBtn.onclick = () => {
-            if(!isAdmin) return showToast('🔒 Login first!');
-            if(confirm('Delete this invoice?')) {
-                deletedItems.push({ type: 'invoice', data: o });
-                orders = orders.filter(x => x.invoiceNo !== o.invoiceNo);
-                let cust = customers.find(c => c.phone === o.phone);
-                if(cust) cust.invoices = cust.invoices.filter(i => i.invoiceNo !== o.invoiceNo);
-                saveData();
-                displayInvoices();
-                displayCustomers();
-                showToast('Deleted - Use Undo');
-            }
-        };
-        c.appendChild(delBtn);
-        let undoBtn = document.createElement('button');
-        undoBtn.innerHTML = '↩️';
-        undoBtn.className = 'btn-success';
-        undoBtn.style.fontSize = '8px';
-        undoBtn.style.padding = '2px 6px';
-        undoBtn.onclick = () => { undoDelete(); };
-        c.appendChild(undoBtn);
+        
+        const c = r.insertCell(5);
+        const view = document.createElement('button');
+        view.textContent = '👁️';
+        view.className = 'btn-info';
+        view.style.fontSize = '7px';
+        view.style.padding = '1px 5px';
+        view.onclick = () => viewInvoice(o.invoiceNo);
+        c.appendChild(view);
+        
+        const del = document.createElement('button');
+        del.textContent = '✕';
+        del.className = 'btn-danger';
+        del.style.fontSize = '7px';
+        del.style.padding = '1px 5px';
+        del.onclick = () => deleteInvoice(o.invoiceNo);
+        c.appendChild(del);
     });
-    
-    document.getElementById('totalInvoiceProfit').textContent = formatCurrency(totalProfit);
-    document.getElementById('totalInvoiceProfit').className = 'value ' + (totalProfit >= 0 ? 'positive' : 'negative');
-    document.getElementById('materialProfit').textContent = formatCurrency(materialProfit);
-    document.getElementById('stoneProfit').textContent = formatCurrency(stoneProfit);
 }
 
 function viewInvoice(invNo) {
-    let o = orders.find(x => x.invoiceNo === invNo);
-    if(!o) return;
-    currentInvoiceForWhatsApp = invNo;
-    let items = '<table><thead><tr><th>Item</th><th>Size</th><th>Qty</th><th>Price</th><th>Total</th></tr></thead><tbody>';
-    o.items.forEach(i => { items += `<tr><td>${i.name}</td><td>${i.size}</td><td>${i.qtyDisplay || i.qty}</td><td>${formatCurrency(i.price)}</td><td>${formatCurrency(i.total)}</td></tr>`; });
-    items += '</tbody></table>';
-    let rem = o.total - (o.paid || 0);
-    let html = `<div id="invoicePrint" class="invoice-box"><div class="header"><h2>🏢 ${company.name}</h2><p>${company.phone}</p></div><div class="body"><div><strong>Invoice:</strong> ${o.invoiceNo}<br><strong>Date:</strong> ${new Date(o.date).toLocaleString()}<br><strong>Customer:</strong> ${o.customer}<br><strong>Phone:</strong> ${o.phone}</div>${items}<div style="text-align:right;margin-top:10px"><h3>Total: ${formatCurrency(o.total)}</h3><p>Paid: ${formatCurrency(o.paid || 0)}</p><p><strong>${rem > 0 ? 'Due: ' + formatCurrency(rem) : 'Fully Paid ✓'}</strong></p></div></div></div>`;
-    document.getElementById('invoiceDetails').innerHTML = html;
-    document.getElementById('invoiceModal').style.display = 'flex';
-    currentEditInvoiceNo = invNo;
+    const o = state.orders.find(x => x.invoiceNo === invNo);
+    if(!o) {
+        showToast('Invoice not found', 'error');
+        return;
+    }
+    
+    const items = o.items.map(i => `${i.name} x${i.qtyDisplay} = ${formatCurrency(i.total)}`).join('\n');
+    let msg = `📄 INVOICE: ${o.invoiceNo}\n`;
+    msg += `Date: ${new Date(o.date).toLocaleString()}\n`;
+    msg += `Customer: ${o.customer}\n`;
+    msg += `Phone: ${o.phone || 'N/A'}\n`;
+    msg += '━━━━━━━━━━━━━━━\n';
+    msg += items + '\n';
+    msg += '━━━━━━━━━━━━━━━\n';
+    msg += `Total: ${formatCurrency(o.total)}\n`;
+    msg += `Paid: ${formatCurrency(o.paid || 0)}\n`;
+    msg += `Balance: ${formatCurrency(o.total - (o.paid || 0))}`;
+    alert(msg);
 }
 
-function openEditInvoice(invNo) {
-    if(!isAdmin) return showToast('🔒 Login first!');
-    let o = orders.find(x => x.invoiceNo === invNo);
-    if(!o) return;
-    currentEditInvoiceNo = invNo;
-    document.getElementById('editCustName').value = o.customer;
-    document.getElementById('editCustPhone').value = o.phone || '';
-    document.getElementById('editTotal').value = o.total;
-    document.getElementById('editPaid').value = o.paid || 0;
-    document.getElementById('editInvoiceModal').style.display = 'flex';
-}
-
-function openEditInvoiceFromModal() {
-    if(!isAdmin) return showToast('🔒 Login first!');
-    openEditInvoice(currentEditInvoiceNo);
-    document.getElementById('invoiceModal').style.display = 'none';
-}
-
-function closeEditInvoice() { document.getElementById('editInvoiceModal').style.display = 'none'; }
-
-function saveEditInvoice() {
-    if(!isAdmin) return showToast('🔒 Login first!');
-    if(!currentEditInvoiceNo) return;
-    let o = orders.find(x => x.invoiceNo === currentEditInvoiceNo);
-    if(!o) return;
-    let newCust = document.getElementById('editCustName').value.trim();
-    let newPhone = document.getElementById('editCustPhone').value.trim();
-    let newTotal = parseFloat(document.getElementById('editTotal').value);
-    let newPaid = parseFloat(document.getElementById('editPaid').value);
-    if(!newTotal || newTotal <= 0) { showToast('Enter valid total'); return; }
-    let oldCust = customers.find(c => c.phone === o.phone);
-    if(oldCust) oldCust.invoices = oldCust.invoices.filter(i => i.invoiceNo !== o.invoiceNo);
-    o.customer = newCust;
-    o.phone = newPhone;
-    o.total = newTotal;
-    o.paid = newPaid || 0;
-    o.remaining = newTotal - (newPaid || 0);
-    o.status = o.remaining <= 0 ? 'paid' : (o.paid > 0 ? 'partial' : 'unpaid');
-    let newCustObj = customers.find(c => c.phone === newPhone);
-    if(!newCustObj) { newCustObj = { name: newCust, phone: newPhone, invoices: [], ledger: [], advance: 0 }; customers.push(newCustObj); }
-    newCustObj.invoices.push({ invoiceNo: o.invoiceNo, date: o.date, amount: newTotal, paid: newPaid || 0, status: o.status });
+function deleteInvoice(invNo) {
+    if(!state.isAdmin) return showToast('🔒 Admin only!', 'error');
+    if(!confirm('Are you sure you want to delete this invoice?')) return;
+    
+    state.orders = state.orders.filter(x => x.invoiceNo !== invNo);
+    state.customers.forEach(c => {
+        c.invoices = c.invoices.filter(i => i.invoiceNo !== invNo);
+    });
+    
     saveData();
-    displayInvoices();
-    displayCustomers();
-    closeEditInvoice();
-    showToast('✅ Invoice updated');
-}
-
-function closeModal() { document.getElementById('invoiceModal').style.display = 'none'; }
-
-function printInvoice() {
-    let w = window.open('', '_blank');
-    w.document.write(`<html><head><title>Invoice</title><style>body{padding:20px} table{width:100%} th,td{padding:8px;border-bottom:1px solid #ddd} th{background:#1a1a2e;color:#ffd700}</style></head><body>${document.getElementById('invoiceDetails').innerHTML}</body></html>`);
-    w.document.close();
-    w.print();
-}
-
-async function shareInvoiceImage() {
-    let el = document.getElementById('invoicePrint');
-    if(!el) return;
-    let canvas = await html2canvas(el, {scale: 2});
-    let img = canvas.toDataURL('image/png');
-    let w = window.open('', '_blank');
-    w.document.write(`<html><body style="margin:0"><img src="${img}" style="max-width:100%"></body></html>`);
-    w.document.close();
-    showToast('Image ready');
-}
-
-function sendWhatsAppDirect() {
-    let o = orders.find(x => x.invoiceNo === currentInvoiceForWhatsApp);
-    if(!o) return;
-    if(!o.phone) { showToast('No phone number'); return; }
-    let phone = o.phone.replace(/\D/g, '');
-    if(phone.startsWith('05')) phone = '966' + phone.substring(1);
-    let msg = `${company.name} Invoice ${o.invoiceNo}%0ATotal: ${formatCurrency(o.total)}%0APaid: ${formatCurrency(o.paid || 0)}%0ABalance: ${formatCurrency(o.total - (o.paid || 0))}%0A${company.tagline}`;
-    window.open(`https://wa.me/${phone}?text=${msg}`, '_blank');
-    showToast('📱 Opening WhatsApp...');
+    renderInvoices();
+    renderCustomers();
+    updateSummary();
+    showToast('✅ Invoice deleted', 'success');
 }
 
 // ==================== EXPENSES ====================
 function addExpense() {
-    if(!isAdmin) return showToast('🔒 Login first!');
-    let head = document.getElementById('expenseHead').value.trim();
-    let amount = parseFloat(document.getElementById('expenseAmount').value);
-    let note = document.getElementById('expenseNote').value.trim();
-    if(!head || !amount || amount <= 0) { showToast('Enter valid expense'); return; }
-    expenses.push({ id: Date.now(), head, amount, note, date: new Date().toISOString() });
+    if(!state.isAdmin) return showToast('🔒 Admin only!', 'error');
+    
+    const head = document.getElementById('expenseHead').value.trim();
+    const amount = parseFloat(document.getElementById('expenseAmount').value);
+    const note = document.getElementById('expenseNote').value.trim();
+    
+    if(!head || !amount || amount <= 0) {
+        showToast('Please enter valid expense details', 'warning');
+        return;
+    }
+    
+    state.expenses.push({
+        id: generateId(),
+        head,
+        amount,
+        note,
+        date: new Date().toISOString()
+    });
+    
     saveData();
-    loadExpenses();
+    renderExpenses();
     updateSummary();
+    
     document.getElementById('expenseHead').value = '';
     document.getElementById('expenseAmount').value = '';
     document.getElementById('expenseNote').value = '';
-    showToast('✅ Expense added');
+    showToast('✅ Expense added', 'success');
 }
 
-function loadExpenses() {
-    let container = document.getElementById('expenseList');
-    let today = new Date().toISOString().split('T')[0];
-    let todayExp = expenses.filter(e => e.date.substring(0,10) === today);
+function renderExpenses() {
+    const container = document.getElementById('expenseList');
+    const today = getToday();
+    const todayExp = state.expenses.filter(e => e.date.substring(0,10) === today);
+    
     container.innerHTML = '';
-    if(todayExp.length === 0) { container.innerHTML = '<div style="color:#666;padding:10px;">No expenses today</div>'; return; }
+    if(todayExp.length === 0) {
+        container.innerHTML = '<div style="color:#666;padding:20px;text-align:center;font-size:11px;">No expenses today</div>';
+        return;
+    }
+    
     let total = 0;
     todayExp.forEach(e => {
         total += e.amount;
-        let div = document.createElement('div');
-        div.className = 'expense-item';
-        div.innerHTML = `<span><strong>${e.head}</strong> ${e.note ? '- ' + e.note : ''} <span style="color:#0f2027;font-weight:bold;">${formatCurrency(e.amount)}</span></span>
-            <span class="exp-actions">
-                <button onclick="editExpense(${e.id})" class="btn-warning" style="padding:2px 6px;font-size:8px;">✏️</button>
-                <button onclick="deleteExpense(${e.id})" class="btn-danger" style="padding:2px 6px;font-size:8px;">✕</button>
-                <button onclick="undoDelete()" class="btn-success" style="padding:2px 6px;font-size:8px;">↩️</button>
-            </span>`;
+        const div = document.createElement('div');
+        div.style.cssText = 'display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #eee;font-size:10px;';
+        div.innerHTML = `
+            <span><strong>${e.head}</strong> ${e.note ? '- ' + e.note : ''}</span>
+            <span>${formatCurrency(e.amount)}</span>
+        `;
         container.appendChild(div);
     });
-    let totalDiv = document.createElement('div');
-    totalDiv.style.cssText = 'font-weight:bold;padding:6px 0;border-top:2px solid #ccc;font-size:11px;';
-    totalDiv.innerHTML = 'Total: ' + formatCurrency(total);
+    
+    const totalDiv = document.createElement('div');
+    totalDiv.style.cssText = 'font-weight:bold;padding:8px 0;border-top:2px solid #ddd;font-size:11px;';
+    totalDiv.innerHTML = `Total: ${formatCurrency(total)}`;
     container.appendChild(totalDiv);
+    
+    // Render expense categories
+    renderExpenseCategories();
 }
 
-function editExpense(id) {
-    if(!isAdmin) return showToast('🔒 Login first!');
-    let exp = expenses.find(e => e.id === id);
-    if(!exp) return;
-    let head = prompt('Expense Head:', exp.head);
-    if(head !== null && head.trim() !== '') exp.head = head.trim();
-    let amount = prompt('Amount:', exp.amount);
-    if(amount !== null && !isNaN(amount)) exp.amount = parseFloat(amount);
-    let note = prompt('Note:', exp.note || '');
-    if(note !== null) exp.note = note.trim();
-    saveData();
-    loadExpenses();
-    showToast('✅ Expense updated');
-}
-
-function deleteExpense(id) {
-    if(!isAdmin) return showToast('🔒 Login first!');
-    if(confirm('Delete this expense?')) {
-        let exp = expenses.find(e => e.id === id);
-        if(exp) {
-            deletedItems.push({ type: 'expense', data: exp });
-            expenses = expenses.filter(e => e.id !== id);
-            saveData();
-            loadExpenses();
-            updateSummary();
-            showToast('Deleted - Use Undo');
-        }
+function renderExpenseCategories() {
+    const container = document.getElementById('expenseCategories');
+    const today = getToday();
+    const todayExp = state.expenses.filter(e => e.date.substring(0,10) === today);
+    
+    // Group by head
+    const categories = {};
+    todayExp.forEach(e => {
+        if(!categories[e.head]) categories[e.head] = 0;
+        categories[e.head] += e.amount;
+    });
+    
+    container.innerHTML = '';
+    if(Object.keys(categories).length === 0) {
+        container.innerHTML = '<div style="color:#666;padding:10px;font-size:11px;">No categories</div>';
+        return;
     }
+    
+    Object.keys(categories).sort().forEach(head => {
+        const div = document.createElement('div');
+        div.style.cssText = 'display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #eee;font-size:10px;';
+        div.innerHTML = `<span>${head}</span><span>${formatCurrency(categories[head])}</span>`;
+        container.appendChild(div);
+    });
 }
 
 // ==================== SUMMARY ====================
 function updateSummary() {
-    const today = new Date().toISOString().split('T')[0];
-    document.getElementById('summaryDate').textContent = today;
-    
-    const todaySales = orders.filter(o => o.date.substring(0,10) === today);
+    const today = getToday();
+    const todaySales = state.orders.filter(o => o.date.substring(0,10) === today);
     const todayCash = todaySales.filter(o => o.status === 'paid' || o.paid >= o.total).reduce((s,o) => s + o.total, 0);
     const todayUdhar = todaySales.filter(o => o.status === 'unpaid' || o.status === 'partial').reduce((s,o) => s + (o.total - (o.paid||0)), 0);
-    const todayIkhrajat = expenses.filter(e => e.date.substring(0,10) === today).reduce((s,e) => s + e.amount, 0);
+    const todayIkhrajat = state.expenses.filter(e => e.date.substring(0,10) === today).reduce((s,e) => s + e.amount, 0);
     
-    const receivedToday = todaySales.reduce((s,o) => s + (o.paid||0), 0);
-    const advanceReceived = customers.reduce((s, c) => s + (c.advance || 0), 0);
-    const previousSales = orders.filter(o => o.date.substring(0,10) < today);
-    const sabqaWusool = previousSales.reduce((s,o) => s + (o.paid||0), 0);
-    
-    const totalCashJamma = receivedToday + sabqaWusool + advanceReceived;
-    const remainingCash = totalCashJamma - todayIkhrajat;
-    const paymentMinus = remainingCash < 0 ? Math.abs(remainingCash) : 0;
+    const sabqaWusool = state.orders
+        .filter(o => o.date.substring(0,10) < today)
+        .reduce((s,o) => s + (o.paid||0), 0);
+    const advanceWusool = state.customers.reduce((s, c) => s + (c.advance || 0), 0);
+    const totalCashJamma = todayCash + sabqaWusool + advanceWusool;
+    const paymentMinus = totalCashJamma < todayIkhrajat ? todayIkhrajat - totalCashJamma : 0;
     
     document.getElementById('sumTodaySale').textContent = formatCurrency(todayCash + todayUdhar);
     document.getElementById('sumUdharSale').textContent = formatCurrency(todayUdhar);
     document.getElementById('sumIkhrajat').textContent = formatCurrency(todayIkhrajat);
     document.getElementById('sumSabqaWusool').textContent = formatCurrency(sabqaWusool);
-    document.getElementById('sumAdvanceWusool').textContent = formatCurrency(advanceReceived);
-    document.getElementById('sumTotalJamma').textContent = formatCurrency(remainingCash >= 0 ? remainingCash : 0);
+    document.getElementById('sumAdvanceWusool').textContent = formatCurrency(advanceWusool);
+    document.getElementById('sumTotalJamma').textContent = formatCurrency(totalCashJamma);
     document.getElementById('sumPaymentMinus').textContent = formatCurrency(paymentMinus);
     
     const pmBox = document.getElementById('paymentMinusBox');
     pmBox.className = 'summary-box ' + (paymentMinus > 0 ? 'negative' : 'positive');
     
     // Net Profit
-    const openingStock = products.reduce((sum, p) => sum + (p.stock * p.cost), 0);
-    const stockIn = stockHistory.filter(h => h.date === today && h.type === 'In').reduce((s,h) => s + (h.qty * h.price), 0);
-    const closingStock = products.reduce((sum, p) => sum + (p.stock * p.cost), 0);
-    const ikhrajat = todayIkhrajat;
+    const openingStock = state.products.reduce((sum, p) => sum + (p.stock * p.cost), 0);
+    const stockIn = state.stockHistory
+        .filter(h => h.date.substring(0,10) === today && h.type === 'In')
+        .reduce((s,h) => s + (h.qty * (h.price || 0)), 0);
+    const closingStock = state.products.reduce((sum, p) => sum + (p.stock * p.cost), 0);
     const totalSales = todaySales.reduce((s, o) => s + o.total, 0);
-    const netProfit = totalSales - (openingStock + stockIn - closingStock + ikhrajat);
+    const netProfit = totalSales - (openingStock + stockIn - closingStock + todayIkhrajat);
     
-    document.getElementById('plOpeningStock').textContent = formatCurrency(openingStock);
+    document.getElementById('plOpening').textContent = formatCurrency(openingStock);
     document.getElementById('plStockIn').textContent = formatCurrency(stockIn);
-    document.getElementById('plClosingStock').textContent = formatCurrency(closingStock);
-    document.getElementById('plIkhrajat').textContent = formatCurrency(ikhrajat);
+    document.getElementById('plClosing').textContent = formatCurrency(closingStock);
+    document.getElementById('plIkhrajat').textContent = formatCurrency(todayIkhrajat);
     
-    const profitColor = netProfit >= 0 ? '#4ade80' : '#f87171';
-    document.getElementById('plTotalProfit').innerHTML = 
-        'Net Profit/Loss: <span style="color:' + profitColor + ';">' + formatCurrency(netProfit) + '</span>';
+    const profitEl = document.getElementById('plTotalProfit');
+    profitEl.textContent = 'Net Profit/Loss: ' + formatCurrency(netProfit);
+    profitEl.style.color = netProfit >= 0 ? '#4ade80' : '#f87171';
     
     // Sold Items
-    let soldItems = {};
+    const soldItems = {};
     todaySales.forEach(o => {
         o.items.forEach(i => {
-            if(!soldItems[i.name]) soldItems[i.name] = { total: 0, remaining: 0, qty: 0 };
-            soldItems[i.name].total += i.qty * i.price;
+            if(!soldItems[i.name]) soldItems[i.name] = { qty: 0, total: 0 };
             soldItems[i.name].qty += i.qty;
-            let p = products.find(pr => pr.name === i.name);
-            soldItems[i.name].remaining = p ? p.stock : 0;
+            soldItems[i.name].total += i.total;
         });
     });
-    let soldHtml = '<div class="stock-summary-item" style="font-weight:bold;border-bottom:2px solid #ccc;"><span>Item</span><span>Sold</span><span>Revenue</span><span>Remaining</span><span>Status</span></div>';
-    let sortedItems = Object.keys(soldItems).sort((a, b) => soldItems[b].qty - soldItems[a].qty);
-    sortedItems.forEach(name => {
-        const data = soldItems[name];
-        const status = data.remaining <= 0 ? '⚠️ Out' : (data.remaining < 10 ? '⚠️ Low' : '✅ OK');
-        soldHtml += `<div class="stock-summary-item" style="${data.remaining <= 0 ? 'background:#fff3cd;' : ''}">
-            <span><strong>${name}</strong></span>
-            <span class="sold">${data.qty}</span>
-            <span>${formatCurrency(data.total)}</span>
-            <span class="remaining">${data.remaining}</span>
-            <span>${status}</span>
-        </div>`;
-    });
-    document.getElementById('soldItemsDisplay').innerHTML = soldHtml || '<div style="padding:10px;color:#666;">No items sold today</div>';
     
-    // Stock Summary
-    let stockHtml = '<div class="stock-summary-item" style="font-weight:bold;border-bottom:2px solid #ccc;"><span>Item</span><span>Opening</span><span>Sold</span><span>Closing</span></div>';
-    products.forEach(item => {
-        const sold = orders.filter(o => o.date.substring(0,10) === today).reduce((s,o) => { let t=0; o.items.forEach(i=>{ if(i.name === item.name) t += parseFloat(i.qty) || 0; }); return s+t; }, 0);
-        const opening = item.stock + sold;
-        stockHtml += `<div class="stock-summary-item">
-            <span>${item.name} ${item.size}</span>
-            <span>${opening}</span>
-            <span class="sold">${sold}</span>
-            <span class="remaining">${item.stock}</span>
+    let soldHtml = '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;font-weight:bold;border-bottom:1px solid #ddd;padding:4px 0;font-size:9px;"><span>Item</span><span>Qty</span><span>Revenue</span></div>';
+    Object.keys(soldItems).sort((a,b) => soldItems[b].qty - soldItems[a].qty).slice(0, 10).forEach(name => {
+        const data = soldItems[name];
+        soldHtml += `<div style="display:grid;grid-template-columns:1fr 1fr 1fr;padding:4px 0;border-bottom:1px solid #eee;font-size:9px;">
+            <span>${name}</span>
+            <span>${data.qty}</span>
+            <span>${formatCurrency(data.total)}</span>
         </div>`;
     });
-    document.getElementById('stockSummaryDisplay').innerHTML = stockHtml;
+    document.getElementById('soldItems').innerHTML = soldHtml || '<div style="padding:10px;color:#666;text-align:center;font-size:10px;">No items sold today</div>';
     
     // Monthly Summary
     const month = today.substring(0,7);
-    const monthSales = orders.filter(o => o.date.substring(0,7) === month);
-    const monthExp = expenses.filter(e => e.date.substring(0,7) === month);
+    const monthSales = state.orders.filter(o => o.date.substring(0,7) === month);
+    const monthExp = state.expenses.filter(e => e.date.substring(0,7) === month);
     const monthData = {};
+    
     monthSales.forEach(o => {
-        if (!monthData[o.date.substring(0,10)]) monthData[o.date.substring(0,10)] = { sale: 0, udhar: 0, ikhrajat: 0 };
-        if (o.status === 'paid' || o.paid >= o.total) monthData[o.date.substring(0,10)].sale += o.total;
-        else monthData[o.date.substring(0,10)].udhar += (o.total - (o.paid||0));
+        const d = o.date.substring(0,10);
+        if (!monthData[d]) monthData[d] = { sale: 0, udhar: 0, ikhrajat: 0 };
+        if (o.status === 'paid' || o.paid >= o.total) {
+            monthData[d].sale += o.total;
+        } else {
+            monthData[d].udhar += (o.total - (o.paid||0));
+        }
     });
+    
     monthExp.forEach(e => {
-        let d = e.date.substring(0,10);
+        const d = e.date.substring(0,10);
         if (!monthData[d]) monthData[d] = { sale: 0, udhar: 0, ikhrajat: 0 };
         monthData[d].ikhrajat += e.amount;
     });
+    
     let mhtml = '';
-    Object.keys(monthData).sort().forEach(d => {
+    Object.keys(monthData).sort().slice(-31).forEach(d => {
         const data = monthData[d];
         const profit = data.sale - data.ikhrajat;
-        mhtml += `<tr><td>${d}</td><td>${formatCurrency(data.sale)}</td><td>${formatCurrency(data.udhar)}</td><td>${formatCurrency(data.ikhrajat)}</td><td style="color:${profit >= 0 ? '#27ae60' : '#e74c3c'}">${formatCurrency(profit)}</td><td>${formatCurrency(data.sale - data.ikhrajat)}</td></tr>`;
+        mhtml += `<tr><td>${d}</td><td>${formatCurrency(data.sale)}</td><td>${formatCurrency(data.udhar)}</td><td>${formatCurrency(data.ikhrajat)}</td><td style="color:${profit >= 0 ? '#27ae60' : '#e74c3c'}">${formatCurrency(profit)}</td></tr>`;
     });
-    document.getElementById('monthlySummaryBody').innerHTML = mhtml || '<tr><td colspan="6">No data</td></tr>';
+    document.getElementById('monthlyBody').innerHTML = mhtml || '<tr><td colspan="5" style="text-align:center;color:#666;">No data</td></tr>';
 }
 
-// ==================== SHARE SUMMARY IMAGE ====================
-async function shareSummaryImage() {
-    let container = document.getElementById('summaryTab');
-    let canvas = await html2canvas(container, {scale: 2});
-    let img = canvas.toDataURL('image/png');
-    let w = window.open('', '_blank');
-    w.document.write(`<html><body style="margin:0"><img src="${img}" style="max-width:100%"></body></html>`);
-    w.document.close();
-    showToast('📷 Summary image ready!');
-}
-
-// ==================== SETTINGS ====================
-function saveCompanySettings() {
-    company.name = document.getElementById('companyNameSetting').value;
-    company.phone = document.getElementById('companyPhoneSetting').value;
-    saveData();
-    document.getElementById('companyName').innerHTML = '🏢 ' + company.name + ' <span class="viewer-badge">👁️ Viewer</span>';
-    showToast('Saved');
-}
-
-function backupData() {
-    let data = { products, orders, customers, expenses, company, stockHistory };
-    let a = document.createElement('a');
-    a.href = URL.createObjectURL(new Blob([JSON.stringify(data)], {type: 'application/json'}));
-    a.download = `backup_${new Date().toISOString().slice(0,10)}.json`;
-    a.click();
-    showToast('Backup created');
-}
-
-function restoreData(file) {
-    let r = new FileReader();
-    r.onload = e => {
-        try {
-            let d = JSON.parse(e.target.result);
-            if(d.products) products = d.products;
-            if(d.orders) orders = d.orders;
-            if(d.customers) customers = d.customers;
-            if(d.expenses) expenses = d.expenses;
-            if(d.company) company = d.company;
-            if(d.stockHistory) stockHistory = d.stockHistory;
-            saveData();
-            location.reload();
-        } catch(err) { showToast('Invalid backup'); }
-    };
-    r.readAsText(file.files[0]);
-}
-
-function resetAll() {
-    if(prompt('Type CONFIRM:') === 'CONFIRM') { localStorage.clear(); location.reload(); }
-}
-
-function syncToCloud() {
-    const data = { products, orders, customers, expenses, company, stockHistory };
-    database.ref('warda_data').set(data).then(() => { showToast('✅ Synced to cloud!'); }).catch(() => { showToast('❌ Sync failed!'); });
-}
-
-// ==================== LIVE SYNC ====================
-function listenForUpdates() {
-    database.ref('warda_data').on('value', snapshot => {
-        const data = snapshot.val();
-        if(data) {
-            if(data.products) products = data.products;
-            if(data.orders) orders = data.orders;
-            if(data.customers) customers = data.customers;
-            if(data.expenses) expenses = data.expenses;
-            if(data.company) company = data.company;
-            if(data.stockHistory) stockHistory = data.stockHistory;
-            saveData();
-            displayProducts();
-            loadInventory();
-            displayInvoices();
-            displayCustomers();
-            loadExpenses();
-            updateSummary();
-            updateCartDisplay();
-            showToast('🔄 Data synced!');
-        }
+// ==================== REPORTS ====================
+function generateReport() {
+    const period = document.getElementById('reportPeriod').value;
+    const { start, end } = getDateRange(period);
+    
+    const periodOrders = state.orders.filter(o => {
+        const date = new Date(o.date);
+        return date >= start && date <= end;
     });
-}
-
-// ==================== AUTO AUTH ====================
-auth.onAuthStateChanged(user => {
-    if(user) {
-        isAdmin = true;
-        document.getElementById('loginModal').style.display = 'none';
-        document.getElementById('roleBadge').textContent = '👑 Admin';
-        document.getElementById('roleBadge').className = 'admin-badge';
-        document.getElementById('loginBtn').style.display = 'none';
-        document.getElementById('logoutBtn').style.display = 'inline-block';
-        document.getElementById('logoutAllBtn').style.display = 'inline-block';
-        document.getElementById('appContainer').classList.remove('view-only');
-        document.getElementById('invoiceProfitBox').style.display = 'block';
-        registerSession();
-        loadData();
-        listenForUpdates();
+    
+    const periodExpenses = state.expenses.filter(e => {
+        const date = new Date(e.date);
+        return date >= start && date <= end;
+    });
+    
+    const revenue = periodOrders.reduce((s, o) => s + o.total, 0);
+    const expenses = periodExpenses.reduce((s, e) => s + e.amount, 0);
+    const profit = revenue - expenses;
+    
+    document.getElementById('reportRevenue').textContent = formatCurrency(revenue);
+    document.getElementById('reportOrders').textContent = periodOrders.length;
+    document.getElementById('reportProfit').textContent = formatCurrency(profit);
+    document.getElementById('reportExpenses').textContent = formatCurrency(expenses);
+    
+    // Detailed report
+    const container = document.getElementById('reportDetails');
+    container.innerHTML = '';
+    
+    if(periodOrders.length === 0 && periodExpenses.length === 0) {
+        container.innerHTML = '<div style="padding:20px;text-align:center;color:#666;">No data for this period</div>';
+        return;
+    }
+    
+    // Top customers
+    const customerSpending = {};
+    periodOrders.forEach(o => {
+        if(!customerSpending[o.customer]) customerSpending[o.customer] = 0;
+        customerSpending[o.customer] += o.total;
+    });
+    
+    const topCustomers = Object.keys(customerSpending)
+        .sort((a,b) => customerSpending[b] - customerSpending[a])
+        .slice(0, 5);
+    
+    let html = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:10px;">';
+    
+    html += '<div><strong>📊 Top Customers</strong>';
+    if(topCustomers.length > 0) {
+        topCustomers.forEach(c => {
+            html += `<div style="display:flex;justify-content:space-between;padding:2px 0;border-bottom:1px solid #eee;">
+                <span>${c}</span>
+                <span>${formatCurrency(customerSpending[c])}</span>
+            </div>`;
+        });
     } else {
-        isAdmin = false;
-        if(document.getElementById('loginModal').style.display !== 'flex') {
-            setTimeout(() => {
-                document.getElementById('loginModal').style.display = 'flex';
-                document.getElementById('appContainer').classList.add('view-only');
-                document.getElementById('invoiceProfitBox').style.display = 'none';
-            }, 1000);
+        html += '<div style="padding:10px;color:#666;">No customers</div>';
+    }
+    html += '</div>';
+    
+    html += '<div><strong>📦 Top Products</strong>';
+    const productSales = {};
+    periodOrders.forEach(o => {
+        o.items.forEach(i => {
+            if(!productSales[i.name]) productSales[i.name] = { qty: 0, total: 0 };
+            productSales[i.name].qty += i.qty;
+            productSales[i.name].total += i.total;
+        });
+    });
+    
+    const topProducts = Object.keys(productSales)
+        .sort((a,b) => productSales[b].total - productSales[a].total)
+        .slice(0, 5);
+    
+    if(topProducts.length > 0) {
+        topProducts.forEach(p => {
+            html += `<div style="display:flex;justify-content:space-between;padding:2px 0;border-bottom:1px solid #eee;">
+                <span>${p}</span>
+                <span>${formatCurrency(productSales[p].total)}</span>
+            </div>`;
+        });
+    } else {
+        html += '<div style="padding:10px;color:#666;">No products sold</div>';
+    }
+    html += '</div></div>';
+    
+    // Recent transactions
+    html += '<div style="margin-top:8px;"><strong>📋 Recent Transactions</strong>';
+    const recent = [...periodOrders].reverse().slice(0, 10);
+    if(recent.length > 0) {
+        recent.forEach(o => {
+            html += `<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #eee;font-size:9px;">
+                <span>${o.invoiceNo}</span>
+                <span>${o.customer}</span>
+                <span>${formatCurrency(o.total)}</span>
+                <span class="badge badge-${o.status}">${o.status}</span>
+            </div>`;
+        });
+    } else {
+        html += '<div style="padding:10px;color:#666;">No transactions</div>';
+    }
+    html += '</div>';
+    
+    container.innerHTML = html;
+}
+
+// ==================== RENDER ALL ====================
+function renderAll() {
+    renderProducts();
+    renderCart();
+    renderStock();
+    renderCustomers();
+    renderInvoices();
+    renderExpenses();
+    updateSummary();
+    populateStockSelect();
+    updateProductSuggestions();
+}
+
+// ==================== INIT ====================
+// Load dark mode preference
+const darkMode = localStorage.getItem('warda_darkmode');
+if(darkMode === 'true') {
+    state.darkMode = true;
+    document.body.classList.add('dark-mode');
+    document.querySelector('.container').classList.add('dark-mode');
+}
+
+init();
+
+// Keyboard shortcuts
+document.addEventListener('keydown', (e) => {
+    // Ctrl+Enter to confirm order
+    if(e.ctrlKey && e.key === 'Enter') {
+        e.preventDefault();
+        confirmOrder();
+    }
+    // Escape to clear cart
+    if(e.key === 'Escape' && document.activeElement?.tagName !== 'INPUT') {
+        if(state.cart.length > 0) {
+            if(confirm('Clear cart?')) {
+                state.cart = [];
+                renderCart();
+                showToast('🛒 Cart cleared', 'info');
+            }
         }
     }
 });
-
-// ==================== INIT ====================
-loadData();
-document.getElementById('companyNameSetting').value = company.name;
-document.getElementById('companyPhoneSetting').value = company.phone;
-setLanguage('en');
-
-setTimeout(() => {
-    if(!isAdmin) {
-        document.getElementById('loginModal').style.display = 'flex';
-        document.getElementById('appContainer').classList.add('view-only');
-        document.getElementById('invoiceProfitBox').style.display = 'none';
-    }
-}, 1500);
-
-window.viewInvoice = viewInvoice;
-window.openEditInvoice = openEditInvoice;
-window.undoDelete = undoDelete;
-window.viewCustomerInvoices = viewCustomerInvoices;
-window.closeCustomerInvoicesModal = closeCustomerInvoicesModal;
-window.closeLedgerModal = closeLedgerModal;
-window.sendWhatsAppDirect = sendWhatsAppDirect;
-window.shareSummaryImage = shareSummaryImage;
 </script>
 </body>
 </html>
