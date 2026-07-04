@@ -150,6 +150,15 @@
         .stock-summary-item{display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr;padding:4px 0;border-bottom:1px solid var(--border);font-size:11px;}
         .stock-summary-item .sold{color:#f39c12;font-weight:bold;}
         .stock-summary-item .remaining{color:#27ae60;font-weight:bold;}
+        .profit-box{background:linear-gradient(135deg,#1a2a4a,#2d3b5a);padding:10px 15px;border-radius:8px;color:white;text-align:center;margin-top:10px;}
+        .profit-box .label{font-size:11px;color:#a0c4e0;}
+        .profit-box .value{font-size:18px;font-weight:bold;color:#ffd700;}
+        .profit-box .value.positive{color:#4ade80;}
+        .profit-box .value.negative{color:#f87171;}
+        .category-profit{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px;}
+        .category-profit .cat-box{background:rgba(255,255,255,0.05);padding:8px;border-radius:6px;}
+        .category-profit .cat-box .cat-label{font-size:10px;color:#a0c4e0;}
+        .category-profit .cat-box .cat-value{font-size:14px;font-weight:bold;color:#ffd700;}
     </style>
 </head>
 <body>
@@ -188,8 +197,7 @@
                 <div class="cat-tabs" id="posCatTabs">
                     <button class="cat-tab active" onclick="filterPOSCategory('all')">📦 All</button>
                     <button class="cat-tab" onclick="filterPOSCategory('mwad')">🧱 Materials</button>
-                    <button class="cat-tab" onclick="filterPOSCategory('mojali')">✨ Polished</button>
-                    <button class="cat-tab" onclick="filterPOSCategory('mosnafar')">🪨 Honed</button>
+                    <button class="cat-tab" onclick="filterPOSCategory('stone')">🪨 Stone</button>
                 </div>
                 <div class="search-box"><input type="text" id="searchProduct" placeholder="🔍 Search..." onkeyup="displayProducts()" onkeydown="if(event.key==='Enter') displayProducts()"></div>
                 <div class="product-list" id="productList"></div>
@@ -258,8 +266,7 @@
             <div class="cat-tabs" id="stockCatTabs">
                 <button class="cat-tab active" onclick="filterStockCategory('all')">📦 All</button>
                 <button class="cat-tab" onclick="filterStockCategory('mwad')">🧱 Materials</button>
-                <button class="cat-tab" onclick="filterStockCategory('mojali')">✨ Polished</button>
-                <button class="cat-tab" onclick="filterStockCategory('mosnafar')">🪨 Honed</button>
+                <button class="cat-tab" onclick="filterStockCategory('stone')">🪨 Stone</button>
             </div>
             <div class="search-box"><input type="text" id="inventorySearch" placeholder="🔍 Search..." onkeyup="loadInventory()"></div>
             <button onclick="addNewProduct()" class="btn-success" style="margin-bottom:8px">➕ Add Product</button>
@@ -275,11 +282,22 @@
     <!-- ===== INVOICES TAB ===== -->
     <div id="invoicesTab" class="tab-content">
         <div class="panel">
-            <h3>📄 All Invoices</h3>
+            <h3>📄 Invoices</h3>
             <div class="search-box"><input type="text" id="invoiceSearch" placeholder="🔍 Search..." onkeyup="displayInvoices()"></div>
-            <div style="overflow-x:auto;max-height:400px;overflow-y:auto">
+            
+            <!-- Total Profit Box -->
+            <div class="profit-box" id="invoiceProfitBox">
+                <div class="label">📈 Total Invoice Profit</div>
+                <div class="value positive" id="totalInvoiceProfit">SAR 0.00</div>
+                <div class="category-profit">
+                    <div class="cat-box"><div class="cat-label">🧱 Materials Profit</div><div class="cat-value" id="materialProfit">SAR 0.00</div></div>
+                    <div class="cat-box"><div class="cat-label">🪨 Stone Profit</div><div class="cat-value" id="stoneProfit">SAR 0.00</div></div>
+                </div>
+            </div>
+            
+            <div style="overflow-x:auto;max-height:400px;overflow-y:auto;margin-top:10px;">
                 <table id="invoicesTable">
-                    <thead><tr><th>Invoice</th><th>Date</th><th>Customer</th><th>Total</th><th>Status</th><th>Actions</th></tr></thead>
+                    <thead><tr><th>Invoice</th><th>Date</th><th>Customer</th><th>Total</th><th>Profit</th><th>Status</th><th>Actions</th></tr></thead>
                     <tbody id="invoicesBody"></tbody>
                 </table>
             </div>
@@ -302,19 +320,20 @@
                 <div class="summary-box" id="paymentMinusBox"><div class="num" id="sumPaymentMinus">0.00</div><div class="lbl">Payment Minus</div></div>
             </div>
             
-            <!-- ===== PROFIT / LOSS ===== -->
+            <!-- ===== PROFIT / LOSS (Stock + Ikhrajat Formula) ===== -->
             <div style="background:linear-gradient(135deg,#1a2a4a,#2d3b5a);padding:15px;border-radius:10px;margin-bottom:15px;color:white;text-align:center;">
-                <h3 style="color:#ffd700;margin-bottom:8px;">📈 Daily Profit / Loss</h3>
+                <h3 style="color:#ffd700;margin-bottom:8px;">📈 Net Profit / Loss</h3>
                 <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;font-size:12px;">
-                    <div><span style="color:#a0c4e0;">Total Sales:</span><br><strong id="plTotalSales">0</strong></div>
-                    <div><span style="color:#a0c4e0;">Total Cost:</span><br><strong id="plTotalCost">0</strong></div>
-                    <div><span style="color:#a0c4e0;">Ikhrajat:</span><br><strong id="plIkhrajatDisplay">0</strong></div>
+                    <div><span style="color:#a0c4e0;">Opening Stock:</span><br><strong id="plOpeningStock">0</strong></div>
+                    <div><span style="color:#a0c4e0;">Stock In:</span><br><strong id="plStockIn">0</strong></div>
+                    <div><span style="color:#a0c4e0;">Closing Stock:</span><br><strong id="plClosingStock">0</strong></div>
+                    <div><span style="color:#a0c4e0;">Ikhrajat:</span><br><strong id="plIkhrajat">0</strong></div>
                 </div>
                 <div style="margin-top:10px;font-size:18px;font-weight:bold;border-top:1px solid #ffd700;padding-top:8px;">
-                    <span id="plDailyProfit" style="color:#ffd700;">Profit: 0.00</span>
+                    <span id="plTotalProfit" style="color:#ffd700;">Profit: 0.00</span>
                 </div>
                 <div style="font-size:10px;color:#a0c4e0;margin-top:4px;">
-                    Formula: Sales - Cost - Ikhrajat = Profit/Loss
+                    Formula: Sales - (Opening + Stock In - Closing + Ikhrajat)
                 </div>
             </div>
             
@@ -586,6 +605,7 @@ let company = { name: "WARDA MARBLE", phone: "+966 59 807 4287" };
 
 function buildProducts() {
     let prods = []; let id = 1;
+    // Materials
     let mwad = [
         ["زاویہ اپ ڈاون","4*4*3mm",9200],
         ["زاویہ اپ ڈاون","4*4*2mm",6600],
@@ -598,17 +618,20 @@ function buildProducts() {
     ];
     mwad.forEach(m => { prods.push({ id: id++, name: m[0], size: m[1], category: 'mwad', selling: 0, cost: 0, stock: m[2], type: 'pieces' }); });
     
-    let mojaliSizes = ["3*7","3*10","3*15","3*20","3*30","3*40"];
-    mojaliSizes.forEach(s => { prods.push({ id: id++, name: "ابیض مجلی مبروم", size: s, category: 'mojali', selling: 65, cost: 50, stock: 50, type: 'sqm' }); });
-    mojaliSizes.forEach(s => { prods.push({ id: id++, name: "ابیض مجلی سادہ", size: s, category: 'mojali', selling: 60, cost: 45, stock: 50, type: 'sqm' }); });
-    let mojaliSpecial = [["(A) ابیض مجلی فرزا","3*40*80",75],["(C) ابیض مجلی فرزا","3*40*60",75],["ابیض مجلی مشطوف","3*30",70]];
-    mojaliSpecial.forEach(m => { prods.push({ id: id++, name: m[0], size: m[1], category: 'mojali', selling: m[2], cost: m[2]-12, stock: 50, type: 'sqm' }); });
-    
-    let mosnafarSizes = ["3*7","3*10","3*15","3*20","3*30","3*40"];
-    mosnafarSizes.forEach(s => { prods.push({ id: id++, name: "ابیض مصنفر مبروم", size: s, category: 'mosnafar', selling: 55, cost: 42, stock: 50, type: 'sqm' }); });
-    mosnafarSizes.forEach(s => { prods.push({ id: id++, name: "ابیض مصنفر سادہ", size: s, category: 'mosnafar', selling: 50, cost: 38, stock: 50, type: 'sqm' }); });
-    let mosnafarSpecial = [["ابیض مصنفر فرزا","3*40*80",65],["پیانو ابیض مصنفر","3*20*50",55]];
-    mosnafarSpecial.forEach(m => { prods.push({ id: id++, name: m[0], size: m[1], category: 'mosnafar', selling: m[2], cost: m[2]-10, stock: 50, type: 'sqm' }); });
+    // Stone (Polished + Honed)
+    let stoneSizes = ["3*7","3*10","3*15","3*20","3*30","3*40"];
+    stoneSizes.forEach(s => { prods.push({ id: id++, name: "ابیض مجلی مبروم", size: s, category: 'stone', selling: 65, cost: 50, stock: 50, type: 'sqm' }); });
+    stoneSizes.forEach(s => { prods.push({ id: id++, name: "ابیض مجلی سادہ", size: s, category: 'stone', selling: 60, cost: 45, stock: 50, type: 'sqm' }); });
+    stoneSizes.forEach(s => { prods.push({ id: id++, name: "ابیض مصنفر مبروم", size: s, category: 'stone', selling: 55, cost: 42, stock: 50, type: 'sqm' }); });
+    stoneSizes.forEach(s => { prods.push({ id: id++, name: "ابیض مصنفر سادہ", size: s, category: 'stone', selling: 50, cost: 38, stock: 50, type: 'sqm' }); });
+    let stoneSpecial = [
+        ["(A) ابیض مجلی فرزا","3*40*80",75],
+        ["(C) ابیض مجلی فرزا","3*40*60",75],
+        ["ابیض مجلی مشطوف","3*30",70],
+        ["ابیض مصنفر فرزا","3*40*80",65],
+        ["پیانو ابیض مصنفر","3*20*50",55]
+    ];
+    stoneSpecial.forEach(m => { prods.push({ id: id++, name: m[0], size: m[1], category: 'stone', selling: m[2], cost: m[2]-12, stock: 50, type: 'sqm' }); });
     
     return prods;
 }
@@ -717,7 +740,7 @@ function displayProducts() {
     filtered.forEach(p => {
         let d = document.createElement('div');
         d.className = 'product-card';
-        let catEmoji = p.category === 'mwad' ? '🧱' : p.category === 'mojali' ? '✨' : '🪨';
+        let catEmoji = p.category === 'mwad' ? '🧱' : '🪨';
         let stockClass = p.stock < 10 ? 'product-stock-low' : '';
         d.innerHTML = `<div class="product-name">${catEmoji} ${p.name}</div><div class="product-size">${p.size}</div><div class="product-price">${p.selling > 0 ? formatCurrency(p.selling) : 'Set Price'}${p.type === 'sqm' ? '/m²' : '/pc'}</div><div class="${stockClass}">Stock: ${p.stock} ${p.stock < 10 ? '⚠️' : ''}</div>`;
         d.onclick = () => {
@@ -745,7 +768,7 @@ function loadInventory() {
     }
     filtered.forEach(p => {
         let r = tb.insertRow();
-        let catName = p.category === 'mwad' ? '🧱 Materials' : p.category === 'mojali' ? '✨ Polished' : '🪨 Honed';
+        let catName = p.category === 'mwad' ? '🧱 Materials' : '🪨 Stone';
         let stockClass = p.stock < 10 ? 'product-stock-low' : '';
         r.insertCell(0).innerHTML = catName;
         r.insertCell(1).innerHTML = p.name;
@@ -814,8 +837,8 @@ function updateProduct(id, field, value) {
 function addNewProduct() {
     if(!isAdmin) return showToast('🔒 Login first!');
     let type = confirm('Marble (SQM) - OK, Fitting - Cancel') ? 'sqm' : 'pieces';
-    let cat = prompt('Category: 1-Materials, 2-Polished, 3-Honed');
-    let catMap = {'1':'mwad','2':'mojali','3':'mosnafar'};
+    let cat = prompt('Category: 1-Materials, 2-Stone');
+    let catMap = {'1':'mwad','2':'stone'};
     let category = catMap[cat] || 'mwad';
     let name = prompt('Product name:');
     if(!name) return;
@@ -1233,18 +1256,31 @@ function displayInvoices() {
     let filtered = orders.filter(o => o.invoiceNo.toLowerCase().includes(search) || o.customer.toLowerCase().includes(search)).reverse();
     let tb = document.getElementById('invoicesBody');
     tb.innerHTML = '';
-    if(filtered.length === 0) {
-        tb.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:#666;">No invoices found</td></tr>';
-        return;
-    }
+    
+    // Calculate total profits
+    let totalProfit = 0;
+    let materialProfit = 0;
+    let stoneProfit = 0;
+    
     filtered.forEach(o => {
+        let profit = o.profit || 0;
+        totalProfit += profit;
+        // Calculate category-wise profit
+        o.items.forEach(item => {
+            let p = products.find(pr => pr.name === item.name);
+            if(p) {
+                if(p.category === 'mwad') materialProfit += (item.price - (item.cost || 0)) * item.qty;
+                else if(p.category === 'stone') stoneProfit += (item.price - (item.cost || 0)) * item.qty;
+            }
+        });
         let r = tb.insertRow();
         r.insertCell(0).innerHTML = o.invoiceNo;
         r.insertCell(1).innerHTML = new Date(o.date).toLocaleDateString();
         r.insertCell(2).innerHTML = o.customer;
         r.insertCell(3).innerHTML = formatCurrency(o.total);
-        r.insertCell(4).innerHTML = `<span class="badge badge-${o.status}">${o.status}</span>`;
-        let c = r.insertCell(5);
+        r.insertCell(4).innerHTML = `<span style="color:${profit >= 0 ? '#27ae60' : '#e74c3c'};font-weight:bold;">${formatCurrency(profit)}</span>`;
+        r.insertCell(5).innerHTML = `<span class="badge badge-${o.status}">${o.status}</span>`;
+        let c = r.insertCell(6);
         let viewBtn = document.createElement('button');
         viewBtn.innerHTML = '👁️';
         viewBtn.className = 'btn-info';
@@ -1280,17 +1316,26 @@ function displayInvoices() {
         undoBtn.onclick = () => { undoDelete(); };
         c.appendChild(undoBtn);
     });
+    
+    // Update Profit Box
+    document.getElementById('totalInvoiceProfit').textContent = formatCurrency(totalProfit);
+    document.getElementById('totalInvoiceProfit').className = 'value ' + (totalProfit >= 0 ? 'positive' : 'negative');
+    document.getElementById('materialProfit').textContent = formatCurrency(materialProfit);
+    document.getElementById('stoneProfit').textContent = formatCurrency(stoneProfit);
 }
 
 function viewInvoice(invNo) {
     let o = orders.find(x => x.invoiceNo === invNo);
     if(!o) return;
     currentInvoiceForWhatsApp = invNo;
-    let items = '<table><thead><tr><th>Item</th><th>Size</th><th>Qty</th><th>Price</th><th>Total</th></tr></thead><tbody>';
-    o.items.forEach(i => { items += `<tr><td>${i.name}</td><td>${i.size}</td><td>${i.qtyDisplay || i.qty}</td><td>${formatCurrency(i.price)}</td><td>${formatCurrency(i.total)}</td></tr>`; });
+    let items = '<table><thead><tr><th>Item</th><th>Size</th><th>Qty</th><th>Price</th><th>Total</th><th>Profit</th></tr></thead><tbody>';
+    o.items.forEach(i => {
+        let profit = (i.price - (i.cost || 0)) * i.qty;
+        items += `<tr><td>${i.name}</td><td>${i.size}</td><td>${i.qtyDisplay || i.qty}</td><td>${formatCurrency(i.price)}</td><td>${formatCurrency(i.total)}</td><td style="color:${profit >= 0 ? '#27ae60' : '#e74c3c'}">${formatCurrency(profit)}</td></tr>`;
+    });
     items += '</tbody></table>';
     let rem = o.total - (o.paid || 0);
-    let html = `<div id="invoicePrint" class="invoice-box"><div class="header"><h2>🏢 ${company.name}</h2><p>${company.phone}</p></div><div class="body"><div><strong>Invoice:</strong> ${o.invoiceNo}<br><strong>Date:</strong> ${new Date(o.date).toLocaleString()}<br><strong>Customer:</strong> ${o.customer}<br><strong>Phone:</strong> ${o.phone}</div>${items}<div style="text-align:right;margin-top:10px"><h3>Total: ${formatCurrency(o.total)}</h3><p>Paid: ${formatCurrency(o.paid || 0)}</p><p><strong>${rem > 0 ? 'Due: ' + formatCurrency(rem) : 'Fully Paid ✓'}</strong></p></div></div></div>`;
+    let html = `<div id="invoicePrint" class="invoice-box"><div class="header"><h2>🏢 ${company.name}</h2><p>${company.phone}</p></div><div class="body"><div><strong>Invoice:</strong> ${o.invoiceNo}<br><strong>Date:</strong> ${new Date(o.date).toLocaleString()}<br><strong>Customer:</strong> ${o.customer}<br><strong>Phone:</strong> ${o.phone}</div>${items}<div style="text-align:right;margin-top:10px"><h3>Total: ${formatCurrency(o.total)}</h3><p>Paid: ${formatCurrency(o.paid || 0)}</p><p><strong>${rem > 0 ? 'Due: ' + formatCurrency(rem) : 'Fully Paid ✓'}</strong></p><p><strong>Profit: ${formatCurrency(o.profit || 0)}</strong></p></div></div></div>`;
     document.getElementById('invoiceDetails').innerHTML = html;
     document.getElementById('invoiceModal').style.display = 'flex';
     currentEditInvoiceNo = invNo;
@@ -1377,7 +1422,7 @@ function sendWhatsAppDirect() {
     if(!o.phone) { showToast('No phone number for this customer'); return; }
     let phone = o.phone.replace(/\D/g, '');
     if(phone.startsWith('05')) phone = '966' + phone.substring(1);
-    let msg = `${company.name} Invoice ${o.invoiceNo}%0ATotal: ${formatCurrency(o.total)}%0APaid: ${formatCurrency(o.paid || 0)}%0ABalance: ${formatCurrency(o.total - (o.paid || 0))}%0A${company.tagline}`;
+    let msg = `${company.name} Invoice ${o.invoiceNo}%0ATotal: ${formatCurrency(o.total)}%0APaid: ${formatCurrency(o.paid || 0)}%0ABalance: ${formatCurrency(o.total - (o.paid || 0))}%0AProfit: ${formatCurrency(o.profit || 0)}%0A${company.tagline}`;
     window.open(`https://wa.me/${phone}?text=${msg}`, '_blank');
     showToast('📱 Opening WhatsApp...');
 }
@@ -1484,20 +1529,24 @@ function updateSummary() {
     const pmBox = document.getElementById('paymentMinusBox');
     pmBox.className = 'summary-box ' + (paymentMinus > 0 ? 'negative' : 'positive');
     
-    // ===== DAILY PROFIT / LOSS =====
-    let totalSalesAmount = todaySales.reduce((s, o) => s + o.total, 0);
-    let totalCostAmount = todaySales.reduce((s, o) => s + o.cost, 0);
-    let dailyProfit = totalSalesAmount - totalCostAmount - todayIkhrajat;
+    // ===== NET PROFIT (Stock + Ikhrajat Formula) =====
+    const openingStock = products.reduce((sum, p) => sum + (p.stock * p.cost), 0);
+    const stockIn = 0;
+    const closingStock = products.reduce((sum, p) => sum + (p.stock * p.cost), 0);
+    const ikhrajat = todayIkhrajat;
+    const totalSales = todaySales.reduce((s, o) => s + o.total, 0);
+    const netProfit = totalSales - (openingStock + stockIn - closingStock + ikhrajat);
     
-    document.getElementById('plTotalSales').textContent = formatCurrency(totalSalesAmount);
-    document.getElementById('plTotalCost').textContent = formatCurrency(totalCostAmount);
-    document.getElementById('plIkhrajatDisplay').textContent = formatCurrency(todayIkhrajat);
+    document.getElementById('plOpeningStock').textContent = formatCurrency(openingStock);
+    document.getElementById('plStockIn').textContent = formatCurrency(stockIn);
+    document.getElementById('plClosingStock').textContent = formatCurrency(closingStock);
+    document.getElementById('plIkhrajat').textContent = formatCurrency(ikhrajat);
     
-    const profitColor = dailyProfit >= 0 ? '#4ade80' : '#f87171';
-    document.getElementById('plDailyProfit').innerHTML = 
-        `Profit/Loss: <span style="color:${profitColor};">${formatCurrency(dailyProfit)}</span>`;
+    const profitColor = netProfit >= 0 ? '#4ade80' : '#f87171';
+    document.getElementById('plTotalProfit').innerHTML = 
+        `Net Profit/Loss: <span style="color:${profitColor};">${formatCurrency(netProfit)}</span>`;
     
-    // ===== RECENTLY SOLD ITEMS (Top First) =====
+    // ===== RECENTLY SOLD ITEMS =====
     let soldItems = {};
     todaySales.forEach(o => {
         o.items.forEach(i => {
@@ -1506,14 +1555,12 @@ function updateSummary() {
             }
             soldItems[i.name].total += i.qty * i.price;
             soldItems[i.name].qty += i.qty;
-            // Find remaining stock
             let p = products.find(pr => pr.name === i.name);
             soldItems[i.name].remaining = p ? p.stock : 0;
         });
     });
     
     let soldHtml = '<div class="stock-summary-item" style="font-weight:bold;border-bottom:2px solid #ccc;"><span>Item</span><span>Sold Qty</span><span>Revenue</span><span>Remaining</span><span>Status</span></div>';
-    // Sort by sold quantity (highest first)
     let sortedItems = Object.keys(soldItems).sort((a, b) => soldItems[b].qty - soldItems[a].qty);
     sortedItems.forEach(name => {
         const data = soldItems[name];
