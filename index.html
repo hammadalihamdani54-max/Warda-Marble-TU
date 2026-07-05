@@ -3,105 +3,65 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Warda Marble - Premium Management</title>
+    <title>Warda Marble</title>
     <style>
-        *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Arial,sans-serif;}
-        :root{--primary:#0f2027;--secondary:#203a43;--gold:#ffd700;--success:#27ae60;--danger:#e74c3c;--warning:#f39c12;--info:#3498db;--bg:#f0f2f5;}
-        body{background:var(--primary);padding:10px;min-height:100vh;}
-        .container{max-width:1400px;margin:0 auto;background:white;border-radius:20px;overflow:hidden;padding:15px;box-shadow:0 10px 30px rgba(0,0,0,0.3);}
-        .header{background:linear-gradient(135deg,var(--primary),var(--secondary));color:var(--gold);padding:12px;text-align:center;border-radius:10px;margin-bottom:10px;}
+        *{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif;}
+        body{background:#0f2027;padding:10px;min-height:100vh;}
+        .container{max-width:1200px;margin:0 auto;background:white;border-radius:20px;overflow:hidden;padding:15px;box-shadow:0 10px 30px rgba(0,0,0,0.3);}
+        .header{background:linear-gradient(135deg,#0f2027,#203a43);color:#ffd700;padding:12px;text-align:center;border-radius:10px;margin-bottom:10px;}
         .header h1{font-size:20px;}
         .tabs{display:flex;gap:3px;margin-bottom:8px;flex-wrap:wrap;background:#1a1a2e;padding:4px;border-radius:8px;}
-        .tab{padding:6px 12px;background:transparent;color:white;border:none;border-radius:5px;cursor:pointer;font-weight:bold;font-size:11px;transition:all 0.3s;}
-        .tab:hover{background:rgba(255,215,0,0.2);}
-        .tab.active{background:var(--gold);color:#1a1a2e;}
-        .tab-content{display:none;padding:10px;background:var(--bg);border-radius:8px;min-height:300px;animation:fadeIn 0.3s;}
+        .tab{padding:6px 12px;background:transparent;color:white;border:none;border-radius:5px;cursor:pointer;font-weight:bold;font-size:11px;}
+        .tab.active{background:#ffd700;color:#1a1a2e;}
+        .tab-content{display:none;padding:10px;background:#f0f2f5;border-radius:8px;min-height:300px;}
         .tab-content.active{display:block;}
-        @keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
-        .panel{background:white;padding:10px;border-radius:8px;margin-bottom:8px;box-shadow:0 2px 4px rgba(0,0,0,0.05);}
-        .panel h3{color:var(--primary);margin-bottom:6px;border-left:3px solid var(--gold);padding-left:8px;font-size:14px;}
+        .panel{background:white;padding:10px;border-radius:8px;margin-bottom:8px;}
+        .panel h3{color:#0f2027;margin-bottom:6px;border-left:3px solid #ffd700;padding-left:8px;font-size:14px;}
         .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
         .grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;}
-        .grid-4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;}
-        input,select{width:100%;padding:5px 7px;border:1px solid #ddd;border-radius:4px;font-size:11px;margin-bottom:4px;transition:border-color 0.3s;}
-        input:focus,select:focus{outline:none;border-color:var(--gold);}
-        button{padding:5px 10px;border:none;border-radius:4px;cursor:pointer;font-weight:bold;font-size:10px;margin:2px;transition:all 0.3s;}
-        button:hover{transform:translateY(-1px);box-shadow:0 2px 8px rgba(0,0,0,0.2);}
-        button:active{transform:translateY(0);}
-        .btn-success{background:var(--success);color:white;}
-        .btn-danger{background:var(--danger);color:white;}
-        .btn-warning{background:var(--warning);color:white;}
-        .btn-info{background:var(--info);color:white;}
-        .btn-primary{background:var(--primary);color:white;}
+        input,select{width:100%;padding:5px 7px;border:1px solid #ddd;border-radius:4px;font-size:11px;margin-bottom:4px;}
+        button{padding:5px 10px;border:none;border-radius:4px;cursor:pointer;font-weight:bold;font-size:10px;margin:2px;}
+        .btn-success{background:#27ae60;color:white;}
+        .btn-danger{background:#e74c3c;color:white;}
+        .btn-warning{background:#f39c12;color:white;}
+        .btn-info{background:#3498db;color:white;}
+        .btn-primary{background:#0f2027;color:white;}
         table{width:100%;border-collapse:collapse;font-size:10px;}
         th,td{padding:4px;border-bottom:1px solid #ddd;text-align:left;}
-        th{background:var(--primary);color:var(--gold);position:sticky;top:0;z-index:10;}
+        th{background:#0f2027;color:#ffd700;}
         .badge{padding:2px 6px;border-radius:8px;font-size:8px;font-weight:bold;display:inline-block;}
-        .badge-paid{background:var(--success);color:white;}
-        .badge-unpaid{background:var(--danger);color:white;}
-        .badge-partial{background:var(--warning);color:white;}
-        .badge-settled{background:#2c3e50;color:white;}
+        .badge-paid{background:#27ae60;color:white;}
+        .badge-unpaid{background:#e74c3c;color:white;}
+        .badge-partial{background:#f39c12;color:white;}
         .total-box{background:#1a1a2e;color:white;padding:8px;border-radius:6px;margin-top:6px;text-align:right;}
         .total-box p{margin:2px 0;font-size:11px;}
-        .summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:5px;margin-bottom:8px;}
-        .summary-box{background:white;padding:6px;border-radius:5px;text-align:center;border:1px solid #ddd;transition:all 0.3s;}
-        .summary-box:hover{transform:scale(1.02);box-shadow:0 2px 8px rgba(0,0,0,0.1);}
-        .summary-box .num{font-size:18px;font-weight:bold;}
+        .summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:5px;margin-bottom:8px;}
+        .summary-box{background:white;padding:6px;border-radius:5px;text-align:center;border:1px solid #ddd;}
+        .summary-box .num{font-size:16px;font-weight:bold;}
         .summary-box .lbl{font-size:8px;color:#666;}
-        .summary-box.positive .num{color:var(--success);}
-        .summary-box.negative .num{color:var(--danger);}
+        .summary-box.positive .num{color:#27ae60;}
+        .summary-box.negative .num{color:#e74c3c;}
         .action-btns{display:flex;flex-wrap:wrap;gap:3px;margin-top:4px;}
-        .product-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:5px;max-height:300px;overflow-y:auto;padding:2px;}
-        .product-list::-webkit-scrollbar{width:4px;}
-        .product-list::-webkit-scrollbar-thumb{background:var(--gold);border-radius:2px;}
-        .product-card{background:#f7fafc;padding:5px;border:1px solid #ddd;border-radius:5px;cursor:pointer;text-align:center;transition:all 0.3s;}
-        .product-card:hover{border-color:var(--gold);transform:scale(1.02);box-shadow:0 2px 8px rgba(0,0,0,0.1);}
+        .product-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:5px;max-height:250px;overflow-y:auto;}
+        .product-card{background:#f7fafc;padding:5px;border:1px solid #ddd;border-radius:5px;cursor:pointer;text-align:center;}
+        .product-card:hover{border-color:#ffd700;}
         .product-card .name{font-weight:bold;font-size:11px;}
-        .product-card .price{color:var(--success);font-size:10px;}
+        .product-card .price{color:#27ae60;font-size:10px;}
         .product-card .stock{font-size:8px;color:#666;}
-        .product-card.out-of-stock{opacity:0.5;cursor:not-allowed;}
-        .product-card.out-of-stock:hover{transform:none;box-shadow:none;}
         .cat-tabs{display:flex;gap:3px;margin-bottom:4px;flex-wrap:wrap;}
-        .cat-tab{padding:2px 8px;background:#e2e8f0;border:none;border-radius:12px;cursor:pointer;font-size:8px;font-weight:bold;transition:all 0.3s;}
-        .cat-tab:hover{background:#cbd5e1;}
-        .cat-tab.active{background:var(--gold);}
+        .cat-tab{padding:2px 8px;background:#e2e8f0;border:none;border-radius:12px;cursor:pointer;font-size:8px;font-weight:bold;}
+        .cat-tab.active{background:#ffd700;}
         .stock-in-out{background:#f7fafc;padding:6px;border-radius:5px;margin-top:4px;}
         .stock-in-out .row{display:flex;gap:4px;flex-wrap:wrap;}
         .stock-in-out .row select,.stock-in-out .row input{flex:1;min-width:60px;}
-        .toast{position:fixed;bottom:20px;right:20px;background:#1a1a2e;color:var(--gold);padding:8px 16px;border-radius:8px;z-index:9999;font-size:11px;box-shadow:0 4px 12px rgba(0,0,0,0.3);animation:slideUp 0.3s;}
-        @keyframes slideUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
-        .login-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);display:flex;justify-content:center;align-items:center;z-index:9999;backdrop-filter:blur(5px);}
-        .login-box{background:white;padding:25px;border-radius:15px;max-width:350px;width:90%;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,0.5);animation:scaleIn 0.3s;}
-        @keyframes scaleIn{from{opacity:0;transform:scale(0.9);}to{opacity:1;transform:scale(1);}}
-        .login-box h2{color:var(--primary);margin-bottom:5px;}
-        .login-box input{width:100%;padding:8px;margin:5px 0;border:1px solid #ddd;border-radius:6px;}
-        .login-box .error{color:var(--danger);font-size:10px;display:none;margin-top:5px;}
-        .view-only .btn:not(.no-disable),.view-only input:not(.no-disable),.view-only select:not(.no-disable){opacity:0.5;pointer-events:none;}
+        .toast{position:fixed;bottom:20px;right:20px;background:#0f2027;color:#ffd700;padding:6px 14px;border-radius:5px;z-index:999;font-size:11px;}
+        .login-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);display:flex;justify-content:center;align-items:center;z-index:9999;}
+        .login-box{background:white;padding:20px;border-radius:10px;max-width:320px;width:90%;text-align:center;}
+        .login-box input{width:100%;padding:6px;margin:4px 0;border:1px solid #ddd;border-radius:4px;}
+        .login-box .error{color:#e74c3c;font-size:10px;display:none;}
+        .view-only .btn,.view-only input,.view-only select{opacity:0.5;pointer-events:none;}
         .view-only .product-card{cursor:default;}
-        .view-only .product-card:hover{transform:none;box-shadow:none;}
-        .modal{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);justify-content:center;align-items:center;z-index:9998;backdrop-filter:blur(3px);}
-        .modal.active{display:flex;}
-        .modal-content{background:white;padding:20px;border-radius:10px;max-width:500px;width:90%;max-height:80vh;overflow-y:auto;}
-        .chart-container{height:200px;margin:10px 0;}
-        .quick-actions{display:flex;gap:4px;flex-wrap:wrap;margin:4px 0;}
-        .quick-actions button{font-size:8px;padding:2px 8px;}
-        @media(max-width:768px){.grid-2{grid-template-columns:1fr;}.grid-3{grid-template-columns:1fr 1fr;}.grid-4{grid-template-columns:1fr 1fr;}.tabs .tab{font-size:9px;padding:4px 8px;}}
-        @media(max-width:480px){.grid-3{grid-template-columns:1fr;}.grid-4{grid-template-columns:1fr;}}
-        .dark-mode{--bg:#1a1a2e;--primary:#0a0a15;--secondary:#1a1a2e;}
-        .dark-mode .panel{background:#2d2d44;color:#e0e0e0;}
-        .dark-mode .panel h3{color:var(--gold);}
-        .dark-mode .product-card{background:#2d2d44;border-color:#444;}
-        .dark-mode .product-card .name{color:#e0e0e0;}
-        .dark-mode .summary-box{background:#2d2d44;border-color:#444;color:#e0e0e0;}
-        .dark-mode .summary-box .lbl{color:#999;}
-        .dark-mode input,.dark-mode select{background:#2d2d44;color:#e0e0e0;border-color:#444;}
-        .dark-mode input::placeholder{color:#888;}
-        .dark-mode .stock-in-out{background:#2d2d44;}
-        .dark-mode table td{color:#e0e0e0;}
-        .dark-mode .total-box{background:#0a0a15;}
-        .dark-mode .login-box{background:#2d2d44;color:#e0e0e0;}
-        .dark-mode .login-box input{background:#1a1a2e;color:#e0e0e0;border-color:#444;}
-        .dark-mode .modal-content{background:#2d2d44;color:#e0e0e0;}
+        @media(max-width:600px){.grid-2{grid-template-columns:1fr;}.grid-3{grid-template-columns:1fr 1fr;}}
     </style>
 </head>
 <body>
@@ -109,18 +69,11 @@
 <div class="container" id="app">
     <!-- Header -->
     <div class="header">
-        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;">
-            <div>
-                <h1>🏢 WARDA MARBLE <span id="roleBadge" style="font-size:11px;background:#6b7a8a;padding:2px 8px;border-radius:8px;">👁️ Viewer</span></h1>
-                <p style="font-size:11px;color:#ccc;">Premium Marble Solutions</p>
-            </div>
-            <div style="display:flex;gap:4px;flex-wrap:wrap;">
-                <button onclick="toggleDarkMode()" style="background:transparent;color:var(--gold);border:1px solid var(--gold);padding:2px 8px;border-radius:4px;cursor:pointer;font-size:10px;">🌓</button>
-                <button onclick="exportData()" style="background:var(--info);color:white;border:none;padding:2px 8px;border-radius:4px;cursor:pointer;font-size:10px;">💾 Backup</button>
-                <button onclick="importData()" style="background:var(--warning);color:white;border:none;padding:2px 8px;border-radius:4px;cursor:pointer;font-size:10px;">📂 Restore</button>
-                <button onclick="showLogin()" id="loginBtn" style="background:var(--success);color:white;border:none;padding:2px 10px;border-radius:4px;cursor:pointer;font-weight:bold;font-size:10px;">🔑 Login</button>
-                <button onclick="logout()" id="logoutBtn" style="display:none;background:var(--danger);color:white;border:none;padding:2px 10px;border-radius:4px;cursor:pointer;font-weight:bold;font-size:10px;">🚪 Logout</button>
-            </div>
+        <h1>🏢 WARDA MARBLE <span id="roleBadge" style="font-size:11px;background:#6b7a8a;padding:2px 8px;border-radius:8px;">👁️ Viewer</span></h1>
+        <p>Premium Marble Solutions</p>
+        <div style="display:flex;gap:4px;justify-content:center;flex-wrap:wrap;margin-top:3px;">
+            <button onclick="showLogin()" id="loginBtn" style="background:#27ae60;color:white;border:none;padding:2px 10px;border-radius:4px;cursor:pointer;font-weight:bold;font-size:10px;">🔑 Login</button>
+            <button onclick="logout()" id="logoutBtn" style="display:none;background:#e74c3c;color:white;border:none;padding:2px 10px;border-radius:4px;cursor:pointer;font-weight:bold;font-size:10px;">🚪 Logout</button>
         </div>
     </div>
 
@@ -132,7 +85,6 @@
         <button class="tab" onclick="showTab('invoices')">📄 Invoices</button>
         <button class="tab" onclick="showTab('summary')">📊 Summary</button>
         <button class="tab" onclick="showTab('expenses')">💸 Expenses</button>
-        <button class="tab" onclick="showTab('reports')">📈 Reports</button>
     </div>
 
     <!-- ===== POS TAB ===== -->
@@ -145,25 +97,24 @@
                     <button class="cat-tab" onclick="filterProducts('mwad')">Materials</button>
                     <button class="cat-tab" onclick="filterProducts('stone')">Stone</button>
                 </div>
-                <input type="text" id="searchProduct" placeholder="🔍 Search by name or size..." onkeyup="renderProducts()">
+                <input type="text" id="searchProduct" placeholder="🔍 Search..." onkeyup="renderProducts()">
                 <div class="product-list" id="productList"></div>
             </div>
             <div class="panel">
                 <h3>🛒 Cart</h3>
-                <div class="quick-actions">
+                <div style="display:flex;gap:3px;margin-bottom:4px;flex-wrap:wrap;">
                     <button class="btn-success" onclick="setMode('sqm')" style="font-size:9px;padding:3px 8px;">📐 SQM</button>
                     <button class="btn-info" onclick="setMode('manual')" style="font-size:9px;padding:3px 8px;">📏 Manual</button>
                     <button class="btn-warning" onclick="setMode('pieces')" style="font-size:9px;padding:3px 8px;">🔧 Pieces</button>
                 </div>
                 <div class="grid-2">
-                    <input type="text" id="itemName" placeholder="Item name" list="productSuggest">
-                    <datalist id="productSuggest"></datalist>
+                    <input type="text" id="itemName" placeholder="Item name">
                     <input type="number" id="costPrice" placeholder="Cost" step="0.01">
                 </div>
                 <div id="sqmInputs">
                     <div class="grid-3">
-                        <input type="number" id="sqmWidth" placeholder="Width (m)" step="0.01" value="0.40">
-                        <input type="number" id="sqmLength" placeholder="Length (m)" step="0.01" value="0.80">
+                        <input type="number" id="sqmWidth" placeholder="Width" step="0.01" value="0.40">
+                        <input type="number" id="sqmLength" placeholder="Length" step="0.01" value="0.80">
                         <input type="number" id="sqmPrice" placeholder="Price/m²" step="0.01">
                     </div>
                 </div>
@@ -212,11 +163,7 @@
                 <button class="cat-tab" onclick="filterStock('stone')">Stone</button>
             </div>
             <input type="text" id="searchStock" placeholder="🔍 Search..." onkeyup="renderStock()">
-            <div style="display:flex;gap:4px;flex-wrap:wrap;margin:4px 0;">
-                <button class="btn-success" onclick="addProduct()" style="padding:3px 8px;font-size:9px;">➕ Add Product</button>
-                <button class="btn-info" onclick="showLowStock()" style="padding:3px 8px;font-size:9px;">⚠️ Low Stock</button>
-                <button class="btn-warning" onclick="showStockAudit()" style="padding:3px 8px;font-size:9px;">📋 Audit Trail</button>
-            </div>
+            <button class="btn-success" onclick="addProduct()" style="margin:3px 0;padding:3px 8px;font-size:9px;">➕ Add Product</button>
             <div style="overflow-x:auto;max-height:250px;overflow-y:auto;">
                 <table>
                     <thead><tr><th>Category</th><th>Name</th><th>Size</th><th>Price</th><th>Cost</th><th>Stock</th><th>Actions</th></tr></thead>
@@ -243,8 +190,8 @@
     <div id="tab-customers" class="tab-content">
         <div class="panel">
             <h3>👥 Customers</h3>
-            <input type="text" id="searchCustomer" placeholder="🔍 Search by name or phone..." onkeyup="renderCustomers()">
-            <div id="customerList" style="max-height:400px;overflow-y:auto;"></div>
+            <input type="text" id="searchCustomer" placeholder="🔍 Search..." onkeyup="renderCustomers()">
+            <div id="customerList" style="max-height:350px;overflow-y:auto;"></div>
         </div>
     </div>
 
@@ -252,7 +199,7 @@
     <div id="tab-invoices" class="tab-content">
         <div class="panel">
             <h3>📄 Invoices</h3>
-            <input type="text" id="searchInvoice" placeholder="🔍 Search by invoice or customer..." onkeyup="renderInvoices()">
+            <input type="text" id="searchInvoice" placeholder="🔍 Search..." onkeyup="renderInvoices()">
             <div style="overflow-x:auto;max-height:350px;overflow-y:auto;">
                 <table>
                     <thead><tr><th>Invoice</th><th>Date</th><th>Customer</th><th>Total</th><th>Status</th><th>Actions</th></tr></thead>
@@ -277,15 +224,15 @@
             </div>
             
             <div style="background:#1a2a4a;padding:10px;border-radius:6px;color:white;text-align:center;">
-                <h4 style="color:var(--gold);font-size:13px;">📈 Net Profit / Loss</h4>
-                <div class="grid-4" style="font-size:10px;margin:4px 0;">
+                <h4 style="color:#ffd700;font-size:13px;">📈 Net Profit / Loss</h4>
+                <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:4px;font-size:10px;margin:4px 0;">
                     <div><span style="color:#a0c4e0;">Opening:</span><br><strong id="plOpening">0</strong></div>
                     <div><span style="color:#a0c4e0;">Stock In:</span><br><strong id="plStockIn">0</strong></div>
                     <div><span style="color:#a0c4e0;">Closing:</span><br><strong id="plClosing">0</strong></div>
                     <div><span style="color:#a0c4e0;">Ikhrajat:</span><br><strong id="plIkhrajat">0</strong></div>
                 </div>
-                <div style="font-size:14px;font-weight:bold;border-top:1px solid var(--gold);padding-top:4px;">
-                    <span id="plTotalProfit" style="color:var(--gold);">Profit: 0.00</span>
+                <div style="font-size:14px;font-weight:bold;border-top:1px solid #ffd700;padding-top:4px;">
+                    <span id="plTotalProfit" style="color:#ffd700;">Profit: 0.00</span>
                 </div>
             </div>
             
@@ -315,56 +262,7 @@
             
             <h4 style="font-size:12px;margin-top:6px;">📋 Today's Expenses</h4>
             <div id="expenseList" style="max-height:250px;overflow-y:auto;"></div>
-            
-            <h4 style="font-size:12px;margin-top:6px;">📊 Expense Categories</h4>
-            <div id="expenseCategories" style="max-height:150px;overflow-y:auto;"></div>
         </div>
-    </div>
-
-    <!-- ===== REPORTS TAB ===== -->
-    <div id="tab-reports" class="tab-content">
-        <div class="panel">
-            <h3>📈 Reports & Analytics</h3>
-            <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px;">
-                <select id="reportPeriod" style="width:auto;flex:1;min-width:100px;">
-                    <option value="today">Today</option>
-                    <option value="week">This Week</option>
-                    <option value="month" selected>This Month</option>
-                    <option value="quarter">This Quarter</option>
-                    <option value="year">This Year</option>
-                </select>
-                <button class="btn-info" onclick="generateReport()" style="padding:3px 12px;">📊 Generate</button>
-            </div>
-            <div id="reportContent">
-                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin:8px 0;">
-                    <div class="summary-box positive"><div class="num" id="reportRevenue">0</div><div class="lbl">Revenue</div></div>
-                    <div class="summary-box"><div class="num" id="reportOrders">0</div><div class="lbl">Orders</div></div>
-                    <div class="summary-box positive"><div class="num" id="reportProfit">0</div><div class="lbl">Profit</div></div>
-                    <div class="summary-box negative"><div class="num" id="reportExpenses">0</div><div class="lbl">Expenses</div></div>
-                </div>
-                <div style="background:#f8fafc;padding:10px;border-radius:6px;max-height:300px;overflow-y:auto;">
-                    <h4 style="font-size:11px;margin-bottom:4px;">📋 Detailed Report</h4>
-                    <div id="reportDetails"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- ===== MODALS ===== -->
-<div id="stockAuditModal" class="modal">
-    <div class="modal-content">
-        <h3 style="color:var(--primary);margin-bottom:10px;">📋 Stock Audit Trail</h3>
-        <div id="auditContent" style="max-height:400px;overflow-y:auto;"></div>
-        <button onclick="closeModal('stockAuditModal')" style="margin-top:10px;width:100%;">Close</button>
-    </div>
-</div>
-
-<div id="lowStockModal" class="modal">
-    <div class="modal-content">
-        <h3 style="color:var(--warning);margin-bottom:10px;">⚠️ Low Stock Items</h3>
-        <div id="lowStockContent" style="max-height:400px;overflow-y:auto;"></div>
-        <button onclick="closeModal('lowStockModal')" style="margin-top:10px;width:100%;">Close</button>
     </div>
 </div>
 
@@ -372,291 +270,215 @@
 <div id="loginOverlay" class="login-overlay">
     <div class="login-box">
         <h2>🔐 Admin Login</h2>
-        <p style="color:#666;font-size:12px;">Secure access to Warda Marble system</p>
+        <p style="color:#666;font-size:12px;">Login to manage system</p>
         <input type="email" id="loginEmail" placeholder="Email" value="admin@warda.com">
         <input type="password" id="loginPassword" placeholder="Password">
-        <button onclick="login()" style="background:var(--success);color:white;border:none;padding:8px;border-radius:6px;cursor:pointer;font-weight:bold;width:100%;">🔓 Login</button>
-        <button onclick="skipLogin()" style="background:#6b7a8a;color:white;border:none;padding:7px;border-radius:6px;cursor:pointer;font-weight:bold;width:100%;margin-top:3px;">👁️ Continue as Viewer</button>
-        <div id="loginError" class="error">❌ Invalid credentials! Please try again.</div>
-        <div style="margin-top:8px;font-size:10px;color:#999;">Email: admin@warda.com | Pass: Hamdani5</div>
+        <button onclick="login()" style="background:#27ae60;color:white;border:none;padding:6px 12px;border-radius:4px;cursor:pointer;font-weight:bold;width:100%;">🔓 Login</button>
+        <button onclick="skipLogin()" style="background:#6b7a8a;color:white;border:none;padding:5px 10px;border-radius:4px;cursor:pointer;font-weight:bold;width:100%;margin-top:3px;">👁️ Continue as Viewer</button>
+        <div id="loginError" class="error">❌ Invalid credentials!</div>
+        <div style="margin-top:6px;font-size:10px;color:#999;">Email: admin@warda.com | Pass: Hamdani5</div>
     </div>
 </div>
 
 <script>
-// ==================== CONFIGURATION ====================
-const CONFIG = {
-    LOW_STOCK_THRESHOLD: 10,
-    SESSION_TIMEOUT: 3600000, // 1 hour
-    CURRENCY: 'SAR',
-    COMPANY: 'Warda Marble'
-};
+// ==================== DATA ====================
+let products = [];
+let orders = [];
+let customers = [];
+let expenses = [];
+let stockHistory = [];
+let cart = [];
+let isAdmin = false;
+let currentFilter = 'all';
+let stockFilter = 'all';
+let currentMode = 'sqm';
 
-// ==================== STATE ====================
-let state = {
-    products: [],
-    orders: [],
-    customers: [],
-    expenses: [],
-    stockHistory: [],
-    cart: [],
-    isAdmin: false,
-    currentFilter: 'all',
-    stockFilter: 'all',
-    currentMode: 'sqm',
-    sessionStart: Date.now(),
-    darkMode: false
-};
-
-// ==================== INIT ====================
-function init() {
-    loadData();
-    renderAll();
-    checkSession();
-    setupAutoSave();
-    
-    // Show login if not admin
-    setTimeout(() => {
-        if(!state.isAdmin) {
-            document.getElementById('loginOverlay').style.display = 'flex';
-            document.querySelector('.container').classList.add('view-only');
-        }
-    }, 500);
-    
-    console.log('✅ Warda Marble System Loaded!');
-    console.log('📦 Products:', state.products.length);
-    console.log('📄 Orders:', state.orders.length);
-    console.log('👥 Customers:', state.customers.length);
-}
-
-// ==================== DATA PERSISTENCE ====================
-function saveData() {
-    try {
-        const data = {
-            products: state.products,
-            orders: state.orders,
-            customers: state.customers,
-            expenses: state.expenses,
-            stockHistory: state.stockHistory,
-            timestamp: Date.now()
-        };
-        localStorage.setItem('warda_data', JSON.stringify(data));
-        localStorage.setItem('warda_products', JSON.stringify(state.products));
-        localStorage.setItem('warda_orders', JSON.stringify(state.orders));
-        localStorage.setItem('warda_customers', JSON.stringify(state.customers));
-        localStorage.setItem('warda_expenses', JSON.stringify(state.expenses));
-        localStorage.setItem('warda_stockHistory', JSON.stringify(state.stockHistory));
-    } catch(e) {
-        console.error('Save error:', e);
-        showToast('⚠️ Error saving data');
-    }
-}
-
-function loadData() {
-    try {
-        // Try loading combined data first
-        const combined = localStorage.getItem('warda_data');
-        if(combined) {
-            const data = JSON.parse(combined);
-            state.products = data.products || [];
-            state.orders = data.orders || [];
-            state.customers = data.customers || [];
-            state.expenses = data.expenses || [];
-            state.stockHistory = data.stockHistory || [];
-        }
-        
-        // Fallback to individual storage
-        if(!state.products || state.products.length === 0) {
-            const p = localStorage.getItem('warda_products');
-            if(p) state.products = JSON.parse(p);
-        }
-        if(state.orders.length === 0) {
-            const o = localStorage.getItem('warda_orders');
-            if(o) state.orders = JSON.parse(o);
-        }
-        if(state.customers.length === 0) {
-            const c = localStorage.getItem('warda_customers');
-            if(c) state.customers = JSON.parse(c);
-        }
-        if(state.expenses.length === 0) {
-            const e = localStorage.getItem('warda_expenses');
-            if(e) state.expenses = JSON.parse(e);
-        }
-        if(state.stockHistory.length === 0) {
-            const sh = localStorage.getItem('warda_stockHistory');
-            if(sh) state.stockHistory = JSON.parse(sh);
-        }
-        
-        // Initialize with default products if empty
-        if(state.products.length === 0) {
-            initDefaultProducts();
-        }
-    } catch(e) {
-        console.error('Load error:', e);
-        initDefaultProducts();
-    }
-}
-
-function initDefaultProducts() {
-    state.products = [
+// ==================== ALL PRODUCTS (100+ ITEMS) ====================
+function initProducts() {
+    products = [
+        // ===== MATERIALS (MWAD) - All Fittings =====
         { id: 1, name: 'زاویہ اپ ڈاون', size: '4*4*3mm', category: 'mwad', selling: 0, cost: 0, stock: 9200, type: 'pieces' },
         { id: 2, name: 'زاویہ اپ ڈاون', size: '4*4*2mm', category: 'mwad', selling: 0, cost: 0, stock: 6600, type: 'pieces' },
         { id: 3, name: 'مسمار مغلوب', size: '10*40', category: 'mwad', selling: 0, cost: 0, stock: 4800, type: 'pieces' },
         { id: 4, name: 'مسمار مغلوب', size: '10*50', category: 'mwad', selling: 0, cost: 0, stock: 4800, type: 'pieces' },
-        { id: 5, name: 'ابیض مجلی مبروم', size: '3*7', category: 'stone', selling: 65, cost: 50, stock: 50, type: 'sqm' },
-        { id: 6, name: 'ابیض مجلی مبروم', size: '3*10', category: 'stone', selling: 65, cost: 50, stock: 50, type: 'sqm' },
-        { id: 7, name: 'ابیض مجلی سادہ', size: '3*7', category: 'stone', selling: 60, cost: 45, stock: 50, type: 'sqm' },
-        { id: 8, name: 'ابیض مصنفر مبروم', size: '3*7', category: 'stone', selling: 55, cost: 42, stock: 50, type: 'sqm' },
-        { id: 9, name: 'ابیض مصنفر سادہ', size: '3*7', category: 'stone', selling: 50, cost: 38, stock: 50, type: 'sqm' },
-        { id: 10, name: '(A) ابیض مجلی فرزا', size: '3*40*80', category: 'stone', selling: 75, cost: 63, stock: 50, type: 'sqm' }
+        { id: 5, name: 'مسمار مغلوب', size: '10*60', category: 'mwad', selling: 0, cost: 0, stock: 3200, type: 'pieces' },
+        { id: 6, name: 'مسمار مغلوب', size: '12*40', category: 'mwad', selling: 0, cost: 0, stock: 2800, type: 'pieces' },
+        { id: 7, name: 'مسمار مغلوب', size: '12*50', category: 'mwad', selling: 0, cost: 0, stock: 2800, type: 'pieces' },
+        { id: 8, name: 'مسمار مغلوب', size: '12*60', category: 'mwad', selling: 0, cost: 0, stock: 1800, type: 'pieces' },
+        { id: 9, name: 'مسمار مغلوب', size: '14*40', category: 'mwad', selling: 0, cost: 0, stock: 2000, type: 'pieces' },
+        { id: 10, name: 'مسمار مغلوب', size: '14*50', category: 'mwad', selling: 0, cost: 0, stock: 2000, type: 'pieces' },
+        { id: 11, name: 'مسمار مغلوب', size: '14*60', category: 'mwad', selling: 0, cost: 0, stock: 1200, type: 'pieces' },
+        { id: 12, name: 'مسمار مغلوب', size: '16*40', category: 'mwad', selling: 0, cost: 0, stock: 1500, type: 'pieces' },
+        { id: 13, name: 'مسمار مغلوب', size: '16*50', category: 'mwad', selling: 0, cost: 0, stock: 1500, type: 'pieces' },
+        { id: 14, name: 'مسمار مغلوب', size: '16*60', category: 'mwad', selling: 0, cost: 0, stock: 1000, type: 'pieces' },
+        { id: 15, name: 'مسمار مغلوب', size: '18*40', category: 'mwad', selling: 0, cost: 0, stock: 1200, type: 'pieces' },
+        { id: 16, name: 'مسمار مغلوب', size: '18*50', category: 'mwad', selling: 0, cost: 0, stock: 1200, type: 'pieces' },
+        { id: 17, name: 'مسمار مغلوب', size: '18*60', category: 'mwad', selling: 0, cost: 0, stock: 800, type: 'pieces' },
+        { id: 18, name: 'مسمار مغلوب', size: '20*40', category: 'mwad', selling: 0, cost: 0, stock: 1000, type: 'pieces' },
+        { id: 19, name: 'مسمار مغلوب', size: '20*50', category: 'mwad', selling: 0, cost: 0, stock: 1000, type: 'pieces' },
+        { id: 20, name: 'مسمار مغلوب', size: '20*60', category: 'mwad', selling: 0, cost: 0, stock: 600, type: 'pieces' },
+        { id: 21, name: 'مسمار مغلوب', size: '22*40', category: 'mwad', selling: 0, cost: 0, stock: 800, type: 'pieces' },
+        { id: 22, name: 'مسمار مغلوب', size: '22*50', category: 'mwad', selling: 0, cost: 0, stock: 800, type: 'pieces' },
+        { id: 23, name: 'مسمار مغلوب', size: '22*60', category: 'mwad', selling: 0, cost: 0, stock: 500, type: 'pieces' },
+        { id: 24, name: 'مسمار مغلوب', size: '25*40', category: 'mwad', selling: 0, cost: 0, stock: 600, type: 'pieces' },
+        { id: 25, name: 'مسمار مغلوب', size: '25*50', category: 'mwad', selling: 0, cost: 0, stock: 600, type: 'pieces' },
+        { id: 26, name: 'مسمار مغلوب', size: '25*60', category: 'mwad', selling: 0, cost: 0, stock: 400, type: 'pieces' },
+        { id: 27, name: 'کیپسول', size: '10*40', category: 'mwad', selling: 0, cost: 0, stock: 3200, type: 'pieces' },
+        { id: 28, name: 'کیپسول', size: '10*50', category: 'mwad', selling: 0, cost: 0, stock: 3200, type: 'pieces' },
+        { id: 29, name: 'کیپسول', size: '10*60', category: 'mwad', selling: 0, cost: 0, stock: 2200, type: 'pieces' },
+        { id: 30, name: 'کیپسول', size: '12*40', category: 'mwad', selling: 0, cost: 0, stock: 2000, type: 'pieces' },
+        { id: 31, name: 'کیپسول', size: '12*50', category: 'mwad', selling: 0, cost: 0, stock: 2000, type: 'pieces' },
+        { id: 32, name: 'کیپسول', size: '12*60', category: 'mwad', selling: 0, cost: 0, stock: 1200, type: 'pieces' },
+        { id: 33, name: 'کیپسول', size: '14*40', category: 'mwad', selling: 0, cost: 0, stock: 1500, type: 'pieces' },
+        { id: 34, name: 'کیپسول', size: '14*50', category: 'mwad', selling: 0, cost: 0, stock: 1500, type: 'pieces' },
+        { id: 35, name: 'کیپسول', size: '14*60', category: 'mwad', selling: 0, cost: 0, stock: 800, type: 'pieces' },
+        { id: 36, name: 'کیپسول', size: '16*40', category: 'mwad', selling: 0, cost: 0, stock: 1200, type: 'pieces' },
+        { id: 37, name: 'کیپسول', size: '16*50', category: 'mwad', selling: 0, cost: 0, stock: 1200, type: 'pieces' },
+        { id: 38, name: 'کیپسول', size: '16*60', category: 'mwad', selling: 0, cost: 0, stock: 700, type: 'pieces' },
+        { id: 39, name: 'کیپسول', size: '18*40', category: 'mwad', selling: 0, cost: 0, stock: 1000, type: 'pieces' },
+        { id: 40, name: 'کیپسول', size: '18*50', category: 'mwad', selling: 0, cost: 0, stock: 1000, type: 'pieces' },
+        { id: 41, name: 'کیپسول', size: '18*60', category: 'mwad', selling: 0, cost: 0, stock: 500, type: 'pieces' },
+        { id: 42, name: 'کیپسول', size: '20*40', category: 'mwad', selling: 0, cost: 0, stock: 800, type: 'pieces' },
+        { id: 43, name: 'کیپسول', size: '20*50', category: 'mwad', selling: 0, cost: 0, stock: 800, type: 'pieces' },
+        { id: 44, name: 'کیپسول', size: '20*60', category: 'mwad', selling: 0, cost: 0, stock: 400, type: 'pieces' },
+        { id: 45, name: 'براغی سقف', size: '10*72', category: 'mwad', selling: 0, cost: 0, stock: 2200, type: 'pieces' },
+        { id: 46, name: 'براغی سقف', size: '10*92', category: 'mwad', selling: 0, cost: 0, stock: 2100, type: 'pieces' },
+        { id: 47, name: 'براغی سقف', size: '10*112', category: 'mwad', selling: 0, cost: 0, stock: 1920, type: 'pieces' },
+        { id: 48, name: 'براغی سقف', size: '10*115', category: 'mwad', selling: 0, cost: 0, stock: 2200, type: 'pieces' },
+        { id: 49, name: 'براغی سقف', size: '10*202', category: 'mwad', selling: 0, cost: 0, stock: 1040, type: 'pieces' },
+        { id: 50, name: 'جولی ابو جمل', size: 'Standard', category: 'mwad', selling: 0, cost: 0, stock: 5, type: 'pieces' },
+        { id: 51, name: 'جولی گلیڈتیر', size: 'Standard', category: 'mwad', selling: 0, cost: 0, stock: 0, type: 'pieces' },
+        { id: 52, name: 'دسک حجر احمر', size: '7 بوسہ', category: 'mwad', selling: 0, cost: 0, stock: 0, type: 'pieces' },
+        { id: 53, name: 'دسک حجر احمر', size: '4.50 بوسہ', category: 'mwad', selling: 0, cost: 0, stock: 7, type: 'pieces' },
+        { id: 54, name: 'دسک جرانیت', size: '7 بوسہ', category: 'mwad', selling: 0, cost: 0, stock: 3, type: 'pieces' },
+        { id: 55, name: 'دسک بوش', size: '9 بوسہ', category: 'mwad', selling: 0, cost: 0, stock: 20, type: 'pieces' },
+        { id: 56, name: 'ریشہ ہلتی', size: '20cm', category: 'mwad', selling: 0, cost: 0, stock: 0, type: 'pieces' },
+        { id: 57, name: 'ریشہ ہلتی', size: '15cm', category: 'mwad', selling: 0, cost: 0, stock: 24, type: 'pieces' },
+        { id: 58, name: 'ریشہ ہلتی', size: '10cm', category: 'mwad', selling: 0, cost: 0, stock: 1, type: 'pieces' },
+        { id: 59, name: 'ریشہ دریل', size: '4mm', category: 'mwad', selling: 0, cost: 0, stock: 12, type: 'pieces' },
+        { id: 60, name: 'ریشہ دریل', size: '6mm', category: 'mwad', selling: 0, cost: 0, stock: 10, type: 'pieces' },
+        { id: 61, name: 'ریشہ دریل', size: '10mm', category: 'mwad', selling: 0, cost: 0, stock: 16, type: 'pieces' },
+        { id: 62, name: 'گمتا چوڑی', size: 'Standard', category: 'mwad', selling: 0, cost: 0, stock: 7, type: 'pieces' },
+        { id: 63, name: 'گمتا سادہ', size: 'Standard', category: 'mwad', selling: 0, cost: 0, stock: 7, type: 'pieces' },
+        { id: 64, name: 'بکرا', size: 'Standard', category: 'mwad', selling: 0, cost: 0, stock: 1, type: 'pieces' },
+        
+        // ===== STONE - Polished (MOJALI) =====
+        { id: 65, name: 'ابیض مجلی مبروم', size: '3*7', category: 'stone', selling: 65, cost: 50, stock: 50, type: 'sqm' },
+        { id: 66, name: 'ابیض مجلی مبروم', size: '3*10', category: 'stone', selling: 65, cost: 50, stock: 50, type: 'sqm' },
+        { id: 67, name: 'ابیض مجلی مبروم', size: '3*15', category: 'stone', selling: 65, cost: 50, stock: 50, type: 'sqm' },
+        { id: 68, name: 'ابیض مجلی مبروم', size: '3*18', category: 'stone', selling: 65, cost: 50, stock: 50, type: 'sqm' },
+        { id: 69, name: 'ابیض مجلی مبروم', size: '3*20', category: 'stone', selling: 65, cost: 50, stock: 50, type: 'sqm' },
+        { id: 70, name: 'ابیض مجلی مبروم', size: '3*25', category: 'stone', selling: 65, cost: 50, stock: 50, type: 'sqm' },
+        { id: 71, name: 'ابیض مجلی مبروم', size: '3*27', category: 'stone', selling: 65, cost: 50, stock: 50, type: 'sqm' },
+        { id: 72, name: 'ابیض مجلی مبروم', size: '3*30', category: 'stone', selling: 65, cost: 50, stock: 50, type: 'sqm' },
+        { id: 73, name: 'ابیض مجلی مبروم', size: '3*32', category: 'stone', selling: 65, cost: 50, stock: 50, type: 'sqm' },
+        { id: 74, name: 'ابیض مجلی مبروم', size: '3*35', category: 'stone', selling: 65, cost: 50, stock: 50, type: 'sqm' },
+        { id: 75, name: 'ابیض مجلی مبروم', size: '3*37', category: 'stone', selling: 65, cost: 50, stock: 50, type: 'sqm' },
+        { id: 76, name: 'ابیض مجلی مبروم', size: '3*40', category: 'stone', selling: 65, cost: 50, stock: 50, type: 'sqm' },
+        { id: 77, name: 'ابیض مجلی مبروم', size: '3*50', category: 'stone', selling: 65, cost: 50, stock: 50, type: 'sqm' },
+        { id: 78, name: 'ابیض مجلی مبروم', size: '3*60', category: 'stone', selling: 65, cost: 50, stock: 50, type: 'sqm' },
+        { id: 79, name: 'ابیض مجلی سادہ', size: '3*7', category: 'stone', selling: 60, cost: 45, stock: 50, type: 'sqm' },
+        { id: 80, name: 'ابیض مجلی سادہ', size: '3*10', category: 'stone', selling: 60, cost: 45, stock: 50, type: 'sqm' },
+        { id: 81, name: 'ابیض مجلی سادہ', size: '3*15', category: 'stone', selling: 60, cost: 45, stock: 50, type: 'sqm' },
+        { id: 82, name: 'ابیض مجلی سادہ', size: '3*18', category: 'stone', selling: 60, cost: 45, stock: 50, type: 'sqm' },
+        { id: 83, name: 'ابیض مجلی سادہ', size: '3*20', category: 'stone', selling: 60, cost: 45, stock: 50, type: 'sqm' },
+        { id: 84, name: 'ابیض مجلی سادہ', size: '3*25', category: 'stone', selling: 60, cost: 45, stock: 50, type: 'sqm' },
+        { id: 85, name: 'ابیض مجلی سادہ', size: '3*27', category: 'stone', selling: 60, cost: 45, stock: 50, type: 'sqm' },
+        { id: 86, name: 'ابیض مجلی سادہ', size: '3*30', category: 'stone', selling: 60, cost: 45, stock: 50, type: 'sqm' },
+        { id: 87, name: 'ابیض مجلی سادہ', size: '3*32', category: 'stone', selling: 60, cost: 45, stock: 50, type: 'sqm' },
+        { id: 88, name: 'ابیض مجلی سادہ', size: '3*35', category: 'stone', selling: 60, cost: 45, stock: 50, type: 'sqm' },
+        { id: 89, name: 'ابیض مجلی سادہ', size: '3*37', category: 'stone', selling: 60, cost: 45, stock: 50, type: 'sqm' },
+        { id: 90, name: 'ابیض مجلی سادہ', size: '3*40', category: 'stone', selling: 60, cost: 45, stock: 50, type: 'sqm' },
+        { id: 91, name: 'ابیض مجلی سادہ', size: '3*50', category: 'stone', selling: 60, cost: 45, stock: 50, type: 'sqm' },
+        { id: 92, name: 'ابیض مجلی سادہ', size: '3*60', category: 'stone', selling: 60, cost: 45, stock: 50, type: 'sqm' },
+        { id: 93, name: '(A) ابیض مجلی فرزا', size: '3*40*80', category: 'stone', selling: 75, cost: 63, stock: 50, type: 'sqm' },
+        { id: 94, name: '(C) ابیض مجلی فرزا', size: '3*40*60', category: 'stone', selling: 75, cost: 63, stock: 50, type: 'sqm' },
+        { id: 95, name: 'ابیض مجلی مشطوف', size: '3*30', category: 'stone', selling: 70, cost: 58, stock: 50, type: 'sqm' },
+        { id: 96, name: 'ابیض بشارتہ فرزا', size: '3*40*80', category: 'stone', selling: 85, cost: 73, stock: 50, type: 'sqm' },
+        { id: 97, name: 'MNHOOD ABIAZ', size: '3*20*1.20', category: 'stone', selling: 65, cost: 53, stock: 50, type: 'sqm' },
+        
+        // ===== STONE - Honed (MOSNAFAR) =====
+        { id: 98, name: 'ابیض مصنفر مبروم', size: '3*7', category: 'stone', selling: 55, cost: 42, stock: 50, type: 'sqm' },
+        { id: 99, name: 'ابیض مصنفر مبروم', size: '3*10', category: 'stone', selling: 55, cost: 42, stock: 50, type: 'sqm' },
+        { id: 100, name: 'ابیض مصنفر مبروم', size: '3*15', category: 'stone', selling: 55, cost: 42, stock: 50, type: 'sqm' },
+        { id: 101, name: 'ابیض مصنفر مبروم', size: '3*18', category: 'stone', selling: 55, cost: 42, stock: 50, type: 'sqm' },
+        { id: 102, name: 'ابیض مصنفر مبروم', size: '3*20', category: 'stone', selling: 55, cost: 42, stock: 50, type: 'sqm' },
+        { id: 103, name: 'ابیض مصنفر مبروم', size: '3*25', category: 'stone', selling: 55, cost: 42, stock: 50, type: 'sqm' },
+        { id: 104, name: 'ابیض مصنفر مبروم', size: '3*27', category: 'stone', selling: 55, cost: 42, stock: 50, type: 'sqm' },
+        { id: 105, name: 'ابیض مصنفر مبروم', size: '3*30', category: 'stone', selling: 55, cost: 42, stock: 50, type: 'sqm' },
+        { id: 106, name: 'ابیض مصنفر مبروم', size: '3*32', category: 'stone', selling: 55, cost: 42, stock: 50, type: 'sqm' },
+        { id: 107, name: 'ابیض مصنفر مبروم', size: '3*35', category: 'stone', selling: 55, cost: 42, stock: 50, type: 'sqm' },
+        { id: 108, name: 'ابیض مصنفر مبروم', size: '3*37', category: 'stone', selling: 55, cost: 42, stock: 50, type: 'sqm' },
+        { id: 109, name: 'ابیض مصنفر مبروم', size: '3*40', category: 'stone', selling: 55, cost: 42, stock: 50, type: 'sqm' },
+        { id: 110, name: 'ابیض مصنفر مبروم', size: '3*50', category: 'stone', selling: 55, cost: 42, stock: 50, type: 'sqm' },
+        { id: 111, name: 'ابیض مصنفر مبروم', size: '3*60', category: 'stone', selling: 55, cost: 42, stock: 50, type: 'sqm' },
+        { id: 112, name: 'ابیض مصنفر سادہ', size: '3*7', category: 'stone', selling: 50, cost: 38, stock: 50, type: 'sqm' },
+        { id: 113, name: 'ابیض مصنفر سادہ', size: '3*10', category: 'stone', selling: 50, cost: 38, stock: 50, type: 'sqm' },
+        { id: 114, name: 'ابیض مصنفر سادہ', size: '3*15', category: 'stone', selling: 50, cost: 38, stock: 50, type: 'sqm' },
+        { id: 115, name: 'ابیض مصنفر سادہ', size: '3*18', category: 'stone', selling: 50, cost: 38, stock: 50, type: 'sqm' },
+        { id: 116, name: 'ابیض مصنفر سادہ', size: '3*20', category: 'stone', selling: 50, cost: 38, stock: 50, type: 'sqm' },
+        { id: 117, name: 'ابیض مصنفر سادہ', size: '3*25', category: 'stone', selling: 50, cost: 38, stock: 50, type: 'sqm' },
+        { id: 118, name: 'ابیض مصنفر سادہ', size: '3*27', category: 'stone', selling: 50, cost: 38, stock: 50, type: 'sqm' },
+        { id: 119, name: 'ابیض مصنفر سادہ', size: '3*30', category: 'stone', selling: 50, cost: 38, stock: 50, type: 'sqm' },
+        { id: 120, name: 'ابیض مصنفر سادہ', size: '3*32', category: 'stone', selling: 50, cost: 38, stock: 50, type: 'sqm' },
+        { id: 121, name: 'ابیض مصنفر سادہ', size: '3*35', category: 'stone', selling: 50, cost: 38, stock: 50, type: 'sqm' },
+        { id: 122, name: 'ابیض مصنفر سادہ', size: '3*37', category: 'stone', selling: 50, cost: 38, stock: 50, type: 'sqm' },
+        { id: 123, name: 'ابیض مصنفر سادہ', size: '3*40', category: 'stone', selling: 50, cost: 38, stock: 50, type: 'sqm' },
+        { id: 124, name: 'ابیض مصنفر سادہ', size: '3*50', category: 'stone', selling: 50, cost: 38, stock: 50, type: 'sqm' },
+        { id: 125, name: 'ابیض مصنفر سادہ', size: '3*60', category: 'stone', selling: 50, cost: 38, stock: 50, type: 'sqm' },
+        { id: 126, name: 'ابیض مصنفر فرزا', size: '3*40*80', category: 'stone', selling: 65, cost: 55, stock: 50, type: 'sqm' },
+        { id: 127, name: 'پیانو ابیض مصنفر', size: '3*20*50', category: 'stone', selling: 55, cost: 45, stock: 50, type: 'sqm' }
     ];
     saveData();
 }
 
-function exportData() {
-    const data = {
-        products: state.products,
-        orders: state.orders,
-        customers: state.customers,
-        expenses: state.expenses,
-        stockHistory: state.stockHistory,
-        exportDate: new Date().toISOString(),
-        version: '1.0'
-    };
-    const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `warda_backup_${new Date().toISOString().split('T')[0]}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-    showToast('✅ Data exported successfully');
+// ==================== SAVE/LOAD ====================
+function saveData() {
+    localStorage.setItem('warda_products', JSON.stringify(products));
+    localStorage.setItem('warda_orders', JSON.stringify(orders));
+    localStorage.setItem('warda_customers', JSON.stringify(customers));
+    localStorage.setItem('warda_expenses', JSON.stringify(expenses));
+    localStorage.setItem('warda_stockHistory', JSON.stringify(stockHistory));
 }
 
-function importData() {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.json';
-    input.onchange = (e) => {
-        const file = e.target.files[0];
-        if(!file) return;
-        const reader = new FileReader();
-        reader.onload = (event) => {
-            try {
-                const data = JSON.parse(event.target.result);
-                if(confirm('This will replace all current data. Are you sure?')) {
-                    state.products = data.products || [];
-                    state.orders = data.orders || [];
-                    state.customers = data.customers || [];
-                    state.expenses = data.expenses || [];
-                    state.stockHistory = data.stockHistory || [];
-                    saveData();
-                    renderAll();
-                    showToast('✅ Data restored successfully');
-                }
-            } catch(err) {
-                showToast('⚠️ Invalid file format');
-            }
-        };
-        reader.readAsText(file);
-    };
-    input.click();
-}
-
-function setupAutoSave() {
-    setInterval(saveData, 30000); // Auto-save every 30 seconds
-}
-
-function checkSession() {
-    if(state.isAdmin) {
-        const elapsed = Date.now() - state.sessionStart;
-        if(elapsed > CONFIG.SESSION_TIMEOUT) {
-            logout();
-            showToast('⏰ Session expired. Please login again.');
-        }
-    }
+function loadData() {
+    let p = localStorage.getItem('warda_products');
+    if(p) products = JSON.parse(p);
+    else initProducts();
+    let o = localStorage.getItem('warda_orders');
+    if(o) orders = JSON.parse(o);
+    let c = localStorage.getItem('warda_customers');
+    if(c) customers = JSON.parse(c);
+    let e = localStorage.getItem('warda_expenses');
+    if(e) expenses = JSON.parse(e);
+    let sh = localStorage.getItem('warda_stockHistory');
+    if(sh) stockHistory = JSON.parse(sh);
 }
 
 // ==================== HELPERS ====================
 function formatCurrency(amt) {
-    return CONFIG.CURRENCY + ' ' + (amt || 0).toFixed(2);
+    return 'SAR ' + amt.toFixed(2);
 }
 
 function getToday() {
     return new Date().toISOString().split('T')[0];
 }
 
-function getDateRange(period) {
-    const now = new Date();
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    let start = new Date(today);
-    
-    switch(period) {
-        case 'today':
-            start = today;
-            break;
-        case 'week':
-            start.setDate(today.getDate() - 7);
-            break;
-        case 'month':
-            start.setMonth(today.getMonth() - 1);
-            break;
-        case 'quarter':
-            start.setMonth(today.getMonth() - 3);
-            break;
-        case 'year':
-            start.setFullYear(today.getFullYear() - 1);
-            break;
-        default:
-            start = today;
-    }
-    return { start, end: today };
-}
-
-function showToast(msg, type = 'info') {
-    const colors = {
-        success: '#27ae60',
-        error: '#e74c3c',
-        warning: '#f39c12',
-        info: '#3498db'
-    };
-    const t = document.createElement('div');
+function showToast(msg) {
+    let t = document.createElement('div');
     t.className = 'toast';
     t.textContent = msg;
-    t.style.borderLeft = `3px solid ${colors[type] || colors.info}`;
     document.body.appendChild(t);
-    setTimeout(() => {
-        t.style.opacity = '0';
-        t.style.transform = 'translateY(20px)';
-        setTimeout(() => t.remove(), 300);
-    }, 3000);
-}
-
-function closeModal(id) {
-    document.getElementById(id).classList.remove('active');
-}
-
-function generateId() {
-    return Date.now() + '_' + Math.random().toString(36).substr(2, 6);
-}
-
-// ==================== DARK MODE ====================
-function toggleDarkMode() {
-    state.darkMode = !state.darkMode;
-    document.body.classList.toggle('dark-mode', state.darkMode);
-    document.querySelector('.container').classList.toggle('dark-mode', state.darkMode);
-    localStorage.setItem('warda_darkmode', state.darkMode);
+    setTimeout(() => t.remove(), 2500);
 }
 
 // ==================== LOGIN ====================
 function login() {
-    const email = document.getElementById('loginEmail').value.trim();
-    const pass = document.getElementById('loginPassword').value.trim();
-    const error = document.getElementById('loginError');
-    
-    // Hash password in production
+    let email = document.getElementById('loginEmail').value;
+    let pass = document.getElementById('loginPassword').value;
+    let error = document.getElementById('loginError');
     if(email === 'admin@warda.com' && pass === 'Hamdani5') {
-        state.isAdmin = true;
-        state.sessionStart = Date.now();
+        isAdmin = true;
         document.getElementById('loginOverlay').style.display = 'none';
         document.getElementById('roleBadge').textContent = '👑 Admin';
         document.getElementById('roleBadge').style.background = '#ffd700';
@@ -664,12 +486,11 @@ function login() {
         document.getElementById('loginBtn').style.display = 'none';
         document.getElementById('logoutBtn').style.display = 'inline-block';
         document.querySelector('.container').classList.remove('view-only');
-        showToast('✅ Admin Login Successful!', 'success');
+        showToast('✅ Admin Login Successful!');
         renderAll();
     } else {
         error.style.display = 'block';
         setTimeout(() => error.style.display = 'none', 3000);
-        showToast('❌ Invalid credentials!', 'error');
     }
 }
 
@@ -679,7 +500,7 @@ function skipLogin() {
     document.getElementById('roleBadge').style.background = '#6b7a8a';
     document.getElementById('roleBadge').style.color = 'white';
     document.querySelector('.container').classList.add('view-only');
-    showToast('👁️ Viewer Mode', 'info');
+    showToast('👁️ Viewer Mode');
     renderAll();
 }
 
@@ -688,14 +509,14 @@ function showLogin() {
 }
 
 function logout() {
-    state.isAdmin = false;
+    isAdmin = false;
     document.getElementById('roleBadge').textContent = '👁️ Viewer';
     document.getElementById('roleBadge').style.background = '#6b7a8a';
     document.getElementById('roleBadge').style.color = 'white';
     document.getElementById('loginBtn').style.display = 'inline-block';
     document.getElementById('logoutBtn').style.display = 'none';
     document.querySelector('.container').classList.add('view-only');
-    showToast('👁️ Viewer Mode', 'info');
+    showToast('👁️ Viewer Mode');
     renderAll();
 }
 
@@ -704,22 +525,18 @@ function showTab(tab) {
     document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     document.getElementById('tab-' + tab).classList.add('active');
-    event.target.classList.add('active');
-    
-    switch(tab) {
-        case 'pos': renderProducts(); renderCart(); break;
-        case 'stock': renderStock(); populateStockSelect(); break;
-        case 'customers': renderCustomers(); break;
-        case 'invoices': renderInvoices(); break;
-        case 'summary': updateSummary(); break;
-        case 'expenses': renderExpenses(); break;
-        case 'reports': generateReport(); break;
-    }
+    if(event) event.target.classList.add('active');
+    if(tab === 'pos') { renderProducts(); renderCart(); }
+    if(tab === 'stock') { renderStock(); populateStockSelect(); }
+    if(tab === 'customers') renderCustomers();
+    if(tab === 'invoices') renderInvoices();
+    if(tab === 'summary') updateSummary();
+    if(tab === 'expenses') renderExpenses();
 }
 
 // ==================== MODE ====================
 function setMode(mode) {
-    state.currentMode = mode;
+    currentMode = mode;
     document.getElementById('sqmInputs').style.display = mode === 'sqm' ? 'block' : 'none';
     document.getElementById('manualInputs').style.display = mode === 'manual' ? 'block' : 'none';
     document.getElementById('piecesInputs').style.display = mode === 'pieces' ? 'block' : 'none';
@@ -727,190 +544,141 @@ function setMode(mode) {
 
 // ==================== PRODUCTS ====================
 function filterProducts(cat) {
-    state.currentFilter = cat;
+    currentFilter = cat;
     document.querySelectorAll('#tab-pos .cat-tab').forEach(b => b.classList.remove('active'));
-    event.target.classList.add('active');
+    if(event) event.target.classList.add('active');
     renderProducts();
 }
 
 function renderProducts() {
-    const search = document.getElementById('searchProduct').value.toLowerCase();
-    const filtered = state.products.filter(p => 
-        (state.currentFilter === 'all' || p.category === state.currentFilter) &&
+    let search = document.getElementById('searchProduct').value.toLowerCase();
+    let filtered = products.filter(p => 
+        (currentFilter === 'all' || p.category === currentFilter) &&
         (p.name.toLowerCase().includes(search) || p.size.toLowerCase().includes(search))
     );
-    
-    const container = document.getElementById('productList');
-    container.innerHTML = '';
-    
-    if(filtered.length === 0) {
-        container.innerHTML = '<div style="text-align:center;padding:20px;color:#666;font-size:11px;">No products found</div>';
-        return;
-    }
-    
+    let c = document.getElementById('productList');
+    c.innerHTML = '';
+    if(filtered.length === 0) { c.innerHTML = '<div style="text-align:center;padding:10px;color:#666;font-size:11px;">No products</div>'; return; }
     filtered.forEach(p => {
-        const div = document.createElement('div');
-        div.className = 'product-card' + (p.stock <= 0 ? ' out-of-stock' : '');
-        const catEmoji = p.category === 'mwad' ? '🧱' : '🪨';
-        div.innerHTML = `
-            <div class="name">${catEmoji} ${p.name}</div>
-            <div class="price">${p.selling > 0 ? formatCurrency(p.selling) : 'Set Price'}</div>
-            <div class="stock">Stock: ${p.stock} ${p.type === 'sqm' ? 'm²' : 'pcs'}</div>
-            ${p.stock <= 0 ? '<div style="color:#e74c3c;font-size:7px;">⚠️ Out of Stock</div>' : ''}
-        `;
-        
-        if(p.stock > 0) {
-            div.onclick = () => {
-                document.getElementById('itemName').value = p.name;
-                document.getElementById('costPrice').value = p.cost;
-                updateProductSuggestions();
-                if(p.type === 'sqm') {
-                    setMode('sqm');
-                    document.getElementById('sqmPrice').value = p.selling;
-                } else {
-                    setMode('pieces');
-                    document.getElementById('pieceSize').value = p.size;
-                    document.getElementById('piecePrice').value = p.selling;
-                }
-                showToast(p.name + ' loaded', 'info');
-            };
-        }
-        container.appendChild(div);
-    });
-}
-
-function updateProductSuggestions() {
-    const datalist = document.getElementById('productSuggest');
-    datalist.innerHTML = '';
-    state.products.forEach(p => {
-        const opt = document.createElement('option');
-        opt.value = p.name;
-        datalist.appendChild(opt);
+        let div = document.createElement('div');
+        div.className = 'product-card';
+        let catEmoji = p.category === 'mwad' ? '🧱' : '🪨';
+        div.innerHTML = `<div class="name">${catEmoji} ${p.name}</div><div class="price">${p.selling > 0 ? formatCurrency(p.selling) : 'Set Price'}</div><div class="stock">Stock: ${p.stock} ${p.type === 'sqm' ? 'm²' : 'pcs'}</div>`;
+        div.onclick = () => {
+            document.getElementById('itemName').value = p.name;
+            document.getElementById('costPrice').value = p.cost;
+            if(p.type === 'sqm') { setMode('sqm'); document.getElementById('sqmPrice').value = p.selling; }
+            else { setMode('pieces'); document.getElementById('pieceSize').value = p.size; document.getElementById('piecePrice').value = p.selling; }
+            showToast(p.name + ' loaded');
+        };
+        c.appendChild(div);
     });
 }
 
 function addProduct() {
-    if(!state.isAdmin) return showToast('🔒 Admin only!', 'error');
-    
-    const type = confirm('Marble (SQM) - OK, Fitting (Pieces) - Cancel') ? 'sqm' : 'pieces';
-    const cat = prompt('Category: 1-Materials, 2-Stone');
-    const catMap = {'1':'mwad','2':'stone'};
-    const category = catMap[cat] || 'mwad';
-    const name = prompt('Product name:');
-    if(!name || !name.trim()) return;
-    
-    const id = state.products.length ? Math.max(...state.products.map(p => p.id)) + 1 : 1;
-    state.products.push({
-        id,
-        name: name.trim(),
-        size: prompt('Size:') || 'N/A',
+    if(!isAdmin) return showToast('🔒 Admin only!');
+    let type = confirm('Marble (SQM) - OK, Fitting (Pieces) - Cancel') ? 'sqm' : 'pieces';
+    let cat = prompt('Category: 1-Materials, 2-Stone');
+    let catMap = {'1':'mwad','2':'stone'};
+    let category = catMap[cat] || 'mwad';
+    let name = prompt('Product name:');
+    if(!name) return;
+    let id = products.length ? Math.max(...products.map(p => p.id)) + 1 : 1;
+    products.push({
+        id, name,
+        size: prompt('Size:'),
         category,
         selling: parseFloat(prompt('Selling price:')) || 0,
         cost: parseFloat(prompt('Purchase price:')) || 0,
-        stock: parseInt(prompt('Stock:')) || 0,
+        stock: parseInt(prompt('Stock:')) || 50,
         type
     });
-    
     saveData();
-    renderAll();
+    renderProducts();
+    renderStock();
     populateStockSelect();
-    showToast('✅ Product added successfully', 'success');
-}
-
-function editProduct(id) {
-    if(!state.isAdmin) return showToast('🔒 Admin only!', 'error');
-    
-    const p = state.products.find(x => x.id === id);
-    if(!p) return;
-    
-    const name = prompt('Name:', p.name);
-    if(name !== null && name.trim() !== '') p.name = name.trim();
-    
-    const size = prompt('Size:', p.size);
-    if(size !== null) p.size = size;
-    
-    const selling = prompt('Selling Price:', p.selling);
-    if(selling !== null && !isNaN(selling)) p.selling = parseFloat(selling);
-    
-    const cost = prompt('Purchase Price:', p.cost);
-    if(cost !== null && !isNaN(cost)) p.cost = parseFloat(cost);
-    
-    const stock = prompt('Stock:', p.stock);
-    if(stock !== null && !isNaN(stock)) p.stock = parseFloat(stock);
-    
-    saveData();
-    renderAll();
-    showToast('✅ Product updated', 'success');
-}
-
-function deleteProduct(id) {
-    if(!state.isAdmin) return showToast('🔒 Admin only!', 'error');
-    if(!confirm('Are you sure you want to delete this product?')) return;
-    
-    state.products = state.products.filter(x => x.id !== id);
-    saveData();
-    renderAll();
-    populateStockSelect();
-    showToast('✅ Product deleted', 'success');
+    showToast('✅ Product added');
 }
 
 // ==================== STOCK ====================
 function filterStock(cat) {
-    state.stockFilter = cat;
+    stockFilter = cat;
     document.querySelectorAll('#tab-stock .cat-tab').forEach(b => b.classList.remove('active'));
-    event.target.classList.add('active');
+    if(event) event.target.classList.add('active');
     renderStock();
 }
 
 function renderStock() {
-    const search = document.getElementById('searchStock').value.toLowerCase();
-    const filtered = state.products.filter(p => 
-        (state.stockFilter === 'all' || p.category === state.stockFilter) &&
+    let search = document.getElementById('searchStock').value.toLowerCase();
+    let filtered = products.filter(p => 
+        (stockFilter === 'all' || p.category === stockFilter) &&
         (p.name.toLowerCase().includes(search) || p.size.toLowerCase().includes(search))
     );
-    
-    const tb = document.getElementById('stockBody');
+    let tb = document.getElementById('stockBody');
     tb.innerHTML = '';
-    
-    if(filtered.length === 0) {
-        tb.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:20px;color:#666;">No products found</td></tr>';
-        return;
-    }
-    
+    if(filtered.length === 0) { tb.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:10px;color:#666;">No products</td></tr>'; return; }
     filtered.forEach(p => {
-        const r = tb.insertRow();
-        const catName = p.category === 'mwad' ? '🧱 Materials' : '🪨 Stone';
+        let r = tb.insertRow();
+        let catName = p.category === 'mwad' ? '🧱 Materials' : '🪨 Stone';
         r.insertCell(0).textContent = catName;
         r.insertCell(1).textContent = p.name;
         r.insertCell(2).textContent = p.size;
-        r.insertCell(3).textContent = p.selling;
+        r.insertCell(3).textContent = p.selling > 0 ? p.selling : '0';
         r.insertCell(4).textContent = p.cost;
-        r.insertCell(5).textContent = p.stock + (p.stock <= CONFIG.LOW_STOCK_THRESHOLD && p.stock > 0 ? ' ⚠️' : '');
-        
-        const c = r.insertCell(6);
-        const editBtn = document.createElement('button');
-        editBtn.textContent = '✏️';
-        editBtn.className = 'btn-warning';
-        editBtn.style.fontSize = '7px';
-        editBtn.style.padding = '1px 5px';
-        editBtn.onclick = () => editProduct(p.id);
-        c.appendChild(editBtn);
-        
-        const delBtn = document.createElement('button');
-        delBtn.textContent = '✕';
-        delBtn.className = 'btn-danger';
-        delBtn.style.fontSize = '7px';
-        delBtn.style.padding = '1px 5px';
-        delBtn.onclick = () => deleteProduct(p.id);
-        c.appendChild(delBtn);
+        r.insertCell(5).textContent = p.stock;
+        let c = r.insertCell(6);
+        let edit = document.createElement('button');
+        edit.textContent = '✏️';
+        edit.className = 'btn-warning';
+        edit.style.fontSize = '7px';
+        edit.style.padding = '1px 5px';
+        edit.onclick = () => editProductStock(p.id);
+        c.appendChild(edit);
+        let del = document.createElement('button');
+        del.textContent = '✕';
+        del.className = 'btn-danger';
+        del.style.fontSize = '7px';
+        del.style.padding = '1px 5px';
+        del.onclick = () => {
+            if(!isAdmin) return showToast('🔒 Admin only!');
+            if(confirm('Delete product?')) {
+                products = products.filter(x => x.id !== p.id);
+                saveData();
+                renderStock();
+                renderProducts();
+                populateStockSelect();
+                showToast('✅ Product deleted');
+            }
+        };
+        c.appendChild(del);
     });
 }
 
+function editProductStock(id) {
+    if(!isAdmin) return showToast('🔒 Admin only!');
+    let p = products.find(x => x.id === id);
+    if(!p) return;
+    let name = prompt('Name:', p.name);
+    if(name !== null && name.trim() !== '') p.name = name.trim();
+    let size = prompt('Size:', p.size);
+    if(size !== null) p.size = size;
+    let selling = prompt('Selling Price:', p.selling);
+    if(selling !== null && !isNaN(selling)) p.selling = parseFloat(selling);
+    let cost = prompt('Purchase Price:', p.cost);
+    if(cost !== null && !isNaN(cost)) p.cost = parseFloat(cost);
+    let stock = prompt('Stock:', p.stock);
+    if(stock !== null && !isNaN(stock)) p.stock = parseFloat(stock);
+    saveData();
+    renderStock();
+    renderProducts();
+    showToast('✅ Product updated');
+}
+
 function populateStockSelect() {
-    const sel = document.getElementById('stockSelect');
+    let sel = document.getElementById('stockSelect');
     sel.innerHTML = '<option value="">Select Item</option>';
-    state.products.forEach(p => {
-        const opt = document.createElement('option');
+    products.forEach(p => {
+        let opt = document.createElement('option');
         opt.value = p.id;
         opt.textContent = p.name + ' (' + p.size + ') - Stock: ' + p.stock;
         sel.appendChild(opt);
@@ -918,391 +686,192 @@ function populateStockSelect() {
 }
 
 function stockIn() {
-    if(!state.isAdmin) return showToast('🔒 Admin only!', 'error');
-    
-    const id = parseInt(document.getElementById('stockSelect').value);
-    const qty = parseFloat(document.getElementById('stockQty').value);
-    const price = parseFloat(document.getElementById('stockPriceIn').value) || 0;
-    
-    if(!id || !qty || qty <= 0) {
-        showToast('Please select item and enter quantity', 'warning');
-        return;
-    }
-    
-    const p = state.products.find(x => x.id === id);
-    if(!p) {
-        showToast('Item not found', 'error');
-        return;
-    }
-    
-    // Update stock with weighted average cost
-    const totalCost = (p.stock * p.cost) + (qty * price);
+    if(!isAdmin) return showToast('🔒 Admin only!');
+    let id = parseInt(document.getElementById('stockSelect').value);
+    let qty = parseFloat(document.getElementById('stockQty').value);
+    let price = parseFloat(document.getElementById('stockPriceIn').value) || 0;
+    if(!id || !qty || qty <= 0) return showToast('Select item and quantity');
+    let p = products.find(x => x.id === id);
+    if(!p) return showToast('Item not found');
     p.stock += qty;
-    p.cost = p.stock > 0 ? totalCost / p.stock : 0;
-    
-    state.stockHistory.push({
-        id: generateId(),
-        date: new Date().toISOString(),
-        item: p.name,
-        qty: qty,
-        type: 'In',
-        price: price,
-        notes: 'Stock In'
-    });
-    
+    if(price > 0) p.cost = (p.cost * (p.stock - qty) + price * qty) / p.stock;
+    stockHistory.push({ date: getToday(), item: p.name, qty: qty, type: 'In', price: price });
     saveData();
-    renderAll();
-    populateStockSelect();
+    renderStock();
+    renderProducts();
+    updateSummary();
     document.getElementById('stockQty').value = '';
     document.getElementById('stockPriceIn').value = '';
-    showToast(`✅ Stock added: +${qty} ${p.type === 'sqm' ? 'm²' : 'pcs'}`, 'success');
+    showToast('✅ Stock added: +' + qty);
 }
 
 function stockOut() {
-    if(!state.isAdmin) return showToast('🔒 Admin only!', 'error');
-    
-    const id = parseInt(document.getElementById('stockSelect').value);
-    const qty = parseFloat(document.getElementById('stockQty').value);
-    
-    if(!id || !qty || qty <= 0) {
-        showToast('Please select item and enter quantity', 'warning');
-        return;
-    }
-    
-    const p = state.products.find(x => x.id === id);
-    if(!p) {
-        showToast('Item not found', 'error');
-        return;
-    }
-    
-    if(p.stock < qty) {
-        showToast(`⚠️ Not enough stock! Available: ${p.stock}`, 'error');
-        return;
-    }
-    
+    if(!isAdmin) return showToast('🔒 Admin only!');
+    let id = parseInt(document.getElementById('stockSelect').value);
+    let qty = parseFloat(document.getElementById('stockQty').value);
+    if(!id || !qty || qty <= 0) return showToast('Select item and quantity');
+    let p = products.find(x => x.id === id);
+    if(!p) return showToast('Item not found');
+    if(p.stock < qty) return showToast('⚠️ Not enough stock! Available: ' + p.stock);
     p.stock -= qty;
-    
-    state.stockHistory.push({
-        id: generateId(),
-        date: new Date().toISOString(),
-        item: p.name,
-        qty: qty,
-        type: 'Out',
-        price: p.cost,
-        notes: 'Stock Out'
-    });
-    
+    stockHistory.push({ date: getToday(), item: p.name, qty: qty, type: 'Out', price: 0 });
     saveData();
-    renderAll();
-    populateStockSelect();
+    renderStock();
+    renderProducts();
+    updateSummary();
     document.getElementById('stockQty').value = '';
     document.getElementById('stockPriceIn').value = '';
-    showToast(`✅ Stock removed: -${qty} ${p.type === 'sqm' ? 'm²' : 'pcs'}`, 'success');
-}
-
-function showLowStock() {
-    const lowItems = state.products.filter(p => p.stock <= CONFIG.LOW_STOCK_THRESHOLD && p.stock > 0);
-    const container = document.getElementById('lowStockContent');
-    container.innerHTML = '';
-    
-    if(lowItems.length === 0) {
-        container.innerHTML = '<div style="padding:20px;text-align:center;color:#666;">✅ All items have sufficient stock</div>';
-    } else {
-        lowItems.forEach(p => {
-            const div = document.createElement('div');
-            div.style.cssText = 'display:flex;justify-content:space-between;padding:8px;border-bottom:1px solid #eee;';
-            div.innerHTML = `
-                <span><strong>${p.name}</strong> (${p.size})</span>
-                <span style="color:#e74c3c;font-weight:bold;">${p.stock} ${p.type === 'sqm' ? 'm²' : 'pcs'}</span>
-            `;
-            container.appendChild(div);
-        });
-    }
-    
-    document.getElementById('lowStockModal').classList.add('active');
-}
-
-function showStockAudit() {
-    const container = document.getElementById('auditContent');
-    container.innerHTML = '';
-    
-    if(state.stockHistory.length === 0) {
-        container.innerHTML = '<div style="padding:20px;text-align:center;color:#666;">No stock history available</div>';
-        return;
-    }
-    
-    // Show last 50 entries
-    const entries = state.stockHistory.slice(-50).reverse();
-    entries.forEach(h => {
-        const div = document.createElement('div');
-        div.style.cssText = 'display:flex;justify-content:space-between;padding:6px;border-bottom:1px solid #eee;font-size:10px;';
-        const typeColor = h.type === 'In' ? '#27ae60' : '#e74c3c';
-        div.innerHTML = `
-            <span>${new Date(h.date).toLocaleString()}</span>
-            <span><strong>${h.item}</strong></span>
-            <span style="color:${typeColor};">${h.type}: ${h.qty}</span>
-            <span>${h.price > 0 ? formatCurrency(h.price) : 'N/A'}</span>
-        `;
-        container.appendChild(div);
-    });
-    
-    document.getElementById('stockAuditModal').classList.add('active');
+    showToast('✅ Stock removed: -' + qty);
 }
 
 // ==================== CART ====================
 function addToCart() {
-    const name = document.getElementById('itemName').value.trim();
-    if(!name) {
-        showToast('Please select an item first', 'warning');
-        return;
-    }
-    
-    const cost = parseFloat(document.getElementById('costPrice').value) || 0;
-    const p = state.products.find(pr => pr.name === name);
+    let name = document.getElementById('itemName').value;
+    if(!name) return showToast('Select item first');
+    let cost = parseFloat(document.getElementById('costPrice').value) || 0;
+    let p = products.find(pr => pr.name === name);
     
     let qty, price, total;
-    
-    if(state.currentMode === 'sqm') {
-        const w = parseFloat(document.getElementById('sqmWidth').value) || 0.40;
-        const l = parseFloat(document.getElementById('sqmLength').value) || 0.80;
+    if(currentMode === 'sqm') {
+        let w = parseFloat(document.getElementById('sqmWidth').value) || 0.40;
+        let l = parseFloat(document.getElementById('sqmLength').value) || 0.80;
         price = parseFloat(document.getElementById('sqmPrice').value);
-        if(!price) {
-            showToast('Please enter price', 'warning');
-            return;
-        }
+        if(!price) return showToast('Enter price');
         qty = w * l;
         total = qty * price;
         
-        if(p && p.stock < qty) {
-            showToast(`⚠️ Not enough stock! Available: ${p.stock} m²`, 'error');
-            return;
+        // FIXED: Stock check for SQM mode
+        if(p && p.type === 'sqm' && p.stock < qty) {
+            return showToast('⚠️ Not enough stock! Available: ' + p.stock + ' m²');
         }
         
-        state.cart.push({
-            id: generateId(),
-            name,
-            size: w.toFixed(2) + 'm x ' + l.toFixed(2) + 'm',
-            qty: qty,
-            qtyDisplay: qty.toFixed(2) + ' m²',
-            price: price,
-            cost: cost,
-            total: total,
-            productId: p ? p.id : null
-        });
-        
-    } else if(state.currentMode === 'manual') {
+        cart.push({ id: Date.now(), name, size: w.toFixed(2) + 'm x ' + l.toFixed(2) + 'm', qty: qty, qtyDisplay: qty.toFixed(2) + ' m²', price: price, cost: cost, total: total });
+    } else if(currentMode === 'manual') {
         qty = parseFloat(document.getElementById('manualArea').value);
         price = parseFloat(document.getElementById('manualPrice').value);
-        if(!qty || !price) {
-            showToast('Please enter area and price', 'warning');
-            return;
-        }
+        if(!qty || !price) return showToast('Enter area and price');
         total = qty * price;
-        state.cart.push({
-            id: generateId(),
-            name,
-            size: 'Manual',
-            qty: qty,
-            qtyDisplay: qty.toFixed(2) + ' m²',
-            price: price,
-            cost: cost,
-            total: total,
-            productId: p ? p.id : null
-        });
-        
+        cart.push({ id: Date.now(), name, size: 'Manual', qty: qty, qtyDisplay: qty.toFixed(2) + ' m²', price: price, cost: cost, total: total });
     } else {
         qty = parseFloat(document.getElementById('pieceQty').value) || 1;
         price = parseFloat(document.getElementById('piecePrice').value);
-        if(!price) {
-            showToast('Please enter price', 'warning');
-            return;
-        }
+        if(!price) return showToast('Enter price');
         total = qty * price;
         
-        if(p && p.stock < qty) {
-            showToast(`⚠️ Not enough stock! Available: ${p.stock} pcs`, 'error');
-            return;
+        // FIXED: Stock check for pieces mode
+        if(p && p.type === 'pieces' && p.stock < qty) {
+            return showToast('⚠️ Not enough stock! Available: ' + p.stock + ' pcs');
         }
         
-        state.cart.push({
-            id: generateId(),
-            name,
-            size: document.getElementById('pieceSize').value || 'N/A',
-            qty: qty,
-            qtyDisplay: qty + ' pcs',
-            price: price,
-            cost: cost,
-            total: total,
-            productId: p ? p.id : null
-        });
+        cart.push({ id: Date.now(), name, size: document.getElementById('pieceSize').value, qty: qty, qtyDisplay: qty + ' pcs', price: price, cost: cost, total: total });
     }
-    
     renderCart();
-    showToast('✅ Added to cart', 'success');
+    showToast('Added to cart');
 }
 
 function renderCart() {
-    const tb = document.getElementById('cartBody');
+    let tb = document.getElementById('cartBody');
     tb.innerHTML = '';
     let total = 0;
-    
-    state.cart.forEach((item, idx) => {
+    cart.forEach((item, idx) => {
         total += item.total;
-        const r = tb.insertRow();
+        let r = tb.insertRow();
         r.insertCell(0).textContent = item.name;
         r.insertCell(1).textContent = item.qtyDisplay;
         r.insertCell(2).textContent = formatCurrency(item.price);
         r.insertCell(3).textContent = formatCurrency(item.total);
-        
-        const btn = document.createElement('button');
+        let btn = document.createElement('button');
         btn.textContent = '✖';
         btn.className = 'btn-danger';
         btn.style.fontSize = '7px';
         btn.style.padding = '1px 5px';
-        btn.onclick = () => {
-            state.cart.splice(idx, 1);
-            renderCart();
-            updateTotals();
-        };
+        btn.onclick = () => { cart.splice(idx, 1); renderCart(); updateTotals(); };
         r.insertCell(4).appendChild(btn);
     });
-    
     document.getElementById('cartTotal').textContent = formatCurrency(total);
     updateTotals();
 }
 
 function updateTotals() {
-    const total = state.cart.reduce((s, i) => s + i.total, 0);
-    const rec = parseFloat(document.getElementById('amountReceived').value) || 0;
-    const bal = total - rec;
-    
+    let total = cart.reduce((s, i) => s + i.total, 0);
+    let rec = parseFloat(document.getElementById('amountReceived').value) || 0;
+    let bal = total - rec;
     document.getElementById('cartTotal').textContent = formatCurrency(total);
-    const msg = document.getElementById('balanceMsg');
-    if(bal > 0) {
-        msg.textContent = 'Due: ' + formatCurrency(bal);
-        msg.style.color = '#e74c3c';
-    } else if(bal < 0) {
-        msg.textContent = 'Refund: ' + formatCurrency(Math.abs(bal));
-        msg.style.color = '#27ae60';
-    } else {
-        msg.textContent = '✅ Fully Paid';
-        msg.style.color = '#27ae60';
-    }
+    document.getElementById('balanceMsg').textContent = bal > 0 ? 'Due: ' + formatCurrency(bal) : bal < 0 ? 'Refund: ' + formatCurrency(Math.abs(bal)) : 'Fully Paid ✓';
 }
 
 function clearCart() {
     if(!confirm('Clear cart?')) return;
-    state.cart = [];
+    cart = [];
     renderCart();
-    showToast('🛒 Cart cleared', 'info');
 }
 
 // ==================== CONFIRM ORDER ====================
 function confirmOrder() {
-    if(!state.isAdmin) return showToast('🔒 Admin only!', 'error');
-    if(state.cart.length === 0) {
-        showToast('Cart is empty', 'warning');
-        return;
-    }
+    if(!isAdmin) return showToast('🔒 Admin only!');
+    if(cart.length === 0) return showToast('Cart empty');
+    let cust = document.getElementById('custName').value || 'Walk-in';
+    let phone = document.getElementById('custPhone').value || '';
+    let rec = parseFloat(document.getElementById('amountReceived').value) || 0;
+    let total = cart.reduce((s, i) => s + i.total, 0);
+    let totalCost = cart.reduce((s, i) => s + (i.qty * (i.cost || 0)), 0);
+    let profit = total - totalCost;
+    let invNo = 'INV-' + String(orders.length + 1).padStart(4, '0');
     
-    const custName = document.getElementById('custName').value.trim() || 'Walk-in';
-    const custPhone = document.getElementById('custPhone').value.trim();
-    const rec = parseFloat(document.getElementById('amountReceived').value) || 0;
-    const total = state.cart.reduce((s, i) => s + i.total, 0);
-    const totalCost = state.cart.reduce((s, i) => s + (i.qty * (i.cost || 0)), 0);
-    const profit = total - totalCost;
-    const invNo = 'INV-' + String(state.orders.length + 1).padStart(4, '0');
-    
-    // Validate stock
-    for(const item of state.cart) {
-        if(item.productId) {
-            const p = state.products.find(pr => pr.id === item.productId);
-            if(p && p.stock < item.qty) {
-                showToast(`⚠️ Not enough stock for ${item.name}! Available: ${p.stock}`, 'error');
-                return;
-            }
+    // FIXED: Stock check before confirming
+    let stockError = false;
+    cart.forEach(i => {
+        let p = products.find(pr => pr.name === i.name);
+        if(p && p.stock < i.qty) { 
+            showToast('⚠️ Not enough stock for ' + i.name + '! Available: ' + p.stock); 
+            stockError = true; 
         }
-    }
+    });
+    if(stockError) return;
     
     // Update stock
-    for(const item of state.cart) {
-        if(item.productId) {
-            const p = state.products.find(pr => pr.id === item.productId);
-            if(p) p.stock -= item.qty;
-        }
-    }
+    cart.forEach(i => {
+        let p = products.find(pr => pr.name === i.name);
+        if(p) p.stock -= i.qty;
+    });
     
-    const paid = Math.min(rec, total);
-    const status = paid >= total ? 'paid' : (paid > 0 ? 'partial' : 'unpaid');
-    
-    const order = {
+    let paid = Math.min(rec, total);
+    let status = paid >= total ? 'paid' : (paid > 0 ? 'partial' : 'unpaid');
+    let order = {
         invoiceNo: invNo,
         date: new Date().toISOString(),
-        customer: custName,
-        phone: custPhone,
-        items: state.cart.map(i => ({...i})),
+        customer: cust,
+        phone,
+        items: cart.map(i => ({...i})),
         total,
         cost: totalCost,
         profit: profit,
         status,
         paid,
-        payments: paid > 0 ? [{
-            id: generateId(),
-            amount: paid,
-            notes: 'POS Payment',
-            date: new Date().toISOString()
-        }] : []
+        payments: paid > 0 ? [{amount: paid, notes: 'POS Payment', date: new Date().toISOString()}] : []
     };
+    orders.push(order);
     
-    state.orders.push(order);
-    
-    // Update customer
-    let custObj = state.customers.find(c => c.phone === custPhone);
-    if(!custObj) {
-        custObj = {
-            id: generateId(),
-            name: custName,
-            phone: custPhone,
-            invoices: [],
-            advance: 0,
-            totalPaid: 0
-        };
-        state.customers.push(custObj);
+    let custObj = customers.find(c => c.phone === phone);
+    if(!custObj) { 
+        custObj = { name: cust, phone, invoices: [], advance: 0 }; 
+        customers.push(custObj); 
     }
-    
-    custObj.invoices.push({
-        invoiceNo: invNo,
-        date: order.date,
-        amount: total,
-        paid: paid,
-        status: status
-    });
-    custObj.totalPaid = (custObj.totalPaid || 0) + paid;
+    custObj.invoices.push({ invoiceNo: invNo, date: order.date, amount: total, paid: paid, status: status });
     
     if(rec > total) {
         custObj.advance = (custObj.advance || 0) + (rec - total);
     }
     
-    // Record stock movement
-    for(const item of state.cart) {
-        if(item.productId) {
-            state.stockHistory.push({
-                id: generateId(),
-                date: new Date().toISOString(),
-                item: item.name,
-                qty: item.qty,
-                type: 'Out',
-                price: item.cost,
-                notes: `Order ${invNo}`
-            });
-        }
-    }
-    
     saveData();
-    showToast(`✅ Order confirmed! ${invNo}`, 'success');
-    
-    state.cart = [];
-    renderAll();
+    showToast('✅ Order confirmed! ' + invNo);
+    cart = [];
+    renderCart();
+    renderProducts();
+    renderStock();
+    renderInvoices();
+    renderCustomers();
+    updateSummary();
     document.getElementById('custName').value = '';
     document.getElementById('custPhone').value = '';
     document.getElementById('amountReceived').value = '0';
@@ -1310,293 +879,178 @@ function confirmOrder() {
 
 // ==================== CUSTOMERS ====================
 function renderCustomers() {
-    const search = document.getElementById('searchCustomer').value.toLowerCase();
-    const filtered = state.customers.filter(c => 
-        c.name.toLowerCase().includes(search) || 
-        (c.phone && c.phone.includes(search))
-    );
-    
-    const container = document.getElementById('customerList');
+    let search = document.getElementById('searchCustomer').value.toLowerCase();
+    let filtered = customers.filter(c => c.name.toLowerCase().includes(search) || (c.phone && c.phone.includes(search)));
+    let container = document.getElementById('customerList');
     container.innerHTML = '';
-    
-    if(filtered.length === 0) {
-        container.innerHTML = '<div style="text-align:center;padding:20px;color:#666;">No customers found</div>';
-        return;
-    }
-    
+    if(filtered.length === 0) { container.innerHTML = '<div style="text-align:center;padding:10px;color:#666;">No customers</div>'; return; }
     filtered.forEach(c => {
-        const due = c.invoices.reduce((s, i) => s + (i.amount - i.paid), 0);
-        const div = document.createElement('div');
+        let due = c.invoices.reduce((s, i) => s + (i.amount - i.paid), 0);
+        let div = document.createElement('div');
         div.style.cssText = 'background:white;border:1px solid #ddd;border-radius:6px;padding:8px;margin-bottom:4px;';
-        const status = due > 0 ? 'Due: ' + formatCurrency(due) : (c.advance > 0 ? 'Advance: ' + formatCurrency(c.advance) : 'Settled');
-        const statusClass = due > 0 ? 'badge-unpaid' : (c.advance > 0 ? 'badge-partial' : 'badge-settled');
-        
-        div.innerHTML = `
-            <div style="display:flex;justify-content:space-between;flex-wrap:wrap;">
-                <strong>${c.name}</strong>
-                <span class="badge ${statusClass}">${status}</span>
-            </div>
-            <div style="font-size:9px;color:#666;">
-                ${c.phone || 'N/A'} | Total: ${formatCurrency(c.invoices.reduce((s,i) => s + i.amount, 0))}
-            </div>
+        let status = due > 0 ? 'Due: ' + formatCurrency(due) : (c.advance > 0 ? 'Advance: ' + formatCurrency(c.advance) : 'Settled');
+        let statusClass = due > 0 ? 'badge-unpaid' : (c.advance > 0 ? 'badge-partial' : 'badge-paid');
+        div.innerHTML = `<div style="display:flex;justify-content:space-between;"><strong>${c.name}</strong> <span class="badge ${statusClass}">${status}</span></div>
+            <div style="font-size:9px;color:#666;">${c.phone || ''} | Total Paid: ${formatCurrency(c.invoices.reduce((s,i) => s + i.paid, 0))}</div>
             <div class="action-btns">
                 <button class="btn-info" style="font-size:8px;padding:1px 6px;" onclick="viewCustomerInvoices('${c.phone}')">📄</button>
                 <button class="btn-success" style="font-size:8px;padding:1px 6px;" onclick="payCustomer('${c.phone}')">💰</button>
-            </div>
-        `;
+            </div>`;
         container.appendChild(div);
     });
 }
 
 function viewCustomerInvoices(phone) {
-    const cust = state.customers.find(c => c.phone === phone);
-    if(!cust) {
-        showToast('Customer not found', 'error');
-        return;
-    }
-    
-    let msg = `📄 Invoices for ${cust.name}\n━━━━━━━━━━━━━━━\n`;
+    let cust = customers.find(c => c.phone === phone);
+    if(!cust) { showToast('Customer not found'); return; }
+    let msg = '📄 Invoices for ' + cust.name + '\n━━━━━━━━━━━━━━━\n';
     cust.invoices.forEach(i => {
-        const bal = i.amount - i.paid;
-        msg += `${i.invoiceNo} | ${new Date(i.date).toLocaleDateString()} | ${formatCurrency(i.amount)} | ${bal > 0 ? 'Due: ' + formatCurrency(bal) : 'Paid'}\n`;
+        let bal = i.amount - i.paid;
+        msg += i.invoiceNo + ' | ' + new Date(i.date).toLocaleDateString() + ' | ' + formatCurrency(i.amount) + ' | ' + (bal > 0 ? 'Due: ' + formatCurrency(bal) : 'Paid') + '\n';
     });
-    msg += '━━━━━━━━━━━━━━━\n';
-    msg += `Advance: ${formatCurrency(cust.advance || 0)}\n`;
-    msg += `Total Paid: ${formatCurrency(cust.totalPaid || 0)}`;
+    msg += '━━━━━━━━━━━━━━━\nAdvance: ' + formatCurrency(cust.advance || 0);
     alert(msg);
 }
 
 function payCustomer(phone) {
-    if(!state.isAdmin) return showToast('🔒 Admin only!', 'error');
-    
-    const cust = state.customers.find(c => c.phone === phone);
-    if(!cust) {
-        showToast('Customer not found', 'error');
-        return;
-    }
-    
-    const amt = prompt(`Enter payment amount for ${cust.name}:`, '0');
+    if(!isAdmin) return showToast('🔒 Admin only!');
+    let cust = customers.find(c => c.phone === phone);
+    if(!cust) { showToast('Customer not found'); return; }
+    let amt = prompt('Enter payment amount for ' + cust.name + ':', 0);
     if(!amt || isNaN(amt) || parseFloat(amt) <= 0) return;
-    
-    const amount = parseFloat(amt);
-    const unpaid = cust.invoices.find(i => i.amount - i.paid > 0);
-    
+    amt = parseFloat(amt);
+    let unpaid = cust.invoices.find(i => i.amount - i.paid > 0);
     if(!unpaid) {
-        cust.advance = (cust.advance || 0) + amount;
-        showToast(`✅ Advance added: ${formatCurrency(amount)}`, 'success');
+        cust.advance = (cust.advance || 0) + amt;
+        showToast('✅ Advance added: ' + formatCurrency(amt));
         saveData();
         renderCustomers();
         updateSummary();
         return;
     }
-    
-    const payAmt = Math.min(amount, unpaid.amount - unpaid.paid);
+    let payAmt = Math.min(amt, unpaid.amount - unpaid.paid);
     unpaid.paid += payAmt;
     unpaid.status = unpaid.paid >= unpaid.amount ? 'paid' : 'partial';
-    
-    const order = state.orders.find(o => o.invoiceNo === unpaid.invoiceNo);
-    if(order) {
-        order.paid = unpaid.paid;
-        order.status = unpaid.status;
+    let order = orders.find(o => o.invoiceNo === unpaid.invoiceNo);
+    if(order) { order.paid = unpaid.paid; order.status = unpaid.status; }
+    if(amt > payAmt) {
+        cust.advance = (cust.advance || 0) + (amt - payAmt);
     }
-    
-    if(amount > payAmt) {
-        cust.advance = (cust.advance || 0) + (amount - payAmt);
-    }
-    
-    cust.totalPaid = (cust.totalPaid || 0) + payAmt;
-    
     saveData();
     renderCustomers();
     renderInvoices();
     updateSummary();
-    showToast(`✅ Received ${formatCurrency(payAmt)}`, 'success');
+    showToast('✅ Received ' + formatCurrency(payAmt));
 }
 
 // ==================== INVOICES ====================
 function renderInvoices() {
-    const search = document.getElementById('searchInvoice').value.toLowerCase();
-    const filtered = state.orders
-        .filter(o => 
-            o.invoiceNo.toLowerCase().includes(search) || 
-            o.customer.toLowerCase().includes(search)
-        )
-        .reverse()
-        .slice(0, 100);
-    
-    const tb = document.getElementById('invoiceBody');
+    let search = document.getElementById('searchInvoice').value.toLowerCase();
+    let filtered = orders.filter(o => o.invoiceNo.toLowerCase().includes(search) || o.customer.toLowerCase().includes(search)).reverse();
+    let tb = document.getElementById('invoiceBody');
     tb.innerHTML = '';
-    
-    if(filtered.length === 0) {
-        tb.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:#666;">No invoices found</td></tr>';
-        return;
-    }
-    
+    if(filtered.length === 0) { tb.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:10px;color:#666;">No invoices</td></tr>'; return; }
     filtered.forEach(o => {
-        const r = tb.insertRow();
+        let r = tb.insertRow();
         r.insertCell(0).textContent = o.invoiceNo;
         r.insertCell(1).textContent = new Date(o.date).toLocaleDateString();
         r.insertCell(2).textContent = o.customer;
         r.insertCell(3).textContent = formatCurrency(o.total);
         r.insertCell(4).innerHTML = `<span class="badge badge-${o.status}">${o.status}</span>`;
-        
-        const c = r.insertCell(5);
-        const view = document.createElement('button');
+        let c = r.insertCell(5);
+        let view = document.createElement('button');
         view.textContent = '👁️';
         view.className = 'btn-info';
         view.style.fontSize = '7px';
         view.style.padding = '1px 5px';
         view.onclick = () => viewInvoice(o.invoiceNo);
         c.appendChild(view);
-        
-        const del = document.createElement('button');
+        let del = document.createElement('button');
         del.textContent = '✕';
         del.className = 'btn-danger';
         del.style.fontSize = '7px';
         del.style.padding = '1px 5px';
-        del.onclick = () => deleteInvoice(o.invoiceNo);
+        del.onclick = () => {
+            if(!isAdmin) return showToast('🔒 Admin only!');
+            if(confirm('Delete invoice?')) {
+                orders = orders.filter(x => x.invoiceNo !== o.invoiceNo);
+                customers.forEach(c => c.invoices = c.invoices.filter(i => i.invoiceNo !== o.invoiceNo));
+                saveData();
+                renderInvoices();
+                renderCustomers();
+                updateSummary();
+                showToast('✅ Invoice deleted');
+            }
+        };
         c.appendChild(del);
     });
 }
 
 function viewInvoice(invNo) {
-    const o = state.orders.find(x => x.invoiceNo === invNo);
-    if(!o) {
-        showToast('Invoice not found', 'error');
-        return;
-    }
-    
-    const items = o.items.map(i => `${i.name} x${i.qtyDisplay} = ${formatCurrency(i.total)}`).join('\n');
-    let msg = `📄 INVOICE: ${o.invoiceNo}\n`;
-    msg += `Date: ${new Date(o.date).toLocaleString()}\n`;
-    msg += `Customer: ${o.customer}\n`;
-    msg += `Phone: ${o.phone || 'N/A'}\n`;
+    let o = orders.find(x => x.invoiceNo === invNo);
+    if(!o) { showToast('Invoice not found'); return; }
+    let items = o.items.map(i => i.name + ' x' + i.qtyDisplay + ' = ' + formatCurrency(i.total)).join('\n');
+    let msg = '📄 INVOICE: ' + o.invoiceNo + '\n';
+    msg += 'Date: ' + new Date(o.date).toLocaleString() + '\n';
+    msg += 'Customer: ' + o.customer + '\n';
+    msg += 'Phone: ' + (o.phone || 'N/A') + '\n';
     msg += '━━━━━━━━━━━━━━━\n';
     msg += items + '\n';
     msg += '━━━━━━━━━━━━━━━\n';
-    msg += `Total: ${formatCurrency(o.total)}\n`;
-    msg += `Paid: ${formatCurrency(o.paid || 0)}\n`;
-    msg += `Balance: ${formatCurrency(o.total - (o.paid || 0))}`;
+    msg += 'Total: ' + formatCurrency(o.total) + '\n';
+    msg += 'Paid: ' + formatCurrency(o.paid || 0) + '\n';
+    msg += 'Balance: ' + formatCurrency(o.total - (o.paid || 0));
     alert(msg);
-}
-
-function deleteInvoice(invNo) {
-    if(!state.isAdmin) return showToast('🔒 Admin only!', 'error');
-    if(!confirm('Are you sure you want to delete this invoice?')) return;
-    
-    state.orders = state.orders.filter(x => x.invoiceNo !== invNo);
-    state.customers.forEach(c => {
-        c.invoices = c.invoices.filter(i => i.invoiceNo !== invNo);
-    });
-    
-    saveData();
-    renderInvoices();
-    renderCustomers();
-    updateSummary();
-    showToast('✅ Invoice deleted', 'success');
 }
 
 // ==================== EXPENSES ====================
 function addExpense() {
-    if(!state.isAdmin) return showToast('🔒 Admin only!', 'error');
-    
-    const head = document.getElementById('expenseHead').value.trim();
-    const amount = parseFloat(document.getElementById('expenseAmount').value);
-    const note = document.getElementById('expenseNote').value.trim();
-    
-    if(!head || !amount || amount <= 0) {
-        showToast('Please enter valid expense details', 'warning');
-        return;
-    }
-    
-    state.expenses.push({
-        id: generateId(),
-        head,
-        amount,
-        note,
-        date: new Date().toISOString()
-    });
-    
+    if(!isAdmin) return showToast('🔒 Admin only!');
+    let head = document.getElementById('expenseHead').value.trim();
+    let amount = parseFloat(document.getElementById('expenseAmount').value);
+    let note = document.getElementById('expenseNote').value.trim();
+    if(!head || !amount || amount <= 0) { showToast('Enter valid expense'); return; }
+    expenses.push({ id: Date.now(), head, amount, note, date: new Date().toISOString() });
     saveData();
     renderExpenses();
     updateSummary();
-    
     document.getElementById('expenseHead').value = '';
     document.getElementById('expenseAmount').value = '';
     document.getElementById('expenseNote').value = '';
-    showToast('✅ Expense added', 'success');
+    showToast('✅ Expense added');
 }
 
 function renderExpenses() {
-    const container = document.getElementById('expenseList');
-    const today = getToday();
-    const todayExp = state.expenses.filter(e => e.date.substring(0,10) === today);
-    
+    let container = document.getElementById('expenseList');
+    let today = getToday();
+    let todayExp = expenses.filter(e => e.date.substring(0,10) === today);
     container.innerHTML = '';
-    if(todayExp.length === 0) {
-        container.innerHTML = '<div style="color:#666;padding:20px;text-align:center;font-size:11px;">No expenses today</div>';
-        return;
-    }
-    
+    if(todayExp.length === 0) { container.innerHTML = '<div style="color:#666;padding:10px;font-size:11px;">No expenses today</div>'; return; }
     let total = 0;
     todayExp.forEach(e => {
         total += e.amount;
-        const div = document.createElement('div');
-        div.style.cssText = 'display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #eee;font-size:10px;';
-        div.innerHTML = `
-            <span><strong>${e.head}</strong> ${e.note ? '- ' + e.note : ''}</span>
-            <span>${formatCurrency(e.amount)}</span>
-        `;
-        container.appendChild(div);
-    });
-    
-    const totalDiv = document.createElement('div');
-    totalDiv.style.cssText = 'font-weight:bold;padding:8px 0;border-top:2px solid #ddd;font-size:11px;';
-    totalDiv.innerHTML = `Total: ${formatCurrency(total)}`;
-    container.appendChild(totalDiv);
-    
-    // Render expense categories
-    renderExpenseCategories();
-}
-
-function renderExpenseCategories() {
-    const container = document.getElementById('expenseCategories');
-    const today = getToday();
-    const todayExp = state.expenses.filter(e => e.date.substring(0,10) === today);
-    
-    // Group by head
-    const categories = {};
-    todayExp.forEach(e => {
-        if(!categories[e.head]) categories[e.head] = 0;
-        categories[e.head] += e.amount;
-    });
-    
-    container.innerHTML = '';
-    if(Object.keys(categories).length === 0) {
-        container.innerHTML = '<div style="color:#666;padding:10px;font-size:11px;">No categories</div>';
-        return;
-    }
-    
-    Object.keys(categories).sort().forEach(head => {
-        const div = document.createElement('div');
+        let div = document.createElement('div');
         div.style.cssText = 'display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #eee;font-size:10px;';
-        div.innerHTML = `<span>${head}</span><span>${formatCurrency(categories[head])}</span>`;
+        div.innerHTML = `<span><strong>${e.head}</strong> ${e.note ? '- ' + e.note : ''}</span><span>${formatCurrency(e.amount)}</span>`;
         container.appendChild(div);
     });
+    let totalDiv = document.createElement('div');
+    totalDiv.style.cssText = 'font-weight:bold;padding:4px 0;border-top:2px solid #ddd;font-size:11px;';
+    totalDiv.innerHTML = 'Total: ' + formatCurrency(total);
+    container.appendChild(totalDiv);
 }
 
 // ==================== SUMMARY ====================
 function updateSummary() {
     const today = getToday();
-    const todaySales = state.orders.filter(o => o.date.substring(0,10) === today);
+    
+    const todaySales = orders.filter(o => o.date.substring(0,10) === today);
     const todayCash = todaySales.filter(o => o.status === 'paid' || o.paid >= o.total).reduce((s,o) => s + o.total, 0);
     const todayUdhar = todaySales.filter(o => o.status === 'unpaid' || o.status === 'partial').reduce((s,o) => s + (o.total - (o.paid||0)), 0);
-    const todayIkhrajat = state.expenses.filter(e => e.date.substring(0,10) === today).reduce((s,e) => s + e.amount, 0);
+    const todayIkhrajat = expenses.filter(e => e.date.substring(0,10) === today).reduce((s,e) => s + e.amount, 0);
     
-    const sabqaWusool = state.orders
-        .filter(o => o.date.substring(0,10) < today)
-        .reduce((s,o) => s + (o.paid||0), 0);
-    const advanceWusool = state.customers.reduce((s, c) => s + (c.advance || 0), 0);
+    const sabqaWusool = orders.filter(o => o.date.substring(0,10) < today).reduce((s,o) => s + (o.paid||0), 0);
+    const advanceWusool = customers.reduce((s, c) => s + (c.advance || 0), 0);
     const totalCashJamma = todayCash + sabqaWusool + advanceWusool;
     const paymentMinus = totalCashJamma < todayIkhrajat ? todayIkhrajat - totalCashJamma : 0;
     
@@ -1612,25 +1066,22 @@ function updateSummary() {
     pmBox.className = 'summary-box ' + (paymentMinus > 0 ? 'negative' : 'positive');
     
     // Net Profit
-    const openingStock = state.products.reduce((sum, p) => sum + (p.stock * p.cost), 0);
-    const stockIn = state.stockHistory
-        .filter(h => h.date.substring(0,10) === today && h.type === 'In')
-        .reduce((s,h) => s + (h.qty * (h.price || 0)), 0);
-    const closingStock = state.products.reduce((sum, p) => sum + (p.stock * p.cost), 0);
+    const openingStock = products.reduce((sum, p) => sum + (p.stock * p.cost), 0);
+    const stockIn = stockHistory.filter(h => h.date === today && h.type === 'In').reduce((s,h) => s + (h.qty * h.price), 0);
+    const closingStock = products.reduce((sum, p) => sum + (p.stock * p.cost), 0);
+    const ikhrajat = todayIkhrajat;
     const totalSales = todaySales.reduce((s, o) => s + o.total, 0);
-    const netProfit = totalSales - (openingStock + stockIn - closingStock + todayIkhrajat);
+    const netProfit = totalSales - (openingStock + stockIn - closingStock + ikhrajat);
     
     document.getElementById('plOpening').textContent = formatCurrency(openingStock);
     document.getElementById('plStockIn').textContent = formatCurrency(stockIn);
     document.getElementById('plClosing').textContent = formatCurrency(closingStock);
-    document.getElementById('plIkhrajat').textContent = formatCurrency(todayIkhrajat);
-    
-    const profitEl = document.getElementById('plTotalProfit');
-    profitEl.textContent = 'Net Profit/Loss: ' + formatCurrency(netProfit);
-    profitEl.style.color = netProfit >= 0 ? '#4ade80' : '#f87171';
+    document.getElementById('plIkhrajat').textContent = formatCurrency(ikhrajat);
+    document.getElementById('plTotalProfit').textContent = 'Net Profit/Loss: ' + formatCurrency(netProfit);
+    document.getElementById('plTotalProfit').style.color = netProfit >= 0 ? '#4ade80' : '#f87171';
     
     // Sold Items
-    const soldItems = {};
+    let soldItems = {};
     todaySales.forEach(o => {
         o.items.forEach(i => {
             if(!soldItems[i.name]) soldItems[i.name] = { qty: 0, total: 0 };
@@ -1638,152 +1089,39 @@ function updateSummary() {
             soldItems[i.name].total += i.total;
         });
     });
-    
-    let soldHtml = '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;font-weight:bold;border-bottom:1px solid #ddd;padding:4px 0;font-size:9px;"><span>Item</span><span>Qty</span><span>Revenue</span></div>';
-    Object.keys(soldItems).sort((a,b) => soldItems[b].qty - soldItems[a].qty).slice(0, 10).forEach(name => {
+    let soldHtml = '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;font-weight:bold;border-bottom:1px solid #ddd;padding:2px 0;font-size:9px;"><span>Item</span><span>Qty</span><span>Revenue</span></div>';
+    Object.keys(soldItems).sort((a,b) => soldItems[b].qty - soldItems[a].qty).forEach(name => {
         const data = soldItems[name];
-        soldHtml += `<div style="display:grid;grid-template-columns:1fr 1fr 1fr;padding:4px 0;border-bottom:1px solid #eee;font-size:9px;">
+        soldHtml += `<div style="display:grid;grid-template-columns:1fr 1fr 1fr;padding:2px 0;border-bottom:1px solid #eee;font-size:9px;">
             <span>${name}</span>
             <span>${data.qty}</span>
             <span>${formatCurrency(data.total)}</span>
         </div>`;
     });
-    document.getElementById('soldItems').innerHTML = soldHtml || '<div style="padding:10px;color:#666;text-align:center;font-size:10px;">No items sold today</div>';
+    document.getElementById('soldItems').innerHTML = soldHtml || '<div style="padding:6px;color:#666;font-size:10px;">No items sold today</div>';
     
     // Monthly Summary
     const month = today.substring(0,7);
-    const monthSales = state.orders.filter(o => o.date.substring(0,7) === month);
-    const monthExp = state.expenses.filter(e => e.date.substring(0,7) === month);
+    const monthSales = orders.filter(o => o.date.substring(0,7) === month);
+    const monthExp = expenses.filter(e => e.date.substring(0,7) === month);
     const monthData = {};
-    
     monthSales.forEach(o => {
-        const d = o.date.substring(0,10);
-        if (!monthData[d]) monthData[d] = { sale: 0, udhar: 0, ikhrajat: 0 };
-        if (o.status === 'paid' || o.paid >= o.total) {
-            monthData[d].sale += o.total;
-        } else {
-            monthData[d].udhar += (o.total - (o.paid||0));
-        }
+        if (!monthData[o.date.substring(0,10)]) monthData[o.date.substring(0,10)] = { sale: 0, udhar: 0, ikhrajat: 0 };
+        if (o.status === 'paid' || o.paid >= o.total) monthData[o.date.substring(0,10)].sale += o.total;
+        else monthData[o.date.substring(0,10)].udhar += (o.total - (o.paid||0));
     });
-    
     monthExp.forEach(e => {
-        const d = e.date.substring(0,10);
+        let d = e.date.substring(0,10);
         if (!monthData[d]) monthData[d] = { sale: 0, udhar: 0, ikhrajat: 0 };
         monthData[d].ikhrajat += e.amount;
     });
-    
     let mhtml = '';
-    Object.keys(monthData).sort().slice(-31).forEach(d => {
+    Object.keys(monthData).sort().forEach(d => {
         const data = monthData[d];
         const profit = data.sale - data.ikhrajat;
         mhtml += `<tr><td>${d}</td><td>${formatCurrency(data.sale)}</td><td>${formatCurrency(data.udhar)}</td><td>${formatCurrency(data.ikhrajat)}</td><td style="color:${profit >= 0 ? '#27ae60' : '#e74c3c'}">${formatCurrency(profit)}</td></tr>`;
     });
     document.getElementById('monthlyBody').innerHTML = mhtml || '<tr><td colspan="5" style="text-align:center;color:#666;">No data</td></tr>';
-}
-
-// ==================== REPORTS ====================
-function generateReport() {
-    const period = document.getElementById('reportPeriod').value;
-    const { start, end } = getDateRange(period);
-    
-    const periodOrders = state.orders.filter(o => {
-        const date = new Date(o.date);
-        return date >= start && date <= end;
-    });
-    
-    const periodExpenses = state.expenses.filter(e => {
-        const date = new Date(e.date);
-        return date >= start && date <= end;
-    });
-    
-    const revenue = periodOrders.reduce((s, o) => s + o.total, 0);
-    const expenses = periodExpenses.reduce((s, e) => s + e.amount, 0);
-    const profit = revenue - expenses;
-    
-    document.getElementById('reportRevenue').textContent = formatCurrency(revenue);
-    document.getElementById('reportOrders').textContent = periodOrders.length;
-    document.getElementById('reportProfit').textContent = formatCurrency(profit);
-    document.getElementById('reportExpenses').textContent = formatCurrency(expenses);
-    
-    // Detailed report
-    const container = document.getElementById('reportDetails');
-    container.innerHTML = '';
-    
-    if(periodOrders.length === 0 && periodExpenses.length === 0) {
-        container.innerHTML = '<div style="padding:20px;text-align:center;color:#666;">No data for this period</div>';
-        return;
-    }
-    
-    // Top customers
-    const customerSpending = {};
-    periodOrders.forEach(o => {
-        if(!customerSpending[o.customer]) customerSpending[o.customer] = 0;
-        customerSpending[o.customer] += o.total;
-    });
-    
-    const topCustomers = Object.keys(customerSpending)
-        .sort((a,b) => customerSpending[b] - customerSpending[a])
-        .slice(0, 5);
-    
-    let html = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:10px;">';
-    
-    html += '<div><strong>📊 Top Customers</strong>';
-    if(topCustomers.length > 0) {
-        topCustomers.forEach(c => {
-            html += `<div style="display:flex;justify-content:space-between;padding:2px 0;border-bottom:1px solid #eee;">
-                <span>${c}</span>
-                <span>${formatCurrency(customerSpending[c])}</span>
-            </div>`;
-        });
-    } else {
-        html += '<div style="padding:10px;color:#666;">No customers</div>';
-    }
-    html += '</div>';
-    
-    html += '<div><strong>📦 Top Products</strong>';
-    const productSales = {};
-    periodOrders.forEach(o => {
-        o.items.forEach(i => {
-            if(!productSales[i.name]) productSales[i.name] = { qty: 0, total: 0 };
-            productSales[i.name].qty += i.qty;
-            productSales[i.name].total += i.total;
-        });
-    });
-    
-    const topProducts = Object.keys(productSales)
-        .sort((a,b) => productSales[b].total - productSales[a].total)
-        .slice(0, 5);
-    
-    if(topProducts.length > 0) {
-        topProducts.forEach(p => {
-            html += `<div style="display:flex;justify-content:space-between;padding:2px 0;border-bottom:1px solid #eee;">
-                <span>${p}</span>
-                <span>${formatCurrency(productSales[p].total)}</span>
-            </div>`;
-        });
-    } else {
-        html += '<div style="padding:10px;color:#666;">No products sold</div>';
-    }
-    html += '</div></div>';
-    
-    // Recent transactions
-    html += '<div style="margin-top:8px;"><strong>📋 Recent Transactions</strong>';
-    const recent = [...periodOrders].reverse().slice(0, 10);
-    if(recent.length > 0) {
-        recent.forEach(o => {
-            html += `<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #eee;font-size:9px;">
-                <span>${o.invoiceNo}</span>
-                <span>${o.customer}</span>
-                <span>${formatCurrency(o.total)}</span>
-                <span class="badge badge-${o.status}">${o.status}</span>
-            </div>`;
-        });
-    } else {
-        html += '<div style="padding:10px;color:#666;">No transactions</div>';
-    }
-    html += '</div>';
-    
-    container.innerHTML = html;
 }
 
 // ==================== RENDER ALL ====================
@@ -1796,38 +1134,24 @@ function renderAll() {
     renderExpenses();
     updateSummary();
     populateStockSelect();
-    updateProductSuggestions();
 }
 
 // ==================== INIT ====================
-// Load dark mode preference
-const darkMode = localStorage.getItem('warda_darkmode');
-if(darkMode === 'true') {
-    state.darkMode = true;
-    document.body.classList.add('dark-mode');
-    document.querySelector('.container').classList.add('dark-mode');
-}
+loadData();
+renderAll();
 
-init();
+// Show login if not admin
+setTimeout(() => {
+    if(!isAdmin) {
+        document.getElementById('loginOverlay').style.display = 'flex';
+        document.querySelector('.container').classList.add('view-only');
+    }
+}, 500);
 
-// Keyboard shortcuts
-document.addEventListener('keydown', (e) => {
-    // Ctrl+Enter to confirm order
-    if(e.ctrlKey && e.key === 'Enter') {
-        e.preventDefault();
-        confirmOrder();
-    }
-    // Escape to clear cart
-    if(e.key === 'Escape' && document.activeElement?.tagName !== 'INPUT') {
-        if(state.cart.length > 0) {
-            if(confirm('Clear cart?')) {
-                state.cart = [];
-                renderCart();
-                showToast('🛒 Cart cleared', 'info');
-            }
-        }
-    }
-});
+console.log('✅ Warda Marble System Loaded!');
+console.log('📦 Products:', products.length);
+console.log('📄 Orders:', orders.length);
+console.log('👥 Customers:', customers.length);
 </script>
 </body>
 </html>
