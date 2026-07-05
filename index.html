@@ -67,7 +67,6 @@
 <body>
 
 <div class="container" id="app">
-    <!-- Header -->
     <div class="header">
         <h1>🏢 WARDA MARBLE <span id="roleBadge" style="font-size:11px;background:#6b7a8a;padding:2px 8px;border-radius:8px;">👁️ Viewer</span></h1>
         <p>Premium Marble Solutions</p>
@@ -77,7 +76,6 @@
         </div>
     </div>
 
-    <!-- Tabs -->
     <div class="tabs">
         <button class="tab active" onclick="showTab('pos')">🛒 POS</button>
         <button class="tab" onclick="showTab('stock')">📦 Stock</button>
@@ -87,7 +85,6 @@
         <button class="tab" onclick="showTab('expenses')">💸 Expenses</button>
     </div>
 
-    <!-- ===== POS TAB ===== -->
     <div id="tab-pos" class="tab-content active">
         <div class="grid-2">
             <div class="panel">
@@ -153,7 +150,6 @@
         </div>
     </div>
 
-    <!-- ===== STOCK TAB ===== -->
     <div id="tab-stock" class="tab-content">
         <div class="panel">
             <h3>📦 Stock Management</h3>
@@ -186,7 +182,6 @@
         </div>
     </div>
 
-    <!-- ===== CUSTOMERS TAB ===== -->
     <div id="tab-customers" class="tab-content">
         <div class="panel">
             <h3>👥 Customers</h3>
@@ -195,7 +190,6 @@
         </div>
     </div>
 
-    <!-- ===== INVOICES TAB ===== -->
     <div id="tab-invoices" class="tab-content">
         <div class="panel">
             <h3>📄 Invoices</h3>
@@ -209,7 +203,6 @@
         </div>
     </div>
 
-    <!-- ===== SUMMARY TAB ===== -->
     <div id="tab-summary" class="tab-content">
         <div class="panel">
             <h3>📊 Daily Summary</h3>
@@ -249,7 +242,6 @@
         </div>
     </div>
 
-    <!-- ===== EXPENSES TAB ===== -->
     <div id="tab-expenses" class="tab-content">
         <div class="panel">
             <h3>💸 Expenses</h3>
@@ -266,7 +258,6 @@
     </div>
 </div>
 
-<!-- ===== LOGIN OVERLAY ===== -->
 <div id="loginOverlay" class="login-overlay">
     <div class="login-box">
         <h2>🔐 Admin Login</h2>
@@ -1140,7 +1131,6 @@ function renderAll() {
 loadData();
 renderAll();
 
-// Show login if not admin
 setTimeout(() => {
     if(!isAdmin) {
         document.getElementById('loginOverlay').style.display = 'flex';
