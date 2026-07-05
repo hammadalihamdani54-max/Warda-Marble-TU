@@ -331,123 +331,92 @@ let taxEnabled = true;
 let taxRate = 15;
 let taxName = "VAT";
 
-// ==================== ALL PRODUCTS (EXACTLY AS YOUR SYSTEM) ====================
+// ==================== ORIGINAL PRODUCTS (AS PER YOUR SYSTEM) ====================
 function initProducts() {
     products = [
-        // ===== MATERIALS (MWAD) - NO CAPSULES =====
-        { id: 1, name: 'زاویہ اپ ڈاون', size: '4*4*3mm', category: 'mwad', selling: 0, cost: 0, stock: 9200, type: 'pieces' },
-        { id: 2, name: 'زاویہ اپ ڈاون', size: '4*4*2mm', category: 'mwad', selling: 0, cost: 0, stock: 6600, type: 'pieces' },
-        { id: 3, name: 'مسمار مغلوب', size: '10*40', category: 'mwad', selling: 0, cost: 0, stock: 4800, type: 'pieces' },
-        { id: 4, name: 'مسمار مغلوب', size: '10*50', category: 'mwad', selling: 0, cost: 0, stock: 4800, type: 'pieces' },
-        { id: 5, name: 'مسمار مغلوب', size: '10*60', category: 'mwad', selling: 0, cost: 0, stock: 3200, type: 'pieces' },
-        { id: 6, name: 'مسمار مغلوب', size: '12*40', category: 'mwad', selling: 0, cost: 0, stock: 2800, type: 'pieces' },
-        { id: 7, name: 'مسمار مغلوب', size: '12*50', category: 'mwad', selling: 0, cost: 0, stock: 2800, type: 'pieces' },
-        { id: 8, name: 'مسمار مغلوب', size: '12*60', category: 'mwad', selling: 0, cost: 0, stock: 1800, type: 'pieces' },
-        { id: 9, name: 'مسمار مغلوب', size: '14*40', category: 'mwad', selling: 0, cost: 0, stock: 2000, type: 'pieces' },
-        { id: 10, name: 'مسمار مغلوب', size: '14*50', category: 'mwad', selling: 0, cost: 0, stock: 2000, type: 'pieces' },
-        { id: 11, name: 'مسمار مغلوب', size: '14*60', category: 'mwad', selling: 0, cost: 0, stock: 1200, type: 'pieces' },
-        { id: 12, name: 'مسمار مغلوب', size: '16*40', category: 'mwad', selling: 0, cost: 0, stock: 1500, type: 'pieces' },
-        { id: 13, name: 'مسمار مغلوب', size: '16*50', category: 'mwad', selling: 0, cost: 0, stock: 1500, type: 'pieces' },
-        { id: 14, name: 'مسمار مغلوب', size: '16*60', category: 'mwad', selling: 0, cost: 0, stock: 1000, type: 'pieces' },
-        { id: 15, name: 'مسمار مغلوب', size: '18*40', category: 'mwad', selling: 0, cost: 0, stock: 1200, type: 'pieces' },
-        { id: 16, name: 'مسمار مغلوب', size: '18*50', category: 'mwad', selling: 0, cost: 0, stock: 1200, type: 'pieces' },
-        { id: 17, name: 'مسمار مغلوب', size: '18*60', category: 'mwad', selling: 0, cost: 0, stock: 800, type: 'pieces' },
-        { id: 18, name: 'مسمار مغلوب', size: '20*40', category: 'mwad', selling: 0, cost: 0, stock: 1000, type: 'pieces' },
-        { id: 19, name: 'مسمار مغلوب', size: '20*50', category: 'mwad', selling: 0, cost: 0, stock: 1000, type: 'pieces' },
-        { id: 20, name: 'مسمار مغلوب', size: '20*60', category: 'mwad', selling: 0, cost: 0, stock: 600, type: 'pieces' },
-        { id: 21, name: 'مسمار مغلوب', size: '22*40', category: 'mwad', selling: 0, cost: 0, stock: 800, type: 'pieces' },
-        { id: 22, name: 'مسمار مغلوب', size: '22*50', category: 'mwad', selling: 0, cost: 0, stock: 800, type: 'pieces' },
-        { id: 23, name: 'مسمار مغلوب', size: '22*60', category: 'mwad', selling: 0, cost: 0, stock: 500, type: 'pieces' },
-        { id: 24, name: 'مسمار مغلوب', size: '25*40', category: 'mwad', selling: 0, cost: 0, stock: 600, type: 'pieces' },
-        { id: 25, name: 'مسمار مغلوب', size: '25*50', category: 'mwad', selling: 0, cost: 0, stock: 600, type: 'pieces' },
-        { id: 26, name: 'مسمار مغلوب', size: '25*60', category: 'mwad', selling: 0, cost: 0, stock: 400, type: 'pieces' },
-        { id: 27, name: 'براغی سقف', size: '10*72', category: 'mwad', selling: 0, cost: 0, stock: 2200, type: 'pieces' },
-        { id: 28, name: 'براغی سقف', size: '10*92', category: 'mwad', selling: 0, cost: 0, stock: 2100, type: 'pieces' },
-        { id: 29, name: 'براغی سقف', size: '10*112', category: 'mwad', selling: 0, cost: 0, stock: 1920, type: 'pieces' },
-        { id: 30, name: 'براغی سقف', size: '10*115', category: 'mwad', selling: 0, cost: 0, stock: 2200, type: 'pieces' },
-        { id: 31, name: 'براغی سقف', size: '10*202', category: 'mwad', selling: 0, cost: 0, stock: 1040, type: 'pieces' },
-        { id: 32, name: 'جولی ابو جمل', size: 'Standard', category: 'mwad', selling: 0, cost: 0, stock: 5, type: 'pieces' },
-        { id: 33, name: 'جولی گلیڈتیر', size: 'Standard', category: 'mwad', selling: 0, cost: 0, stock: 0, type: 'pieces' },
-        { id: 34, name: 'دسک حجر احمر', size: '7 بوسہ', category: 'mwad', selling: 0, cost: 0, stock: 0, type: 'pieces' },
-        { id: 35, name: 'دسک حجر احمر', size: '4.50 بوسہ', category: 'mwad', selling: 0, cost: 0, stock: 7, type: 'pieces' },
-        { id: 36, name: 'دسک جرانیت', size: '7 بوسہ', category: 'mwad', selling: 0, cost: 0, stock: 3, type: 'pieces' },
-        { id: 37, name: 'دسک بوش', size: '9 بوسہ', category: 'mwad', selling: 0, cost: 0, stock: 20, type: 'pieces' },
-        { id: 38, name: 'ریشہ ہلتی', size: '20cm', category: 'mwad', selling: 0, cost: 0, stock: 0, type: 'pieces' },
-        { id: 39, name: 'ریشہ ہلتی', size: '15cm', category: 'mwad', selling: 0, cost: 0, stock: 24, type: 'pieces' },
-        { id: 40, name: 'ریشہ ہلتی', size: '10cm', category: 'mwad', selling: 0, cost: 0, stock: 1, type: 'pieces' },
-        { id: 41, name: 'ریشہ دریل', size: '4mm', category: 'mwad', selling: 0, cost: 0, stock: 12, type: 'pieces' },
-        { id: 42, name: 'ریشہ دریل', size: '6mm', category: 'mwad', selling: 0, cost: 0, stock: 10, type: 'pieces' },
-        { id: 43, name: 'ریشہ دریل', size: '10mm', category: 'mwad', selling: 0, cost: 0, stock: 16, type: 'pieces' },
-        { id: 44, name: 'گمتا چوڑی', size: 'Standard', category: 'mwad', selling: 0, cost: 0, stock: 7, type: 'pieces' },
-        { id: 45, name: 'گمتا سادہ', size: 'Standard', category: 'mwad', selling: 0, cost: 0, stock: 7, type: 'pieces' },
-        { id: 46, name: 'بکرا', size: 'Standard', category: 'mwad', selling: 0, cost: 0, stock: 1, type: 'pieces' },
+        // ===== MATERIALS (MWAD) - AS PER YOUR LIST =====
+        // مسمار مغلوب
+        { id: 1, name: 'مسمار مغلوب', size: '10*40', category: 'mwad', selling: 0, cost: 0, stock: 4800, type: 'pieces' },
+        { id: 2, name: 'مسمار مغلوب', size: '10*50', category: 'mwad', selling: 0, cost: 0, stock: 4800, type: 'pieces' },
+        { id: 3, name: 'مسمار مغلوب', size: '10*60', category: 'mwad', selling: 0, cost: 0, stock: 3500, type: 'pieces' },
+        { id: 4, name: 'مسمار مغلوب', size: '10*80', category: 'mwad', selling: 0, cost: 0, stock: 1500, type: 'pieces' },
+        { id: 5, name: 'مسمار مغلوب', size: '10*100', category: 'mwad', selling: 0, cost: 0, stock: 1440, type: 'pieces' },
         
-        // ===== STONE - Polished (MOJALI) =====
-        { id: 47, name: 'ابیض مجلی مبروم', size: '3*7', category: 'stone', selling: 65, cost: 50, stock: 50, type: 'sqm' },
-        { id: 48, name: 'ابیض مجلی مبروم', size: '3*10', category: 'stone', selling: 65, cost: 50, stock: 50, type: 'sqm' },
-        { id: 49, name: 'ابیض مجلی مبروم', size: '3*15', category: 'stone', selling: 65, cost: 50, stock: 50, type: 'sqm' },
-        { id: 50, name: 'ابیض مجلی مبروم', size: '3*18', category: 'stone', selling: 65, cost: 50, stock: 50, type: 'sqm' },
-        { id: 51, name: 'ابیض مجلی مبروم', size: '3*20', category: 'stone', selling: 65, cost: 50, stock: 50, type: 'sqm' },
-        { id: 52, name: 'ابیض مجلی مبروم', size: '3*25', category: 'stone', selling: 65, cost: 50, stock: 50, type: 'sqm' },
-        { id: 53, name: 'ابیض مجلی مبروم', size: '3*27', category: 'stone', selling: 65, cost: 50, stock: 50, type: 'sqm' },
-        { id: 54, name: 'ابیض مجلی مبروم', size: '3*30', category: 'stone', selling: 65, cost: 50, stock: 50, type: 'sqm' },
-        { id: 55, name: 'ابیض مجلی مبروم', size: '3*32', category: 'stone', selling: 65, cost: 50, stock: 50, type: 'sqm' },
-        { id: 56, name: 'ابیض مجلی مبروم', size: '3*35', category: 'stone', selling: 65, cost: 50, stock: 50, type: 'sqm' },
-        { id: 57, name: 'ابیض مجلی مبروم', size: '3*37', category: 'stone', selling: 65, cost: 50, stock: 50, type: 'sqm' },
-        { id: 58, name: 'ابیض مجلی مبروم', size: '3*40', category: 'stone', selling: 65, cost: 50, stock: 50, type: 'sqm' },
-        { id: 59, name: 'ابیض مجلی مبروم', size: '3*50', category: 'stone', selling: 65, cost: 50, stock: 50, type: 'sqm' },
-        { id: 60, name: 'ابیض مجلی مبروم', size: '3*60', category: 'stone', selling: 65, cost: 50, stock: 50, type: 'sqm' },
-        { id: 61, name: 'ابیض مجلی سادہ', size: '3*7', category: 'stone', selling: 60, cost: 45, stock: 50, type: 'sqm' },
-        { id: 62, name: 'ابیض مجلی سادہ', size: '3*10', category: 'stone', selling: 60, cost: 45, stock: 50, type: 'sqm' },
-        { id: 63, name: 'ابیض مجلی سادہ', size: '3*15', category: 'stone', selling: 60, cost: 45, stock: 50, type: 'sqm' },
-        { id: 64, name: 'ابیض مجلی سادہ', size: '3*18', category: 'stone', selling: 60, cost: 45, stock: 50, type: 'sqm' },
-        { id: 65, name: 'ابیض مجلی سادہ', size: '3*20', category: 'stone', selling: 60, cost: 45, stock: 50, type: 'sqm' },
-        { id: 66, name: 'ابیض مجلی سادہ', size: '3*25', category: 'stone', selling: 60, cost: 45, stock: 50, type: 'sqm' },
-        { id: 67, name: 'ابیض مجلی سادہ', size: '3*27', category: 'stone', selling: 60, cost: 45, stock: 50, type: 'sqm' },
-        { id: 68, name: 'ابیض مجلی سادہ', size: '3*30', category: 'stone', selling: 60, cost: 45, stock: 50, type: 'sqm' },
-        { id: 69, name: 'ابیض مجلی سادہ', size: '3*32', category: 'stone', selling: 60, cost: 45, stock: 50, type: 'sqm' },
-        { id: 70, name: 'ابیض مجلی سادہ', size: '3*35', category: 'stone', selling: 60, cost: 45, stock: 50, type: 'sqm' },
-        { id: 71, name: 'ابیض مجلی سادہ', size: '3*37', category: 'stone', selling: 60, cost: 45, stock: 50, type: 'sqm' },
-        { id: 72, name: 'ابیض مجلی سادہ', size: '3*40', category: 'stone', selling: 60, cost: 45, stock: 50, type: 'sqm' },
-        { id: 73, name: 'ابیض مجلی سادہ', size: '3*50', category: 'stone', selling: 60, cost: 45, stock: 50, type: 'sqm' },
-        { id: 74, name: 'ابیض مجلی سادہ', size: '3*60', category: 'stone', selling: 60, cost: 45, stock: 50, type: 'sqm' },
-        { id: 75, name: '(A) ابیض مجلی فرزا', size: '3*40*80', category: 'stone', selling: 75, cost: 63, stock: 50, type: 'sqm' },
-        { id: 76, name: '(C) ابیض مجلی فرزا', size: '3*40*60', category: 'stone', selling: 75, cost: 63, stock: 50, type: 'sqm' },
-        { id: 77, name: 'ابیض مجلی مشطوف', size: '3*30', category: 'stone', selling: 70, cost: 58, stock: 50, type: 'sqm' },
-        { id: 78, name: 'ابیض بشارتہ فرزا', size: '3*40*80', category: 'stone', selling: 85, cost: 73, stock: 50, type: 'sqm' },
-        { id: 79, name: 'MNHOOD ABIAZ', size: '3*20*1.20', category: 'stone', selling: 65, cost: 53, stock: 50, type: 'sqm' },
+        // زاویہ اپ ڈاون
+        { id: 6, name: 'زاویہ اپ ڈاون', size: '4*4*3mm', category: 'mwad', selling: 0, cost: 0, stock: 9200, type: 'pieces' },
+        { id: 7, name: 'زاویہ اپ ڈاون', size: '4*4*2mm', category: 'mwad', selling: 0, cost: 0, stock: 6600, type: 'pieces' },
+        { id: 8, name: 'زاویہ اپ ڈاون', size: '4*3*2mm', category: 'mwad', selling: 0, cost: 0, stock: 2500, type: 'pieces' },
+        { id: 9, name: 'زاویہ اپ ڈاون', size: '4*3*3mm', category: 'mwad', selling: 0, cost: 0, stock: 4300, type: 'pieces' },
+        { id: 10, name: 'زاویہ اپ ڈاون', size: '4*5*3mm', category: 'mwad', selling: 0, cost: 0, stock: 1200, type: 'pieces' },
+        { id: 11, name: 'زاویہ اپ ڈاون', size: '4*6*3mm', category: 'mwad', selling: 0, cost: 0, stock: 850, type: 'pieces' },
+        { id: 12, name: 'زاویہ اپ ڈاون', size: '4*8*3mm', category: 'mwad', selling: 0, cost: 0, stock: 420, type: 'pieces' },
+        { id: 13, name: 'زاویہ اپ ڈاون', size: '4*10*3mm', category: 'mwad', selling: 0, cost: 0, stock: 400, type: 'pieces' },
         
-        // ===== STONE - Honed (MOSNAFAR) =====
-        { id: 80, name: 'ابیض مصنفر مبروم', size: '3*7', category: 'stone', selling: 55, cost: 42, stock: 50, type: 'sqm' },
-        { id: 81, name: 'ابیض مصنفر مبروم', size: '3*10', category: 'stone', selling: 55, cost: 42, stock: 50, type: 'sqm' },
-        { id: 82, name: 'ابیض مصنفر مبروم', size: '3*15', category: 'stone', selling: 55, cost: 42, stock: 50, type: 'sqm' },
-        { id: 83, name: 'ابیض مصنفر مبروم', size: '3*18', category: 'stone', selling: 55, cost: 42, stock: 50, type: 'sqm' },
-        { id: 84, name: 'ابیض مصنفر مبروم', size: '3*20', category: 'stone', selling: 55, cost: 42, stock: 50, type: 'sqm' },
-        { id: 85, name: 'ابیض مصنفر مبروم', size: '3*25', category: 'stone', selling: 55, cost: 42, stock: 50, type: 'sqm' },
-        { id: 86, name: 'ابیض مصنفر مبروم', size: '3*27', category: 'stone', selling: 55, cost: 42, stock: 50, type: 'sqm' },
-        { id: 87, name: 'ابیض مصنفر مبروم', size: '3*30', category: 'stone', selling: 55, cost: 42, stock: 50, type: 'sqm' },
-        { id: 88, name: 'ابیض مصنفر مبروم', size: '3*32', category: 'stone', selling: 55, cost: 42, stock: 50, type: 'sqm' },
-        { id: 89, name: 'ابیض مصنفر مبروم', size: '3*35', category: 'stone', selling: 55, cost: 42, stock: 50, type: 'sqm' },
-        { id: 90, name: 'ابیض مصنفر مبروم', size: '3*37', category: 'stone', selling: 55, cost: 42, stock: 50, type: 'sqm' },
-        { id: 91, name: 'ابیض مصنفر مبروم', size: '3*40', category: 'stone', selling: 55, cost: 42, stock: 50, type: 'sqm' },
-        { id: 92, name: 'ابیض مصنفر مبروم', size: '3*50', category: 'stone', selling: 55, cost: 42, stock: 50, type: 'sqm' },
-        { id: 93, name: 'ابیض مصنفر مبروم', size: '3*60', category: 'stone', selling: 55, cost: 42, stock: 50, type: 'sqm' },
-        { id: 94, name: 'ابیض مصنفر سادہ', size: '3*7', category: 'stone', selling: 50, cost: 38, stock: 50, type: 'sqm' },
-        { id: 95, name: 'ابیض مصنفر سادہ', size: '3*10', category: 'stone', selling: 50, cost: 38, stock: 50, type: 'sqm' },
-        { id: 96, name: 'ابیض مصنفر سادہ', size: '3*15', category: 'stone', selling: 50, cost: 38, stock: 50, type: 'sqm' },
-        { id: 97, name: 'ابیض مصنفر سادہ', size: '3*18', category: 'stone', selling: 50, cost: 38, stock: 50, type: 'sqm' },
-        { id: 98, name: 'ابیض مصنفر سادہ', size: '3*20', category: 'stone', selling: 50, cost: 38, stock: 50, type: 'sqm' },
-        { id: 99, name: 'ابیض مصنفر سادہ', size: '3*25', category: 'stone', selling: 50, cost: 38, stock: 50, type: 'sqm' },
-        { id: 100, name: 'ابیض مصنفر سادہ', size: '3*27', category: 'stone', selling: 50, cost: 38, stock: 50, type: 'sqm' },
-        { id: 101, name: 'ابیض مصنفر سادہ', size: '3*30', category: 'stone', selling: 50, cost: 38, stock: 50, type: 'sqm' },
-        { id: 102, name: 'ابیض مصنفر سادہ', size: '3*32', category: 'stone', selling: 50, cost: 38, stock: 50, type: 'sqm' },
-        { id: 103, name: 'ابیض مصنفر سادہ', size: '3*35', category: 'stone', selling: 50, cost: 38, stock: 50, type: 'sqm' },
-        { id: 104, name: 'ابیض مصنفر سادہ', size: '3*37', category: 'stone', selling: 50, cost: 38, stock: 50, type: 'sqm' },
-        { id: 105, name: 'ابیض مصنفر سادہ', size: '3*40', category: 'stone', selling: 50, cost: 38, stock: 50, type: 'sqm' },
-        { id: 106, name: 'ابیض مصنفر سادہ', size: '3*50', category: 'stone', selling: 50, cost: 38, stock: 50, type: 'sqm' },
-        { id: 107, name: 'ابیض مصنفر سادہ', size: '3*60', category: 'stone', selling: 50, cost: 38, stock: 50, type: 'sqm' },
-        { id: 108, name: 'ابیض مصنفر فرزا', size: '3*40*80', category: 'stone', selling: 65, cost: 55, stock: 50, type: 'sqm' },
-        { id: 109, name: 'پیانو ابیض مصنفر', size: '3*20*50', category: 'stone', selling: 55, cost: 45, stock: 50, type: 'sqm' }
+        // براغی سقف
+        { id: 14, name: 'براغی سقف', size: '10*72', category: 'mwad', selling: 0, cost: 0, stock: 2200, type: 'pieces' },
+        { id: 15, name: 'براغی سقف', size: '10*92', category: 'mwad', selling: 0, cost: 0, stock: 2100, type: 'pieces' },
+        { id: 16, name: 'براغی سقف', size: '10*112', category: 'mwad', selling: 0, cost: 0, stock: 1920, type: 'pieces' },
+        { id: 17, name: 'براغی سقف', size: '10*115', category: 'mwad', selling: 0, cost: 0, stock: 2200, type: 'pieces' },
+        { id: 18, name: 'براغی سقف', size: '10*202', category: 'mwad', selling: 0, cost: 0, stock: 1040, type: 'pieces' },
+        
+        // گمتا اور جولی
+        { id: 19, name: 'گمتا چوڑی', size: 'Standard', category: 'mwad', selling: 0, cost: 0, stock: 7, type: 'pieces' },
+        { id: 20, name: 'گمتا سادہ', size: 'Standard', category: 'mwad', selling: 0, cost: 0, stock: 7, type: 'pieces' },
+        { id: 21, name: 'جولی ابو جمل', size: 'Standard', category: 'mwad', selling: 0, cost: 0, stock: 5, type: 'pieces' },
+        { id: 22, name: 'جولی گلیڈتیر', size: 'Standard', category: 'mwad', selling: 0, cost: 0, stock: 0, type: 'pieces' },
+        
+        // دسک
+        { id: 23, name: 'دسک حجر احمر', size: '7 بوسہ', category: 'mwad', selling: 0, cost: 0, stock: 0, type: 'pieces' },
+        { id: 24, name: 'دسک حجر احمر', size: '4.50 بوسہ', category: 'mwad', selling: 0, cost: 0, stock: 7, type: 'pieces' },
+        { id: 25, name: 'دسک جرانیت', size: '7 بوسہ', category: 'mwad', selling: 0, cost: 0, stock: 3, type: 'pieces' },
+        { id: 26, name: 'دسک بوش', size: '9 بوسہ', category: 'mwad', selling: 0, cost: 0, stock: 20, type: 'pieces' },
+        
+        // ریشہ
+        { id: 27, name: 'ریشہ ہلتی', size: '20cm', category: 'mwad', selling: 0, cost: 0, stock: 0, type: 'pieces' },
+        { id: 28, name: 'ریشہ ہلتی', size: '15cm', category: 'mwad', selling: 0, cost: 0, stock: 24, type: 'pieces' },
+        { id: 29, name: 'ریشہ ہلتی', size: '10cm', category: 'mwad', selling: 0, cost: 0, stock: 1, type: 'pieces' },
+        { id: 30, name: 'ریشہ دریل', size: '4mm', category: 'mwad', selling: 0, cost: 0, stock: 12, type: 'pieces' },
+        { id: 31, name: 'ریشہ دریل', size: '6mm', category: 'mwad', selling: 0, cost: 0, stock: 10, type: 'pieces' },
+        { id: 32, name: 'ریشہ دریل', size: '10mm', category: 'mwad', selling: 0, cost: 0, stock: 16, type: 'pieces' },
+        
+        { id: 33, name: 'بکرا', size: 'Standard', category: 'mwad', selling: 0, cost: 0, stock: 1, type: 'pieces' },
+        
+        // ===== STONE - ابیض مجلی (Polished) =====
+        { id: 34, name: 'ابیض مجلی', size: '20cm', category: 'stone', selling: 65, cost: 50, stock: 50, type: 'sqm' },
+        { id: 35, name: 'ابیض مجلی', size: '30cm', category: 'stone', selling: 65, cost: 50, stock: 50, type: 'sqm' },
+        { id: 36, name: 'ابیض مجلی', size: '40cm', category: 'stone', selling: 65, cost: 50, stock: 50, type: 'sqm' },
+        { id: 37, name: 'ابیض مجلی مبروم', size: '20cm', category: 'stone', selling: 70, cost: 55, stock: 50, type: 'sqm' },
+        { id: 38, name: 'ابیض مجلی مبروم', size: '30cm', category: 'stone', selling: 70, cost: 55, stock: 50, type: 'sqm' },
+        { id: 39, name: 'ابیض مجلی مبروم', size: '40cm', category: 'stone', selling: 70, cost: 55, stock: 50, type: 'sqm' },
+        { id: 40, name: 'ابیض مجلی فرزا', size: '20cm', category: 'stone', selling: 75, cost: 60, stock: 50, type: 'sqm' },
+        { id: 41, name: 'ابیض مجلی فرزا', size: '30cm', category: 'stone', selling: 75, cost: 60, stock: 50, type: 'sqm' },
+        { id: 42, name: 'ابیض مجلی فرزا', size: '40cm', category: 'stone', selling: 75, cost: 60, stock: 50, type: 'sqm' },
+        { id: 43, name: 'ابیض مجلی فرزا', size: '40*80', category: 'stone', selling: 85, cost: 68, stock: 50, type: 'sqm' },
+        { id: 44, name: 'ابیض مجلی مشطوف', size: '30cm', category: 'stone', selling: 70, cost: 55, stock: 50, type: 'sqm' },
+        
+        // ===== STONE - ابیض مصنفر (Honed) =====
+        { id: 45, name: 'ابیض مصنفر', size: '20cm', category: 'stone', selling: 55, cost: 42, stock: 50, type: 'sqm' },
+        { id: 46, name: 'ابیض مصنفر', size: '30cm', category: 'stone', selling: 55, cost: 42, stock: 50, type: 'sqm' },
+        { id: 47, name: 'ابیض مصنفر', size: '40cm', category: 'stone', selling: 55, cost: 42, stock: 50, type: 'sqm' },
+        { id: 48, name: 'ابیض مصنفر مبروم', size: '20cm', category: 'stone', selling: 60, cost: 46, stock: 50, type: 'sqm' },
+        { id: 49, name: 'ابیض مصنفر مبروم', size: '30cm', category: 'stone', selling: 60, cost: 46, stock: 50, type: 'sqm' },
+        { id: 50, name: 'ابیض مصنفر مبروم', size: '40cm', category: 'stone', selling: 60, cost: 46, stock: 50, type: 'sqm' },
+        { id: 51, name: 'ابیض مصنفر فرزا', size: '20cm', category: 'stone', selling: 65, cost: 50, stock: 50, type: 'sqm' },
+        { id: 52, name: 'ابیض مصنفر فرزا', size: '30cm', category: 'stone', selling: 65, cost: 50, stock: 50, type: 'sqm' },
+        { id: 53, name: 'ابیض مصنفر فرزا', size: '40cm', category: 'stone', selling: 65, cost: 50, stock: 50, type: 'sqm' },
+        { id: 54, name: 'ابیض مصنفر فرزا', size: '40*80', category: 'stone', selling: 75, cost: 58, stock: 50, type: 'sqm' },
+        
+        // ===== STONE - واجھہ جبل (Wajha Jabal) =====
+        { id: 55, name: 'واجھہ جبل', size: '20cm', category: 'stone', selling: 45, cost: 35, stock: 50, type: 'sqm' },
+        { id: 56, name: 'واجھہ جبل', size: '30cm', category: 'stone', selling: 45, cost: 35, stock: 50, type: 'sqm' },
+        { id: 57, name: 'واجھہ جبل', size: '40cm', category: 'stone', selling: 45, cost: 35, stock: 50, type: 'sqm' },
+        { id: 58, name: 'واجھہ جبل مبروم', size: '20cm', category: 'stone', selling: 50, cost: 40, stock: 50, type: 'sqm' },
+        { id: 59, name: 'واجھہ جبل مبروم', size: '30cm', category: 'stone', selling: 50, cost: 40, stock: 50, type: 'sqm' },
+        { id: 60, name: 'واجھہ جبل مبروم', size: '40cm', category: 'stone', selling: 50, cost: 40, stock: 50, type: 'sqm' },
+        { id: 61, name: 'واجھہ جبل فرزا', size: '20cm', category: 'stone', selling: 55, cost: 44, stock: 50, type: 'sqm' },
+        { id: 62, name: 'واجھہ جبل فرزا', size: '30cm', category: 'stone', selling: 55, cost: 44, stock: 50, type: 'sqm' },
+        { id: 63, name: 'واجھہ جبل فرزا', size: '40cm', category: 'stone', selling: 55, cost: 44, stock: 50, type: 'sqm' },
+        { id: 64, name: 'واجھہ جبل فرزا', size: '40*80', category: 'stone', selling: 65, cost: 52, stock: 50, type: 'sqm' }
     ];
     saveData();
 }
@@ -760,7 +729,6 @@ function addToCart() {
     let cost = parseFloat(document.getElementById('costPrice').value) || 0;
     let p = products.find(pr => pr.name === name);
     
-    // Save for undo
     cartHistory.push(JSON.parse(JSON.stringify(cart)));
     
     let qty, price, total;
@@ -991,7 +959,6 @@ function editCustomer(phone) {
     if(name !== null && name.trim() !== '') cust.name = name.trim();
     let newPhone = prompt('Phone Number:', cust.phone);
     if(newPhone !== null && newPhone.trim() !== '') {
-        // Update phone in orders too
         orders.forEach(o => { if(o.phone === cust.phone) o.phone = newPhone.trim(); });
         cust.phone = newPhone.trim();
     }
@@ -1076,12 +1043,6 @@ function editInvoice(invNo) {
     if(cust !== null && cust.trim() !== '') o.customer = cust.trim();
     let phone = prompt('Phone Number:', o.phone || '');
     if(phone !== null) o.phone = phone.trim();
-    // Update customer records
-    let custObj = customers.find(c => c.phone === o.phone);
-    if(custObj) {
-        let inv = custObj.invoices.find(i => i.invoiceNo === invNo);
-        if(inv) { inv.customer = o.customer; }
-    }
     saveData();
     renderInvoices();
     renderCustomers();
@@ -1214,9 +1175,7 @@ function saveSettings() {
     let name = document.getElementById('companyName').value;
     let phone = document.getElementById('companyPhone').value;
     let address = document.getElementById('companyAddress').value;
-    // Save to localStorage
     localStorage.setItem('warda_company', JSON.stringify({name, phone, address}));
-    // Update header
     document.querySelector('.header h1').innerHTML = '🏢 ' + name + ' <span id="roleBadge" style="font-size:11px;background:#6b7a8a;padding:2px 8px;border-radius:8px;">👁️ Viewer</span>';
     showToast('✅ Settings saved');
 }
@@ -1293,7 +1252,6 @@ function renderAll() {
     renderExpenses();
     updateSummary();
     populateStockSelect();
-    // Load company settings
     let comp = localStorage.getItem('warda_company');
     if(comp) {
         try {
