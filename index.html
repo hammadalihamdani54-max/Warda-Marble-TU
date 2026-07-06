@@ -293,19 +293,95 @@ let currentFilter = 'all';
 let stockFilter = 'all';
 let currentMode = 'sqm';
 
-// ==================== INIT PRODUCTS ====================
+// ==================== ALL PRODUCTS (AS PER YOUR SYSTEM) ====================
 function initProducts() {
     products = [
-        { id: 1, name: 'زاویہ اپ ڈاون', size: '4*4*3mm', category: 'mwad', selling: 0, cost: 0, stock: 9200, type: 'pieces' },
-        { id: 2, name: 'زاویہ اپ ڈاون', size: '4*4*2mm', category: 'mwad', selling: 0, cost: 0, stock: 6600, type: 'pieces' },
-        { id: 3, name: 'مسمار مغلوب', size: '10*40', category: 'mwad', selling: 0, cost: 0, stock: 4800, type: 'pieces' },
-        { id: 4, name: 'مسمار مغلوب', size: '10*50', category: 'mwad', selling: 0, cost: 0, stock: 4800, type: 'pieces' },
-        { id: 5, name: 'ابیض مجلی مبروم', size: '3*7', category: 'stone', selling: 65, cost: 50, stock: 50, type: 'sqm' },
-        { id: 6, name: 'ابیض مجلی مبروم', size: '3*10', category: 'stone', selling: 65, cost: 50, stock: 50, type: 'sqm' },
-        { id: 7, name: 'ابیض مجلی سادہ', size: '3*7', category: 'stone', selling: 60, cost: 45, stock: 50, type: 'sqm' },
-        { id: 8, name: 'ابیض مصنفر مبروم', size: '3*7', category: 'stone', selling: 55, cost: 42, stock: 50, type: 'sqm' },
-        { id: 9, name: 'ابیض مصنفر سادہ', size: '3*7', category: 'stone', selling: 50, cost: 38, stock: 50, type: 'sqm' },
-        { id: 10, name: '(A) ابیض مجلی فرزا', size: '3*40*80', category: 'stone', selling: 75, cost: 63, stock: 50, type: 'sqm' }
+        // ===== MATERIALS (MWAD) =====
+        // مسمار مغلوب
+        { id: 1, name: 'مسمار مغلوب', size: '10*40', category: 'mwad', selling: 0, cost: 0, stock: 4800, type: 'pieces' },
+        { id: 2, name: 'مسمار مغلوب', size: '10*50', category: 'mwad', selling: 0, cost: 0, stock: 4800, type: 'pieces' },
+        { id: 3, name: 'مسمار مغلوب', size: '10*60', category: 'mwad', selling: 0, cost: 0, stock: 3500, type: 'pieces' },
+        { id: 4, name: 'مسمار مغلوب', size: '10*80', category: 'mwad', selling: 0, cost: 0, stock: 1500, type: 'pieces' },
+        { id: 5, name: 'مسمار مغلوب', size: '10*100', category: 'mwad', selling: 0, cost: 0, stock: 1440, type: 'pieces' },
+        
+        // زاویہ اپ ڈاون
+        { id: 6, name: 'زاویہ اپ ڈاون', size: '4*4*3mm', category: 'mwad', selling: 0, cost: 0, stock: 9200, type: 'pieces' },
+        { id: 7, name: 'زاویہ اپ ڈاون', size: '4*4*2mm', category: 'mwad', selling: 0, cost: 0, stock: 6600, type: 'pieces' },
+        { id: 8, name: 'زاویہ اپ ڈاون', size: '4*3*2mm', category: 'mwad', selling: 0, cost: 0, stock: 2500, type: 'pieces' },
+        { id: 9, name: 'زاویہ اپ ڈاون', size: '4*3*3mm', category: 'mwad', selling: 0, cost: 0, stock: 4300, type: 'pieces' },
+        { id: 10, name: 'زاویہ اپ ڈاون', size: '4*5*3mm', category: 'mwad', selling: 0, cost: 0, stock: 1200, type: 'pieces' },
+        { id: 11, name: 'زاویہ اپ ڈاون', size: '4*6*3mm', category: 'mwad', selling: 0, cost: 0, stock: 850, type: 'pieces' },
+        { id: 12, name: 'زاویہ اپ ڈاون', size: '4*8*3mm', category: 'mwad', selling: 0, cost: 0, stock: 420, type: 'pieces' },
+        { id: 13, name: 'زاویہ اپ ڈاون', size: '4*10*3mm', category: 'mwad', selling: 0, cost: 0, stock: 400, type: 'pieces' },
+        
+        // براغی سقف
+        { id: 14, name: 'براغی سقف', size: '10*72', category: 'mwad', selling: 0, cost: 0, stock: 2200, type: 'pieces' },
+        { id: 15, name: 'براغی سقف', size: '10*92', category: 'mwad', selling: 0, cost: 0, stock: 2100, type: 'pieces' },
+        { id: 16, name: 'براغی سقف', size: '10*112', category: 'mwad', selling: 0, cost: 0, stock: 1920, type: 'pieces' },
+        { id: 17, name: 'براغی سقف', size: '10*115', category: 'mwad', selling: 0, cost: 0, stock: 2200, type: 'pieces' },
+        { id: 18, name: 'براغی سقف', size: '10*202', category: 'mwad', selling: 0, cost: 0, stock: 1040, type: 'pieces' },
+        
+        // گمتا
+        { id: 19, name: 'گمتا چوڑی', size: 'Standard', category: 'mwad', selling: 0, cost: 0, stock: 7, type: 'pieces' },
+        { id: 20, name: 'گمتا سادہ', size: 'Standard', category: 'mwad', selling: 0, cost: 0, stock: 7, type: 'pieces' },
+        
+        // جولی
+        { id: 21, name: 'جولی ابو جمل', size: 'Standard', category: 'mwad', selling: 0, cost: 0, stock: 5, type: 'pieces' },
+        { id: 22, name: 'جولی گلیڈتیر', size: 'Standard', category: 'mwad', selling: 0, cost: 0, stock: 0, type: 'pieces' },
+        
+        // دسک
+        { id: 23, name: 'دسک حجر احمر', size: '7 بوسہ', category: 'mwad', selling: 0, cost: 0, stock: 0, type: 'pieces' },
+        { id: 24, name: 'دسک حجر احمر', size: '4.50 بوسہ', category: 'mwad', selling: 0, cost: 0, stock: 7, type: 'pieces' },
+        { id: 25, name: 'دسک جرانیت', size: '7 بوسہ', category: 'mwad', selling: 0, cost: 0, stock: 3, type: 'pieces' },
+        { id: 26, name: 'دسک بوش', size: '9 بوسہ', category: 'mwad', selling: 0, cost: 0, stock: 20, type: 'pieces' },
+        
+        // ریشہ
+        { id: 27, name: 'ریشہ ہلتی', size: '20cm', category: 'mwad', selling: 0, cost: 0, stock: 0, type: 'pieces' },
+        { id: 28, name: 'ریشہ ہلتی', size: '15cm', category: 'mwad', selling: 0, cost: 0, stock: 24, type: 'pieces' },
+        { id: 29, name: 'ریشہ ہلتی', size: '10cm', category: 'mwad', selling: 0, cost: 0, stock: 1, type: 'pieces' },
+        { id: 30, name: 'ریشہ دریل', size: '4mm', category: 'mwad', selling: 0, cost: 0, stock: 12, type: 'pieces' },
+        { id: 31, name: 'ریشہ دریل', size: '6mm', category: 'mwad', selling: 0, cost: 0, stock: 10, type: 'pieces' },
+        { id: 32, name: 'ریشہ دریل', size: '10mm', category: 'mwad', selling: 0, cost: 0, stock: 16, type: 'pieces' },
+        
+        // بکرا
+        { id: 33, name: 'بکرا', size: 'Standard', category: 'mwad', selling: 0, cost: 0, stock: 1, type: 'pieces' },
+        
+        // ===== STONE - ابیض مجلی (Polished) =====
+        { id: 34, name: 'ابیض مجلی', size: '20cm', category: 'stone', selling: 65, cost: 50, stock: 50, type: 'sqm' },
+        { id: 35, name: 'ابیض مجلی', size: '30cm', category: 'stone', selling: 65, cost: 50, stock: 50, type: 'sqm' },
+        { id: 36, name: 'ابیض مجلی', size: '40cm', category: 'stone', selling: 65, cost: 50, stock: 50, type: 'sqm' },
+        { id: 37, name: 'ابیض مجلی مبروم', size: '20cm', category: 'stone', selling: 70, cost: 55, stock: 50, type: 'sqm' },
+        { id: 38, name: 'ابیض مجلی مبروم', size: '30cm', category: 'stone', selling: 70, cost: 55, stock: 50, type: 'sqm' },
+        { id: 39, name: 'ابیض مجلی مبروم', size: '40cm', category: 'stone', selling: 70, cost: 55, stock: 50, type: 'sqm' },
+        { id: 40, name: 'ابیض مجلی فرزا', size: '20cm', category: 'stone', selling: 75, cost: 60, stock: 50, type: 'sqm' },
+        { id: 41, name: 'ابیض مجلی فرزا', size: '30cm', category: 'stone', selling: 75, cost: 60, stock: 50, type: 'sqm' },
+        { id: 42, name: 'ابیض مجلی فرزا', size: '40cm', category: 'stone', selling: 75, cost: 60, stock: 50, type: 'sqm' },
+        { id: 43, name: 'ابیض مجلی فرزا', size: '40*80', category: 'stone', selling: 85, cost: 68, stock: 50, type: 'sqm' },
+        { id: 44, name: 'ابیض مجلی مشطوف', size: '30cm', category: 'stone', selling: 70, cost: 55, stock: 50, type: 'sqm' },
+        
+        // ===== STONE - ابیض مصنفر (Honed) =====
+        { id: 45, name: 'ابیض مصنفر', size: '20cm', category: 'stone', selling: 55, cost: 42, stock: 50, type: 'sqm' },
+        { id: 46, name: 'ابیض مصنفر', size: '30cm', category: 'stone', selling: 55, cost: 42, stock: 50, type: 'sqm' },
+        { id: 47, name: 'ابیض مصنفر', size: '40cm', category: 'stone', selling: 55, cost: 42, stock: 50, type: 'sqm' },
+        { id: 48, name: 'ابیض مصنفر مبروم', size: '20cm', category: 'stone', selling: 60, cost: 46, stock: 50, type: 'sqm' },
+        { id: 49, name: 'ابیض مصنفر مبروم', size: '30cm', category: 'stone', selling: 60, cost: 46, stock: 50, type: 'sqm' },
+        { id: 50, name: 'ابیض مصنفر مبروم', size: '40cm', category: 'stone', selling: 60, cost: 46, stock: 50, type: 'sqm' },
+        { id: 51, name: 'ابیض مصنفر فرزا', size: '20cm', category: 'stone', selling: 65, cost: 50, stock: 50, type: 'sqm' },
+        { id: 52, name: 'ابیض مصنفر فرزا', size: '30cm', category: 'stone', selling: 65, cost: 50, stock: 50, type: 'sqm' },
+        { id: 53, name: 'ابیض مصنفر فرزا', size: '40cm', category: 'stone', selling: 65, cost: 50, stock: 50, type: 'sqm' },
+        { id: 54, name: 'ابیض مصنفر فرزا', size: '40*80', category: 'stone', selling: 75, cost: 58, stock: 50, type: 'sqm' },
+        
+        // ===== STONE - واجھہ جبل (Wajha Jabal) =====
+        { id: 55, name: 'واجھہ جبل', size: '20cm', category: 'stone', selling: 45, cost: 35, stock: 50, type: 'sqm' },
+        { id: 56, name: 'واجھہ جبل', size: '30cm', category: 'stone', selling: 45, cost: 35, stock: 50, type: 'sqm' },
+        { id: 57, name: 'واجھہ جبل', size: '40cm', category: 'stone', selling: 45, cost: 35, stock: 50, type: 'sqm' },
+        { id: 58, name: 'واجھہ جبل مبروم', size: '20cm', category: 'stone', selling: 50, cost: 40, stock: 50, type: 'sqm' },
+        { id: 59, name: 'واجھہ جبل مبروم', size: '30cm', category: 'stone', selling: 50, cost: 40, stock: 50, type: 'sqm' },
+        { id: 60, name: 'واجھہ جبل مبروم', size: '40cm', category: 'stone', selling: 50, cost: 40, stock: 50, type: 'sqm' },
+        { id: 61, name: 'واجھہ جبل فرزا', size: '20cm', category: 'stone', selling: 55, cost: 44, stock: 50, type: 'sqm' },
+        { id: 62, name: 'واجھہ جبل فرزا', size: '30cm', category: 'stone', selling: 55, cost: 44, stock: 50, type: 'sqm' },
+        { id: 63, name: 'واجھہ جبل فرزا', size: '40cm', category: 'stone', selling: 55, cost: 44, stock: 50, type: 'sqm' },
+        { id: 64, name: 'واجھہ جبل فرزا', size: '40*80', category: 'stone', selling: 65, cost: 52, stock: 50, type: 'sqm' }
     ];
     saveData();
 }
@@ -403,7 +479,7 @@ function showTab(tab) {
     document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     document.getElementById('tab-' + tab).classList.add('active');
-    event.target.classList.add('active');
+    if(event) event.target.classList.add('active');
     if(tab === 'pos') { renderProducts(); renderCart(); }
     if(tab === 'stock') { renderStock(); populateStockSelect(); }
     if(tab === 'customers') renderCustomers();
@@ -424,7 +500,7 @@ function setMode(mode) {
 function filterProducts(cat) {
     currentFilter = cat;
     document.querySelectorAll('#tab-pos .cat-tab').forEach(b => b.classList.remove('active'));
-    event.target.classList.add('active');
+    if(event) event.target.classList.add('active');
     renderProducts();
 }
 
@@ -482,7 +558,7 @@ function addProduct() {
 function filterStock(cat) {
     stockFilter = cat;
     document.querySelectorAll('#tab-stock .cat-tab').forEach(b => b.classList.remove('active'));
-    event.target.classList.add('active');
+    if(event) event.target.classList.add('active');
     renderStock();
 }
 
@@ -501,7 +577,7 @@ function renderStock() {
         r.insertCell(0).textContent = catName;
         r.insertCell(1).textContent = p.name;
         r.insertCell(2).textContent = p.size;
-        r.insertCell(3).textContent = p.selling;
+        r.insertCell(3).textContent = p.selling > 0 ? p.selling : '0';
         r.insertCell(4).textContent = p.cost;
         r.insertCell(5).textContent = p.stock;
         let c = r.insertCell(6);
@@ -510,7 +586,7 @@ function renderStock() {
         edit.className = 'btn-warning';
         edit.style.fontSize = '7px';
         edit.style.padding = '1px 5px';
-        edit.onclick = () => editProduct(p.id);
+        edit.onclick = () => editProductStock(p.id);
         c.appendChild(edit);
         let del = document.createElement('button');
         del.textContent = '✕';
@@ -532,7 +608,7 @@ function renderStock() {
     });
 }
 
-function editProduct(id) {
+function editProductStock(id) {
     if(!isAdmin) return showToast('🔒 Admin only!');
     let p = products.find(x => x.id === id);
     if(!p) return;
@@ -608,7 +684,6 @@ function addToCart() {
     if(!name) return showToast('Select item first');
     let cost = parseFloat(document.getElementById('costPrice').value) || 0;
     let p = products.find(pr => pr.name === name);
-    if(p && p.stock <= 0) { showToast('⚠️ Out of stock!'); return; }
     
     let qty, price, total;
     if(currentMode === 'sqm') {
@@ -618,6 +693,12 @@ function addToCart() {
         if(!price) return showToast('Enter price');
         qty = w * l;
         total = qty * price;
+        
+        // FIXED: Stock check for SQM mode
+        if(p && p.type === 'sqm' && p.stock < qty) {
+            return showToast('⚠️ Not enough stock! Available: ' + p.stock + ' m²');
+        }
+        
         cart.push({ id: Date.now(), name, size: w.toFixed(2) + 'm x ' + l.toFixed(2) + 'm', qty: qty, qtyDisplay: qty.toFixed(2) + ' m²', price: price, cost: cost, total: total });
     } else if(currentMode === 'manual') {
         qty = parseFloat(document.getElementById('manualArea').value);
@@ -630,6 +711,12 @@ function addToCart() {
         price = parseFloat(document.getElementById('piecePrice').value);
         if(!price) return showToast('Enter price');
         total = qty * price;
+        
+        // FIXED: Stock check for pieces mode
+        if(p && p.type === 'pieces' && p.stock < qty) {
+            return showToast('⚠️ Not enough stock! Available: ' + p.stock + ' pcs');
+        }
+        
         cart.push({ id: Date.now(), name, size: document.getElementById('pieceSize').value, qty: qty, qtyDisplay: qty + ' pcs', price: price, cost: cost, total: total });
     }
     renderCart();
@@ -685,18 +772,21 @@ function confirmOrder() {
     let profit = total - totalCost;
     let invNo = 'INV-' + String(orders.length + 1).padStart(4, '0');
     
-    // Check stock
+    // FIXED: Stock check before confirming
     let stockError = false;
     cart.forEach(i => {
         let p = products.find(pr => pr.name === i.name);
-        if(p && p.stock < i.qty) { showToast('⚠️ Not enough stock for ' + i.name + '! Available: ' + p.stock); stockError = true; }
+        if(p && p.stock < i.qty) { 
+            showToast('⚠️ Not enough stock for ' + i.name + '! Available: ' + p.stock); 
+            stockError = true; 
+        }
     });
     if(stockError) return;
     
     // Update stock
     cart.forEach(i => {
         let p = products.find(pr => pr.name === i.name);
-        if(p && p.stock > 0) p.stock -= i.qty;
+        if(p) p.stock -= i.qty;
     });
     
     let paid = Math.min(rec, total);
@@ -717,7 +807,10 @@ function confirmOrder() {
     orders.push(order);
     
     let custObj = customers.find(c => c.phone === phone);
-    if(!custObj) { custObj = { name: cust, phone, invoices: [], advance: 0 }; customers.push(custObj); }
+    if(!custObj) { 
+        custObj = { name: cust, phone, invoices: [], advance: 0 }; 
+        customers.push(custObj); 
+    }
     custObj.invoices.push({ invoiceNo: invNo, date: order.date, amount: total, paid: paid, status: status });
     
     if(rec > total) {
@@ -750,7 +843,7 @@ function renderCustomers() {
         let div = document.createElement('div');
         div.style.cssText = 'background:white;border:1px solid #ddd;border-radius:6px;padding:8px;margin-bottom:4px;';
         let status = due > 0 ? 'Due: ' + formatCurrency(due) : (c.advance > 0 ? 'Advance: ' + formatCurrency(c.advance) : 'Settled');
-        let statusClass = due > 0 ? 'badge-unpaid' : (c.advance > 0 ? 'badge-partial' : 'badge-settled');
+        let statusClass = due > 0 ? 'badge-unpaid' : (c.advance > 0 ? 'badge-partial' : 'badge-paid');
         div.innerHTML = `<div style="display:flex;justify-content:space-between;"><strong>${c.name}</strong> <span class="badge ${statusClass}">${status}</span></div>
             <div style="font-size:9px;color:#666;">${c.phone || ''} | Total Paid: ${formatCurrency(c.invoices.reduce((s,i) => s + i.paid, 0))}</div>
             <div class="action-btns">
@@ -850,7 +943,7 @@ function renderInvoices() {
 function viewInvoice(invNo) {
     let o = orders.find(x => x.invoiceNo === invNo);
     if(!o) { showToast('Invoice not found'); return; }
-    let items = o.items.map(i => i.name + ' x' + i.qty + ' = ' + formatCurrency(i.total)).join('\n');
+    let items = o.items.map(i => i.name + ' x' + i.qtyDisplay + ' = ' + formatCurrency(i.total)).join('\n');
     let msg = '📄 INVOICE: ' + o.invoiceNo + '\n';
     msg += 'Date: ' + new Date(o.date).toLocaleString() + '\n';
     msg += 'Customer: ' + o.customer + '\n';
@@ -899,33 +992,6 @@ function renderExpenses() {
     totalDiv.style.cssText = 'font-weight:bold;padding:4px 0;border-top:2px solid #ddd;font-size:11px;';
     totalDiv.innerHTML = 'Total: ' + formatCurrency(total);
     container.appendChild(totalDiv);
-}
-
-function editExpense(id) {
-    if(!isAdmin) return showToast('🔒 Admin only!');
-    let exp = expenses.find(e => e.id === id);
-    if(!exp) return;
-    let head = prompt('Head:', exp.head);
-    if(head !== null) exp.head = head.trim();
-    let amount = prompt('Amount:', exp.amount);
-    if(amount !== null && !isNaN(amount)) exp.amount = parseFloat(amount);
-    let note = prompt('Note:', exp.note || '');
-    if(note !== null) exp.note = note.trim();
-    saveData();
-    renderExpenses();
-    updateSummary();
-    showToast('✅ Expense updated');
-}
-
-function deleteExpense(id) {
-    if(!isAdmin) return showToast('🔒 Admin only!');
-    if(confirm('Delete this expense?')) {
-        expenses = expenses.filter(e => e.id !== id);
-        saveData();
-        renderExpenses();
-        updateSummary();
-        showToast('✅ Expense deleted');
-    }
 }
 
 // ==================== SUMMARY ====================
@@ -1028,7 +1094,6 @@ function renderAll() {
 loadData();
 renderAll();
 
-// Show login if not admin
 setTimeout(() => {
     if(!isAdmin) {
         document.getElementById('loginOverlay').style.display = 'flex';
