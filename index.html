@@ -13,7 +13,9 @@
         .header{background:linear-gradient(135deg,#0f2027,#203a43);color:#ffd700;padding:12px;text-align:center;border-radius:10px;margin-bottom:10px;position:relative;}
         body.dark-mode .header{background:linear-gradient(135deg,#0a0a15,#1a1a2e);}
         .header h1{font-size:20px;}
-        .device-info{position:absolute;right:15px;top:50%;transform:translateY(-50%);font-size:9px;color:#a0c4e0;text-align:right;}
+        .status-bar{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;font-size:9px;color:#a0c4e0;margin-top:3px;}
+        .status-bar .online{color:#4ade80;}
+        .status-bar .offline{color:#f87171;}
         .tabs{display:flex;gap:3px;margin-bottom:8px;flex-wrap:wrap;background:#1a1a2e;padding:4px;border-radius:8px;}
         body.dark-mode .tabs{background:#0a0a15;}
         .tab{padding:6px 12px;background:transparent;color:white;border:none;border-radius:5px;cursor:pointer;font-weight:bold;font-size:11px;}
@@ -27,6 +29,7 @@
         body.dark-mode .panel h3{color:#ffd700;}
         .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
         .grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;}
+        .grid-4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;}
         input,select{width:100%;padding:5px 7px;border:1px solid #ddd;border-radius:4px;font-size:11px;margin-bottom:4px;}
         body.dark-mode input,body.dark-mode select{background:#1a1a2e;color:#e0e0e0;border-color:#444;}
         button{padding:5px 10px;border:none;border-radius:4px;cursor:pointer;font-weight:bold;font-size:10px;margin:2px;transition:0.2s;}
@@ -50,7 +53,7 @@
         .total-box{background:#1a1a2e;color:white;padding:8px;border-radius:6px;margin-top:6px;text-align:right;}
         body.dark-mode .total-box{background:#0a0a15;}
         .total-box p{margin:2px 0;font-size:11px;}
-        .summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:5px;margin-bottom:8px;}
+        .summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:5px;margin-bottom:8px;}
         .summary-box{background:white;padding:6px;border-radius:5px;text-align:center;border:1px solid #ddd;cursor:pointer;transition:0.2s;}
         body.dark-mode .summary-box{background:#2d2d44;border-color:#444;color:#e0e0e0;}
         .summary-box:hover{transform:scale(1.02);}
@@ -59,6 +62,7 @@
         body.dark-mode .summary-box .lbl{color:#999;}
         .summary-box.positive .num{color:#27ae60;}
         .summary-box.negative .num{color:#e74c3c;}
+        .summary-box.warning .num{color:#f39c12;}
         .action-btns{display:flex;flex-wrap:wrap;gap:3px;margin-top:4px;}
         .product-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:5px;max-height:300px;overflow-y:auto;}
         .product-card{background:#f7fafc;padding:8px;border:1px solid #ddd;border-radius:5px;cursor:pointer;text-align:center;transition:0.2s;}
@@ -79,24 +83,22 @@
         .stock-in-out .row select,.stock-in-out .row input{flex:1;min-width:60px;}
         .toast{position:fixed;bottom:20px;right:20px;background:#0f2027;color:#ffd700;padding:6px 14px;border-radius:5px;z-index:999;font-size:11px;}
         body.dark-mode .toast{background:#1a1a2e;}
-        .login-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);display:flex;justify-content:center;align-items:center;z-index:9999;}
+        .login-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);display:none;justify-content:center;align-items:center;z-index:9999;}
         .login-box{background:white;padding:20px;border-radius:10px;max-width:320px;width:90%;text-align:center;}
         body.dark-mode .login-box{background:#2d2d44;color:#e0e0e0;}
         .login-box input{width:100%;padding:6px;margin:4px 0;border:1px solid #ddd;border-radius:4px;}
         body.dark-mode .login-box input{background:#1a1a2e;color:#e0e0e0;border-color:#444;}
         .login-box .error{color:#e74c3c;font-size:10px;display:none;}
-        .view-only .btn,.view-only input,.view-only select{opacity:0.5;pointer-events:none;}
+        .view-only .btn:not(.no-disable),.view-only input:not(.no-disable),.view-only select:not(.no-disable){opacity:0.5;pointer-events:none;}
         .view-only .product-card{cursor:default;}
-        @media(max-width:600px){.grid-2{grid-template-columns:1fr;}.grid-3{grid-template-columns:1fr 1fr;}.device-info{display:none;}}
+        @media(max-width:600px){.grid-2{grid-template-columns:1fr;}.grid-3{grid-template-columns:1fr 1fr;}.grid-4{grid-template-columns:1fr 1fr;}}
         .label-text{font-size:10px;font-weight:bold;color:#555;margin-bottom:2px;display:block;}
         body.dark-mode .label-text{color:#aaa;}
-        .cart-item-edit{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px;}
-        .cart-item-edit input{width:60px;padding:2px 4px;font-size:9px;}
         .profit-loss-box{background:#1a2a4a;padding:8px;border-radius:6px;color:white;text-align:center;margin-top:6px;}
         .profit-loss-box .profit{color:#4ade80;font-weight:bold;}
         .profit-loss-box .loss{color:#f87171;font-weight:bold;}
         .modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);z-index:1000;justify-content:center;align-items:center;}
-        .modal-content{background:white;padding:20px;border-radius:10px;max-width:500px;width:95%;max-height:80vh;overflow:auto;}
+        .modal-content{background:white;padding:20px;border-radius:10px;max-width:600px;width:95%;max-height:85vh;overflow:auto;}
         body.dark-mode .modal-content{background:#2d2d44;color:#e0e0e0;}
         .invoice-box{font-family:Arial;max-width:650px;margin:auto;border:2px solid #ffd700;border-radius:10px;background:white;overflow:hidden;}
         body.dark-mode .invoice-box{background:#1a1a2e;color:#e0e0e0;}
@@ -107,6 +109,10 @@
         .invoice-box th{background:#1a1a2e;color:#ffd700;padding:6px;text-align:center;}
         .invoice-box td{padding:6px;text-align:center;border-bottom:1px solid #ddd;}
         body.dark-mode .invoice-box td{border-color:#444;}
+        .customer-profile{background:#f8fafc;padding:10px;border-radius:8px;margin-bottom:8px;}
+        body.dark-mode .customer-profile{background:#1a1a2e;}
+        .customer-profile .stat{display:inline-block;margin:4px 10px 4px 0;font-size:11px;}
+        .expense-edit-btn{font-size:7px;padding:1px 5px;}
     </style>
 </head>
 <body>
@@ -116,9 +122,16 @@
     <div class="header">
         <h1>🏢 WARDA MARBLE <span id="roleBadge" style="font-size:11px;background:#6b7a8a;padding:2px 8px;border-radius:8px;">👁️ Viewer</span></h1>
         <p>Premium Marble Solutions</p>
-        <div class="device-info" id="deviceInfo"></div>
+        <div class="status-bar">
+            <span id="onlineStatus">🟢 Online</span>
+            <span id="deviceInfo"></span>
+            <span style="font-size:9px;" id="lastSync">Last sync: Just now</span>
+        </div>
         <div style="display:flex;gap:4px;justify-content:center;flex-wrap:wrap;margin-top:3px;">
             <button onclick="toggleDarkMode()" style="background:transparent;color:#ffd700;border:1px solid #ffd700;padding:2px 8px;border-radius:4px;cursor:pointer;font-size:10px;">🌓</button>
+            <button onclick="backupData()" style="background:#3498db;color:white;border:none;padding:2px 10px;border-radius:4px;cursor:pointer;font-weight:bold;font-size:10px;">💾 Backup</button>
+            <button onclick="document.getElementById('restoreFile').click()" style="background:#f39c12;color:white;border:none;padding:2px 10px;border-radius:4px;cursor:pointer;font-weight:bold;font-size:10px;">📂 Restore</button>
+            <input type="file" id="restoreFile" style="display:none" onchange="restoreData(this)">
             <button onclick="showLogin()" id="loginBtn" style="background:#27ae60;color:white;border:none;padding:2px 10px;border-radius:4px;cursor:pointer;font-weight:bold;font-size:10px;">🔑 Login</button>
             <button onclick="logout()" id="logoutBtn" style="display:none;background:#e74c3c;color:white;border:none;padding:2px 10px;border-radius:4px;cursor:pointer;font-weight:bold;font-size:10px;">🚪 Logout</button>
         </div>
@@ -234,6 +247,7 @@
                     <button class="btn-success" onclick="stockIn()" style="flex:1;padding:3px;font-size:9px;">➕ In</button>
                     <button class="btn-danger" onclick="stockOut()" style="flex:1;padding:3px;font-size:9px;">➖ Out</button>
                 </div>
+                <div style="margin-top:4px;font-size:9px;color:#666;" id="stockHistoryPreview"></div>
             </div>
         </div>
     </div>
@@ -243,7 +257,7 @@
         <div class="panel">
             <h3>👥 Customers</h3>
             <input type="text" id="searchCustomer" placeholder="🔍 Search..." onkeyup="renderCustomers()">
-            <div id="customerList" style="max-height:400px;overflow-y:auto;"></div>
+            <div id="customerList" style="max-height:500px;overflow-y:auto;"></div>
         </div>
     </div>
 
@@ -254,7 +268,7 @@
             <input type="text" id="searchInvoice" placeholder="🔍 Search..." onkeyup="renderInvoices()">
             <div style="overflow-x:auto;max-height:400px;overflow-y:auto;">
                 <table>
-                    <thead><tr><th>Invoice</th><th>Date</th><th>Customer</th><th>Total</th><th>Paid</th><th>Balance/Advance</th><th>Status</th><th>Actions</th></tr></thead>
+                    <thead><tr><th>Invoice</th><th>Date</th><th>Customer</th><th>Total</th><th>Paid</th><th>Balance</th><th>Status</th><th>Actions</th></tr></thead>
                     <tbody id="invoiceBody"></tbody>
                 </table>
             </div>
@@ -267,21 +281,21 @@
             <h3>📊 Daily Summary</h3>
             <div class="summary-grid" id="summaryGrid">
                 <div class="summary-box positive"><div class="num" id="sumTodaySale">0.00</div><div class="lbl">Today's Sale (Bills)</div></div>
-                <div class="summary-box positive"><div class="num" id="sumCashSale">0.00</div><div class="lbl">Cash Collected</div></div>
+                <div class="summary-box positive"><div class="num" id="sumCashIn">0.00</div><div class="lbl">Cash In Today</div></div>
+                <div class="summary-box negative"><div class="num" id="sumCashOut">0.00</div><div class="lbl">Cash Out Today</div></div>
+                <div class="summary-box positive"><div class="num" id="sumNetCash">0.00</div><div class="lbl">Net Cash Today</div></div>
                 <div class="summary-box warning"><div class="num" id="sumUdharSale">0.00</div><div class="lbl">Udhar (Due)</div></div>
-                <div class="summary-box negative"><div class="num" id="sumIkhrajat">0.00</div><div class="lbl">Ikhrajat</div></div>
                 <div class="summary-box positive"><div class="num" id="sumSabqaWusool">0.00</div><div class="lbl">Sabqa Wusool</div></div>
-                <div class="summary-box positive"><div class="num" id="sumAdvanceWusool">0.00</div><div class="lbl">Advance</div></div>
+                <div class="summary-box positive"><div class="num" id="sumAdvanceWusool">0.00</div><div class="lbl">Advance Received</div></div>
                 <div class="summary-box positive"><div class="num" id="sumTotalJamma">0.00</div><div class="lbl">Total Cash</div></div>
-                <div class="summary-box" id="paymentMinusBox"><div class="num" id="sumPaymentMinus">0.00</div><div class="lbl">Payment Minus</div></div>
             </div>
             
             <div class="profit-loss-box">
-                <h4 style="color:#ffd700;font-size:13px;">📈 Net Profit / Loss</h4>
-                <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:4px;font-size:10px;margin:4px 0;">
-                    <div><span style="color:#a0c4e0;">Opening:</span><br><strong id="plOpening">0</strong></div>
+                <h4 style="color:#ffd700;font-size:13px;">📈 Daily Profit / Loss</h4>
+                <div class="grid-4" style="font-size:10px;margin:4px 0;">
+                    <div><span style="color:#a0c4e0;">Opening Stock:</span><br><strong id="plOpening">0</strong></div>
                     <div><span style="color:#a0c4e0;">Stock In:</span><br><strong id="plStockIn">0</strong></div>
-                    <div><span style="color:#a0c4e0;">Closing:</span><br><strong id="plClosing">0</strong></div>
+                    <div><span style="color:#a0c4e0;">Closing Stock:</span><br><strong id="plClosing">0</strong></div>
                     <div><span style="color:#a0c4e0;">Ikhrajat:</span><br><strong id="plIkhrajat">0</strong></div>
                 </div>
                 <div style="font-size:16px;font-weight:bold;border-top:1px solid #ffd700;padding-top:4px;">
@@ -305,7 +319,7 @@
     <!-- ===== EXPENSES TAB ===== -->
     <div id="tab-expenses" class="tab-content">
         <div class="panel">
-            <h3>💸 Expenses</h3>
+            <h3>💸 Expenses (Ikhrajat)</h3>
             <div class="grid-2">
                 <input type="text" id="expenseHead" placeholder="Expense Head">
                 <input type="number" id="expenseAmount" placeholder="Amount" step="0.01">
@@ -315,6 +329,9 @@
             
             <h4 style="font-size:12px;margin-top:6px;">📋 Today's Expenses</h4>
             <div id="expenseList" style="max-height:250px;overflow-y:auto;"></div>
+            
+            <h4 style="font-size:12px;margin-top:6px;">📊 Expense Summary</h4>
+            <div id="expenseSummary" style="font-size:10px;"></div>
         </div>
     </div>
 
@@ -342,8 +359,8 @@
                 <div>
                     <h4 style="font-size:12px;margin-bottom:8px;">💾 Data Management</h4>
                     <button onclick="backupData()" class="btn-info" style="width:100%;">📥 Backup Data</button>
-                    <button onclick="document.getElementById('restoreFile').click()" class="btn-warning" style="width:100%;margin-top:4px;">📤 Restore Data</button>
-                    <input type="file" id="restoreFile" style="display:none" onchange="restoreData(this)">
+                    <button onclick="document.getElementById('restoreFile2').click()" class="btn-warning" style="width:100%;margin-top:4px;">📤 Restore Data</button>
+                    <input type="file" id="restoreFile2" style="display:none" onchange="restoreData(this)">
                     <button onclick="resetAll()" class="btn-danger" style="width:100%;margin-top:4px;">⚠️ Reset All Data</button>
                 </div>
             </div>
@@ -384,6 +401,19 @@
     </div>
 </div>
 
+<div id="editExpenseModal" class="modal">
+    <div class="modal-content">
+        <h3>✏️ Edit Expense</h3>
+        <div><label class="label-text">Expense Head</label><input type="text" id="editExpenseHead"></div>
+        <div><label class="label-text">Amount</label><input type="number" id="editExpenseAmount" step="0.01"></div>
+        <div><label class="label-text">Note</label><input type="text" id="editExpenseNote"></div>
+        <div style="text-align:center;margin-top:10px;">
+            <button onclick="saveExpenseEdit()" class="btn-success">💾 Save</button>
+            <button onclick="closeModal('editExpenseModal')" class="btn-danger">Cancel</button>
+        </div>
+    </div>
+</div>
+
 <!-- ===== LOGIN OVERLAY ===== -->
 <div id="loginOverlay" class="login-overlay">
     <div class="login-box">
@@ -417,17 +447,16 @@ let taxName = "VAT";
 let editCartIndex = -1;
 let currentInvoiceNo = null;
 let darkMode = false;
+let editExpenseId = null;
 
 // ==================== ALL PRODUCTS ====================
 function initProducts() {
     products = [
-        // مسمار مغلوب
         { id: 1, name: 'مسمار مغلوب', size: '10*40', category: 'mwad', selling: 0, cost: 0, stock: 4800, type: 'pieces' },
         { id: 2, name: 'مسمار مغلوب', size: '10*50', category: 'mwad', selling: 0, cost: 0, stock: 4800, type: 'pieces' },
         { id: 3, name: 'مسمار مغلوب', size: '10*60', category: 'mwad', selling: 0, cost: 0, stock: 3500, type: 'pieces' },
         { id: 4, name: 'مسمار مغلوب', size: '10*80', category: 'mwad', selling: 0, cost: 0, stock: 1500, type: 'pieces' },
         { id: 5, name: 'مسمار مغلوب', size: '10*100', category: 'mwad', selling: 0, cost: 0, stock: 1440, type: 'pieces' },
-        // زاویہ اپ ڈاون
         { id: 6, name: 'زاویہ اپ ڈاون', size: '4*4*3mm', category: 'mwad', selling: 0, cost: 0, stock: 9200, type: 'pieces' },
         { id: 7, name: 'زاویہ اپ ڈاون', size: '4*4*2mm', category: 'mwad', selling: 0, cost: 0, stock: 6600, type: 'pieces' },
         { id: 8, name: 'زاویہ اپ ڈاون', size: '4*3*2mm', category: 'mwad', selling: 0, cost: 0, stock: 2500, type: 'pieces' },
@@ -436,33 +465,26 @@ function initProducts() {
         { id: 11, name: 'زاویہ اپ ڈاون', size: '4*6*3mm', category: 'mwad', selling: 0, cost: 0, stock: 850, type: 'pieces' },
         { id: 12, name: 'زاویہ اپ ڈاون', size: '4*8*3mm', category: 'mwad', selling: 0, cost: 0, stock: 420, type: 'pieces' },
         { id: 13, name: 'زاویہ اپ ڈاون', size: '4*10*3mm', category: 'mwad', selling: 0, cost: 0, stock: 400, type: 'pieces' },
-        // براغی سقف
         { id: 14, name: 'براغی سقف', size: '10*72', category: 'mwad', selling: 0, cost: 0, stock: 2200, type: 'pieces' },
         { id: 15, name: 'براغی سقف', size: '10*92', category: 'mwad', selling: 0, cost: 0, stock: 2100, type: 'pieces' },
         { id: 16, name: 'براغی سقف', size: '10*112', category: 'mwad', selling: 0, cost: 0, stock: 1920, type: 'pieces' },
         { id: 17, name: 'براغی سقف', size: '10*115', category: 'mwad', selling: 0, cost: 0, stock: 2200, type: 'pieces' },
         { id: 18, name: 'براغی سقف', size: '10*202', category: 'mwad', selling: 0, cost: 0, stock: 1040, type: 'pieces' },
-        // گمتا
         { id: 19, name: 'گمتا چوڑی', size: 'Standard', category: 'mwad', selling: 0, cost: 0, stock: 7, type: 'pieces' },
         { id: 20, name: 'گمتا سادہ', size: 'Standard', category: 'mwad', selling: 0, cost: 0, stock: 7, type: 'pieces' },
-        // جولی
         { id: 21, name: 'جولی ابو جمل', size: 'Standard', category: 'mwad', selling: 0, cost: 0, stock: 5, type: 'pieces' },
         { id: 22, name: 'جولی گلیڈتیر', size: 'Standard', category: 'mwad', selling: 0, cost: 0, stock: 0, type: 'pieces' },
-        // دسک
         { id: 23, name: 'دسک حجر احمر', size: '7 بوسہ', category: 'mwad', selling: 0, cost: 0, stock: 0, type: 'pieces' },
         { id: 24, name: 'دسک حجر احمر', size: '4.50 بوسہ', category: 'mwad', selling: 0, cost: 0, stock: 7, type: 'pieces' },
         { id: 25, name: 'دسک جرانیت', size: '7 بوسہ', category: 'mwad', selling: 0, cost: 0, stock: 3, type: 'pieces' },
         { id: 26, name: 'دسک بوش', size: '9 بوسہ', category: 'mwad', selling: 0, cost: 0, stock: 20, type: 'pieces' },
-        // ریشہ
         { id: 27, name: 'ریشہ ہلتی', size: '20cm', category: 'mwad', selling: 0, cost: 0, stock: 0, type: 'pieces' },
         { id: 28, name: 'ریشہ ہلتی', size: '15cm', category: 'mwad', selling: 0, cost: 0, stock: 24, type: 'pieces' },
         { id: 29, name: 'ریشہ ہلتی', size: '10cm', category: 'mwad', selling: 0, cost: 0, stock: 1, type: 'pieces' },
         { id: 30, name: 'ریشہ دریل', size: '4mm', category: 'mwad', selling: 0, cost: 0, stock: 12, type: 'pieces' },
         { id: 31, name: 'ریشہ دریل', size: '6mm', category: 'mwad', selling: 0, cost: 0, stock: 10, type: 'pieces' },
         { id: 32, name: 'ریشہ دریل', size: '10mm', category: 'mwad', selling: 0, cost: 0, stock: 16, type: 'pieces' },
-        // بکرا
         { id: 33, name: 'بکرا', size: 'Standard', category: 'mwad', selling: 0, cost: 0, stock: 1, type: 'pieces' },
-        // ===== STONE - ابیض مجلی =====
         { id: 34, name: 'ابیض مجلی', size: '20cm', category: 'stone', selling: 65, cost: 50, stock: 50, type: 'sqm' },
         { id: 35, name: 'ابیض مجلی', size: '30cm', category: 'stone', selling: 65, cost: 50, stock: 50, type: 'sqm' },
         { id: 36, name: 'ابیض مجلی', size: '40cm', category: 'stone', selling: 65, cost: 50, stock: 50, type: 'sqm' },
@@ -474,7 +496,6 @@ function initProducts() {
         { id: 42, name: 'ابیض مجلی فرزا', size: '40cm', category: 'stone', selling: 75, cost: 60, stock: 50, type: 'sqm' },
         { id: 43, name: 'ابیض مجلی فرزا', size: '40*80', category: 'stone', selling: 85, cost: 68, stock: 50, type: 'sqm' },
         { id: 44, name: 'ابیض مجلی مشطوف', size: '30cm', category: 'stone', selling: 70, cost: 55, stock: 50, type: 'sqm' },
-        // ===== STONE - ابیض مصنفر =====
         { id: 45, name: 'ابیض مصنفر', size: '20cm', category: 'stone', selling: 55, cost: 42, stock: 50, type: 'sqm' },
         { id: 46, name: 'ابیض مصنفر', size: '30cm', category: 'stone', selling: 55, cost: 42, stock: 50, type: 'sqm' },
         { id: 47, name: 'ابیض مصنفر', size: '40cm', category: 'stone', selling: 55, cost: 42, stock: 50, type: 'sqm' },
@@ -485,7 +506,6 @@ function initProducts() {
         { id: 52, name: 'ابیض مصنفر فرزا', size: '30cm', category: 'stone', selling: 65, cost: 50, stock: 50, type: 'sqm' },
         { id: 53, name: 'ابیض مصنفر فرزا', size: '40cm', category: 'stone', selling: 65, cost: 50, stock: 50, type: 'sqm' },
         { id: 54, name: 'ابیض مصنفر فرزا', size: '40*80', category: 'stone', selling: 75, cost: 58, stock: 50, type: 'sqm' },
-        // ===== STONE - واجھہ جبل =====
         { id: 55, name: 'واجھہ جبل', size: '20cm', category: 'stone', selling: 45, cost: 35, stock: 50, type: 'sqm' },
         { id: 56, name: 'واجھہ جبل', size: '30cm', category: 'stone', selling: 45, cost: 35, stock: 50, type: 'sqm' },
         { id: 57, name: 'واجھہ جبل', size: '40cm', category: 'stone', selling: 45, cost: 35, stock: 50, type: 'sqm' },
@@ -511,6 +531,7 @@ function saveData() {
     localStorage.setItem('warda_taxRate', taxRate);
     localStorage.setItem('warda_taxName', taxName);
     localStorage.setItem('warda_darkmode', darkMode);
+    document.getElementById('lastSync').textContent = 'Last sync: ' + new Date().toLocaleTimeString();
 }
 
 function loadData() {
@@ -568,6 +589,20 @@ function toggleDarkMode() {
     showToast(darkMode ? '🌙 Dark Mode' : '☀️ Light Mode');
 }
 
+// ==================== ONLINE STATUS ====================
+function updateOnlineStatus() {
+    const status = document.getElementById('onlineStatus');
+    if(navigator.onLine) {
+        status.textContent = '🟢 Online';
+        status.className = 'online';
+    } else {
+        status.textContent = '🔴 Offline (Local)';
+        status.className = 'offline';
+    }
+}
+window.addEventListener('online', updateOnlineStatus);
+window.addEventListener('offline', updateOnlineStatus);
+
 // ==================== DEVICE INFO ====================
 function getDeviceInfo() {
     let info = '';
@@ -617,7 +652,9 @@ function skipLogin() {
 }
 
 function showLogin() {
-    document.getElementById('loginOverlay').style.display = 'flex';
+    if(!isAdmin) {
+        document.getElementById('loginOverlay').style.display = 'flex';
+    }
 }
 
 function logout() {
@@ -807,13 +844,14 @@ function stockIn() {
     if(!p) return showToast('Item not found');
     p.stock += qty;
     if(price > 0) p.cost = (p.cost * (p.stock - qty) + price * qty) / p.stock;
-    stockHistory.push({ date: getToday(), item: p.name, qty: qty, type: 'In', price: price });
+    stockHistory.push({ date: new Date().toISOString(), item: p.name, qty: qty, type: 'In', price: price });
     saveData();
     renderStock();
     renderProducts();
     updateSummary();
     document.getElementById('stockQty').value = '';
     document.getElementById('stockPriceIn').value = '';
+    showStockHistory();
     showToast('✅ Stock added: +' + qty);
 }
 
@@ -826,14 +864,24 @@ function stockOut() {
     if(!p) return showToast('Item not found');
     if(p.stock < qty) return showToast('⚠️ Not enough stock! Available: ' + p.stock);
     p.stock -= qty;
-    stockHistory.push({ date: getToday(), item: p.name, qty: qty, type: 'Out', price: 0 });
+    stockHistory.push({ date: new Date().toISOString(), item: p.name, qty: qty, type: 'Out', price: p.cost });
     saveData();
     renderStock();
     renderProducts();
     updateSummary();
     document.getElementById('stockQty').value = '';
     document.getElementById('stockPriceIn').value = '';
+    showStockHistory();
     showToast('✅ Stock removed: -' + qty);
+}
+
+function showStockHistory() {
+    let container = document.getElementById('stockHistoryPreview');
+    let recent = stockHistory.slice(-5).reverse();
+    container.innerHTML = '<strong>Recent:</strong> ';
+    recent.forEach(h => {
+        container.innerHTML += `<span style="margin:0 4px;">${h.type === 'In' ? '➕' : '➖'} ${h.item} (${h.qty})</span>`;
+    });
 }
 
 // ==================== CART ====================
@@ -951,7 +999,7 @@ function saveCartEdit() {
     item.price = price;
     item.cost = cost;
     item.total = qty * price;
-    if(item.type === 'sqm') item.qtyDisplay = qty.toFixed(2) + ' m²';
+    if(item.qtyDisplay.includes('m²')) item.qtyDisplay = qty.toFixed(2) + ' m²';
     else item.qtyDisplay = qty + ' pcs';
     closeModal('editCartModal');
     renderCart();
@@ -963,7 +1011,7 @@ function updateTotals() {
     let rec = parseFloat(document.getElementById('amountReceived').value) || 0;
     let bal = total - rec;
     document.getElementById('cartTotal').textContent = formatCurrency(total);
-    document.getElementById('balanceMsg').textContent = bal > 0 ? 'Due: ' + formatCurrency(bal) : bal < 0 ? 'Refund: ' + formatCurrency(Math.abs(bal)) : 'Fully Paid ✓';
+    document.getElementById('balanceMsg').textContent = bal > 0 ? 'Due: ' + formatCurrency(bal) : bal < 0 ? 'Refund: ' + formatCurrency(Math.abs(bal)) : '✅ Fully Paid';
 }
 
 function clearCart() {
@@ -1080,28 +1128,44 @@ function renderCustomers() {
     let filtered = customers.filter(c => c.name.toLowerCase().includes(search) || (c.phone && c.phone.includes(search)));
     let container = document.getElementById('customerList');
     container.innerHTML = '';
-    if(filtered.length === 0) { container.innerHTML = '<div style="text-align:center;padding:10px;color:#666;">No customers</div>'; return; }
+    if(filtered.length === 0) { container.innerHTML = '<div style="text-align:center;padding:20px;color:#666;">No customers found</div>'; return; }
     filtered.forEach(c => {
         let due = c.invoices.reduce((s, i) => s + (i.amount - i.paid), 0);
+        let totalSales = c.invoices.reduce((s, i) => s + i.amount, 0);
+        let totalPaid = c.invoices.reduce((s, i) => s + i.paid, 0);
+        let profit = c.invoices.reduce((s, i) => {
+            let o = orders.find(ord => ord.invoiceNo === i.invoiceNo);
+            return s + (o ? o.profit : 0);
+        }, 0);
+        
         let div = document.createElement('div');
-        div.style.cssText = 'background:white;border:1px solid #ddd;border-radius:6px;padding:8px;margin-bottom:4px;';
-        if(darkMode) div.style.cssText += 'background:#2d2d44;border-color:#444;color:#e0e0e0;';
-        let status = due > 0 ? 'Due: ' + formatCurrency(due) : (c.advance > 0 ? 'Advance: ' + formatCurrency(c.advance) : 'Settled');
-        let statusClass = due > 0 ? 'badge-unpaid' : (c.advance > 0 ? 'badge-partial' : 'badge-settled');
-        div.innerHTML = `<div style="display:flex;justify-content:space-between;flex-wrap:wrap;"><strong>${c.name}</strong> <span class="badge ${statusClass}">${status}</span></div>
-            <div style="font-size:9px;color:#666;">${c.phone || ''} | Total Paid: ${formatCurrency(c.totalPaid || 0)}</div>
-            <div class="action-btns">
-                <button class="btn-info" style="font-size:8px;padding:1px 6px;" onclick="viewCustomerInvoices('${c.phone}')">📄</button>
-                <button class="btn-success" style="font-size:8px;padding:1px 6px;" onclick="payCustomer('${c.phone}')">💰</button>
-                <button class="btn-warning" style="font-size:8px;padding:1px 6px;" onclick="editCustomer('${c.phone}')">✏️</button>
-                <button class="btn-danger" style="font-size:8px;padding:1px 6px;" onclick="deleteCustomer('${c.phone}')">🗑️</button>
+        div.className = 'customer-profile';
+        if(darkMode) div.style.cssText += 'background:#1a1a2e;border-color:#444;color:#e0e0e0;';
+        div.innerHTML = `
+            <div style="display:flex;justify-content:space-between;flex-wrap:wrap;margin-bottom:4px;">
+                <strong style="font-size:13px;">${c.name}</strong>
+                <span style="font-size:11px;">📞 ${c.phone || 'N/A'}</span>
             </div>
-            <div style="margin-top:4px;font-size:9px;">`;
-        c.invoices.slice(-5).forEach(i => {
-            let bal = i.amount - i.paid;
-            div.innerHTML += `<span style="display:inline-block;margin:2px 4px 2px 0;background:#f0f2f5;padding:2px 6px;border-radius:3px;">${i.invoiceNo}: ${formatCurrency(i.amount)} ${bal > 0 ? '⚠️Due' : '✅'}</span>`;
-        });
-        div.innerHTML += `</div>`;
+            <div style="display:flex;flex-wrap:wrap;gap:8px;font-size:10px;">
+                <span class="stat">💰 Total Sales: ${formatCurrency(totalSales)}</span>
+                <span class="stat">✅ Paid: ${formatCurrency(totalPaid)}</span>
+                <span class="stat ${due > 0 ? 'badge-unpaid' : 'badge-paid'}">${due > 0 ? 'Due: ' + formatCurrency(due) : 'Settled'}</span>
+                <span class="stat">📈 Profit: ${formatCurrency(profit)}</span>
+                ${c.advance > 0 ? `<span class="stat" style="color:#f39c12;">Advance: ${formatCurrency(c.advance)}</span>` : ''}
+            </div>
+            <div style="margin-top:4px;font-size:9px;display:flex;flex-wrap:wrap;gap:4px;">
+                ${c.invoices.slice(-5).map(i => {
+                    let bal = i.amount - i.paid;
+                    return `<span style="background:#f0f2f5;padding:2px 6px;border-radius:3px;">${i.invoiceNo}: ${formatCurrency(i.amount)} ${bal > 0 ? '⚠️' : '✅'}</span>`;
+                }).join('')}
+            </div>
+            <div class="action-btns" style="margin-top:4px;">
+                <button class="btn-info" style="font-size:8px;padding:2px 8px;" onclick="viewCustomerInvoices('${c.phone}')">📄 Invoices</button>
+                <button class="btn-success" style="font-size:8px;padding:2px 8px;" onclick="payCustomer('${c.phone}')">💰 Pay</button>
+                <button class="btn-warning" style="font-size:8px;padding:2px 8px;" onclick="editCustomer('${c.phone}')">✏️ Edit</button>
+                <button class="btn-danger" style="font-size:8px;padding:2px 8px;" onclick="deleteCustomer('${c.phone}')">🗑️ Delete</button>
+            </div>
+        `;
         container.appendChild(div);
     });
 }
@@ -1109,14 +1173,18 @@ function renderCustomers() {
 function viewCustomerInvoices(phone) {
     let cust = customers.find(c => c.phone === phone);
     if(!cust) { showToast('Customer not found'); return; }
-    let msg = '📄 Invoices for ' + cust.name + '\n━━━━━━━━━━━━━━━\n';
+    let msg = '📄 INVOICES FOR ' + cust.name.toUpperCase() + '\n';
+    msg += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n';
     let totalDue = 0;
     cust.invoices.forEach(i => {
         let bal = i.amount - i.paid;
         totalDue += bal;
-        msg += i.invoiceNo + ' | ' + new Date(i.date).toLocaleDateString() + ' | ' + formatCurrency(i.amount) + ' | Paid: ' + formatCurrency(i.paid) + ' | ' + (bal > 0 ? 'Due: ' + formatCurrency(bal) : 'Paid ✓') + '\n';
+        msg += `${i.invoiceNo} | ${new Date(i.date).toLocaleDateString()} | Total: ${formatCurrency(i.amount)} | Paid: ${formatCurrency(i.paid)} | ${bal > 0 ? 'Due: ' + formatCurrency(bal) : '✅ Paid'}\n`;
     });
-    msg += '━━━━━━━━━━━━━━━\nTotal Due: ' + formatCurrency(totalDue) + '\nAdvance: ' + formatCurrency(cust.advance || 0) + '\nTotal Paid: ' + formatCurrency(cust.totalPaid || 0);
+    msg += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n';
+    msg += `Total Due: ${formatCurrency(totalDue)}\n`;
+    msg += `Advance: ${formatCurrency(cust.advance || 0)}\n`;
+    msg += `Total Paid: ${formatCurrency(cust.totalPaid || 0)}`;
     alert(msg);
 }
 
@@ -1187,7 +1255,7 @@ function renderInvoices() {
     let filtered = orders.filter(o => o.invoiceNo.toLowerCase().includes(search) || o.customer.toLowerCase().includes(search)).reverse();
     let tb = document.getElementById('invoiceBody');
     tb.innerHTML = '';
-    if(filtered.length === 0) { tb.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:10px;color:#666;">No invoices</td></tr>'; return; }
+    if(filtered.length === 0) { tb.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:20px;color:#666;">No invoices found</td></tr>'; return; }
     filtered.forEach(o => {
         let r = tb.insertRow();
         let bal = o.total - (o.paid || 0);
@@ -1196,7 +1264,7 @@ function renderInvoices() {
         r.insertCell(2).textContent = o.customer;
         r.insertCell(3).textContent = formatCurrency(o.total);
         r.insertCell(4).textContent = formatCurrency(o.paid || 0);
-        r.insertCell(5).innerHTML = bal > 0 ? `<span style="color:#e74c3c;">Due: ${formatCurrency(bal)}</span>` : (bal < 0 ? `<span style="color:#27ae60;">Advance: ${formatCurrency(Math.abs(bal))}</span>` : 'Settled');
+        r.insertCell(5).innerHTML = bal > 0 ? `<span style="color:#e74c3c;">Due: ${formatCurrency(bal)}</span>` : (bal < 0 ? `<span style="color:#27ae60;">Advance: ${formatCurrency(Math.abs(bal))}</span>` : '✅ Settled');
         r.insertCell(6).innerHTML = `<span class="badge badge-${o.status}">${o.status}</span>`;
         let c = r.insertCell(7);
         c.innerHTML = `<div class="action-btns">
@@ -1271,6 +1339,12 @@ function editInvoice(invNo) {
     if(cust !== null && cust.trim() !== '') o.customer = cust.trim();
     let phone = prompt('Phone Number:', o.phone || '');
     if(phone !== null) o.phone = phone.trim();
+    // Update customer record
+    let custObj = customers.find(c => c.phone === o.phone);
+    if(custObj) {
+        let inv = custObj.invoices.find(i => i.invoiceNo === invNo);
+        if(inv) inv.customer = o.customer;
+    }
     saveData();
     renderInvoices();
     renderCustomers();
@@ -1342,9 +1416,16 @@ function renderExpenses() {
     todayExp.forEach(e => {
         total += e.amount;
         let div = document.createElement('div');
-        div.style.cssText = 'display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #eee;font-size:10px;';
+        div.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid #eee;font-size:10px;';
         if(darkMode) div.style.cssText += 'border-color:#444;';
-        div.innerHTML = `<span><strong>${e.head}</strong> ${e.note ? '- ' + e.note : ''}</span><span>${formatCurrency(e.amount)}</span>`;
+        div.innerHTML = `
+            <span><strong>${e.head}</strong> ${e.note ? '- ' + e.note : ''}</span>
+            <span>
+                ${formatCurrency(e.amount)}
+                <button onclick="editExpense(${e.id})" class="btn-warning expense-edit-btn" style="font-size:7px;padding:1px 5px;">✏️</button>
+                <button onclick="deleteExpense(${e.id})" class="btn-danger expense-edit-btn" style="font-size:7px;padding:1px 5px;">✕</button>
+            </span>
+        `;
         container.appendChild(div);
     });
     let totalDiv = document.createElement('div');
@@ -1352,6 +1433,59 @@ function renderExpenses() {
     if(darkMode) totalDiv.style.cssText += 'border-color:#444;';
     totalDiv.innerHTML = 'Total: ' + formatCurrency(total);
     container.appendChild(totalDiv);
+    
+    // Expense summary by head
+    let summary = document.getElementById('expenseSummary');
+    let heads = {};
+    todayExp.forEach(e => {
+        if(!heads[e.head]) heads[e.head] = 0;
+        heads[e.head] += e.amount;
+    });
+    let html = '';
+    Object.keys(heads).forEach(h => {
+        html += `<span style="display:inline-block;margin:2px 8px 2px 0;background:#f0f2f5;padding:2px 8px;border-radius:3px;">${h}: ${formatCurrency(heads[h])}</span>`;
+    });
+    summary.innerHTML = html || 'No categories';
+}
+
+function editExpense(id) {
+    if(!isAdmin) return showToast('🔒 Admin only!');
+    let exp = expenses.find(e => e.id === id);
+    if(!exp) return;
+    editExpenseId = id;
+    document.getElementById('editExpenseHead').value = exp.head;
+    document.getElementById('editExpenseAmount').value = exp.amount;
+    document.getElementById('editExpenseNote').value = exp.note || '';
+    openModal('editExpenseModal');
+}
+
+function saveExpenseEdit() {
+    if(editExpenseId === null) return;
+    let exp = expenses.find(e => e.id === editExpenseId);
+    if(!exp) return;
+    let head = document.getElementById('editExpenseHead').value.trim();
+    let amount = parseFloat(document.getElementById('editExpenseAmount').value);
+    let note = document.getElementById('editExpenseNote').value.trim();
+    if(!head || !amount || amount <= 0) { showToast('Enter valid expense'); return; }
+    exp.head = head;
+    exp.amount = amount;
+    exp.note = note;
+    saveData();
+    renderExpenses();
+    updateSummary();
+    closeModal('editExpenseModal');
+    showToast('✅ Expense updated');
+}
+
+function deleteExpense(id) {
+    if(!isAdmin) return showToast('🔒 Admin only!');
+    if(confirm('Delete this expense?')) {
+        expenses = expenses.filter(e => e.id !== id);
+        saveData();
+        renderExpenses();
+        updateSummary();
+        showToast('✅ Expense deleted');
+    }
 }
 
 // ==================== SUMMARY ====================
@@ -1359,39 +1493,36 @@ function updateSummary() {
     const today = getToday();
     
     const todaySales = orders.filter(o => o.date.substring(0,10) === today);
-    const todayCash = todaySales.filter(o => o.status === 'paid' || o.paid >= o.total).reduce((s,o) => s + o.total, 0);
-    const todayUdhar = todaySales.filter(o => o.status === 'unpaid' || o.status === 'partial').reduce((s,o) => s + (o.total - (o.paid||0)), 0);
+    const todayCash = todaySales.reduce((s,o) => s + (o.paid || 0), 0);
+    const todayUdhar = todaySales.reduce((s,o) => s + (o.total - (o.paid || 0)), 0);
     const todayIkhrajat = expenses.filter(e => e.date.substring(0,10) === today).reduce((s,e) => s + e.amount, 0);
     
-    const sabqaWusool = orders.filter(o => o.date.substring(0,10) < today).reduce((s,o) => s + (o.paid||0), 0);
+    const sabqaWusool = orders.filter(o => o.date.substring(0,10) < today).reduce((s,o) => s + (o.paid || 0), 0);
     const advanceWusool = customers.reduce((s, c) => s + (c.advance || 0), 0);
     const totalCashJamma = todayCash + sabqaWusool + advanceWusool;
-    const paymentMinus = totalCashJamma < todayIkhrajat ? todayIkhrajat - totalCashJamma : 0;
+    const cashOut = todayIkhrajat;
+    const netCash = totalCashJamma - cashOut;
     
     document.getElementById('sumTodaySale').textContent = formatCurrency(todaySales.reduce((s,o) => s + o.total, 0));
-    document.getElementById('sumCashSale').textContent = formatCurrency(todayCash);
+    document.getElementById('sumCashIn').textContent = formatCurrency(todayCash);
+    document.getElementById('sumCashOut').textContent = formatCurrency(cashOut);
+    document.getElementById('sumNetCash').textContent = formatCurrency(netCash);
     document.getElementById('sumUdharSale').textContent = formatCurrency(todayUdhar);
-    document.getElementById('sumIkhrajat').textContent = formatCurrency(todayIkhrajat);
     document.getElementById('sumSabqaWusool').textContent = formatCurrency(sabqaWusool);
     document.getElementById('sumAdvanceWusool').textContent = formatCurrency(advanceWusool);
     document.getElementById('sumTotalJamma').textContent = formatCurrency(totalCashJamma);
-    document.getElementById('sumPaymentMinus').textContent = formatCurrency(paymentMinus);
-    
-    const pmBox = document.getElementById('paymentMinusBox');
-    pmBox.className = 'summary-box ' + (paymentMinus > 0 ? 'negative' : 'positive');
     
     // Net Profit
     const openingStock = products.reduce((sum, p) => sum + (p.stock * p.cost), 0);
-    const stockIn = stockHistory.filter(h => h.date === today && h.type === 'In').reduce((s,h) => s + (h.qty * h.price), 0);
+    const stockIn = stockHistory.filter(h => h.date.substring(0,10) === today && h.type === 'In').reduce((s,h) => s + (h.qty * (h.price || 0)), 0);
     const closingStock = products.reduce((sum, p) => sum + (p.stock * p.cost), 0);
-    const ikhrajat = todayIkhrajat;
     const totalSales = todaySales.reduce((s, o) => s + o.total, 0);
-    const netProfit = totalSales - (openingStock + stockIn - closingStock + ikhrajat);
+    const netProfit = totalSales - (openingStock + stockIn - closingStock + todayIkhrajat);
     
     document.getElementById('plOpening').textContent = formatCurrency(openingStock);
     document.getElementById('plStockIn').textContent = formatCurrency(stockIn);
     document.getElementById('plClosing').textContent = formatCurrency(closingStock);
-    document.getElementById('plIkhrajat').textContent = formatCurrency(ikhrajat);
+    document.getElementById('plIkhrajat').textContent = formatCurrency(todayIkhrajat);
     
     const profitEl = document.getElementById('plTotalProfit');
     if(netProfit >= 0) {
@@ -1412,7 +1543,7 @@ function updateSummary() {
         });
     });
     let soldHtml = '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;font-weight:bold;border-bottom:1px solid #ddd;padding:2px 0;font-size:9px;"><span>Item</span><span>Qty</span><span>Revenue</span></div>';
-    Object.keys(soldItems).sort((a,b) => soldItems[b].qty - soldItems[a].qty).forEach(name => {
+    Object.keys(soldItems).sort((a,b) => soldItems[b].qty - soldItems[a].qty).slice(0, 10).forEach(name => {
         const data = soldItems[name];
         soldHtml += `<div style="display:grid;grid-template-columns:1fr 1fr 1fr;padding:2px 0;border-bottom:1px solid #eee;font-size:9px;">
             <span>${name}</span>
@@ -1465,7 +1596,7 @@ function saveTaxSettings() {
 }
 
 function backupData() {
-    let data = { products, orders, customers, expenses, stockHistory, taxEnabled, taxRate, taxName, date: new Date().toISOString() };
+    let data = { products, orders, customers, expenses, stockHistory, taxEnabled, taxRate, taxName, date: new Date().toISOString(), version: '2.0' };
     let blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
     let url = URL.createObjectURL(blob);
     let a = document.createElement('a');
@@ -1524,6 +1655,7 @@ function renderAll() {
     renderExpenses();
     updateSummary();
     populateStockSelect();
+    showStockHistory();
     let comp = localStorage.getItem('warda_company');
     if(comp) {
         try {
@@ -1536,6 +1668,7 @@ function renderAll() {
     document.getElementById('taxEnable').checked = taxEnabled;
     document.getElementById('taxRate').value = taxRate;
     document.getElementById('taxName').value = taxName;
+    updateOnlineStatus();
 }
 
 // ==================== INIT ====================
@@ -1543,13 +1676,10 @@ loadData();
 if(darkMode) document.body.classList.add('dark-mode');
 renderAll();
 getDeviceInfo();
+updateOnlineStatus();
 
-setTimeout(() => {
-    if(!isAdmin) {
-        document.getElementById('loginOverlay').style.display = 'flex';
-        document.querySelector('.container').classList.add('view-only');
-    }
-}, 500);
+// Auto-save every 30 seconds
+setInterval(saveData, 30000);
 
 console.log('✅ Warda Marble System Loaded!');
 console.log('📦 Products:', products.length);
