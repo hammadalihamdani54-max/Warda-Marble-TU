@@ -27,6 +27,8 @@
         body.dark-mode .panel{background:#2d2d44;}
         .panel h3{color:#0f2027;margin-bottom:6px;border-left:3px solid #ffd700;padding-left:8px;font-size:14px;}
         body.dark-mode .panel h3{color:#ffd700;}
+        .pos-layout{display:grid;grid-template-columns:1fr 1.2fr;gap:10px;}
+        @media(max-width:768px){.pos-layout{grid-template-columns:1fr;}}
         .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
         .grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;}
         .grid-4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;}
@@ -64,11 +66,13 @@
         .summary-box.negative .num{color:#e74c3c;}
         .summary-box.warning .num{color:#f39c12;}
         .action-btns{display:flex;flex-wrap:wrap;gap:3px;margin-top:4px;}
-        .product-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:5px;max-height:300px;overflow-y:auto;}
+        .product-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:5px;max-height:400px;overflow-y:auto;}
         .product-card{background:#f7fafc;padding:8px;border:1px solid #ddd;border-radius:5px;cursor:pointer;text-align:center;transition:0.2s;}
         body.dark-mode .product-card{background:#1a1a2e;border-color:#444;color:#e0e0e0;}
         .product-card:hover{border-color:#ffd700;transform:scale(1.02);}
         .product-card .name{font-weight:bold;font-size:11px;}
+        .product-card .size{font-size:9px;color:#666;}
+        body.dark-mode .product-card .size{color:#999;}
         .product-card .price{color:#27ae60;font-size:10px;}
         .product-card .stock{font-size:8px;color:#666;}
         body.dark-mode .product-card .stock{color:#999;}
@@ -91,14 +95,13 @@
         .login-box .error{color:#e74c3c;font-size:10px;display:none;}
         .view-only .btn:not(.no-disable),.view-only input:not(.no-disable),.view-only select:not(.no-disable){opacity:0.5;pointer-events:none;}
         .view-only .product-card{cursor:default;}
-        @media(max-width:600px){.grid-2{grid-template-columns:1fr;}.grid-3{grid-template-columns:1fr 1fr;}.grid-4{grid-template-columns:1fr 1fr;}}
         .label-text{font-size:10px;font-weight:bold;color:#555;margin-bottom:2px;display:block;}
         body.dark-mode .label-text{color:#aaa;}
         .profit-loss-box{background:#1a2a4a;padding:8px;border-radius:6px;color:white;text-align:center;margin-top:6px;}
         .profit-loss-box .profit{color:#4ade80;font-weight:bold;}
         .profit-loss-box .loss{color:#f87171;font-weight:bold;}
         .modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);z-index:1000;justify-content:center;align-items:center;}
-        .modal-content{background:white;padding:20px;border-radius:10px;max-width:600px;width:95%;max-height:85vh;overflow:auto;}
+        .modal-content{background:white;padding:20px;border-radius:10px;max-width:650px;width:95%;max-height:85vh;overflow:auto;}
         body.dark-mode .modal-content{background:#2d2d44;color:#e0e0e0;}
         .invoice-box{font-family:Arial;max-width:650px;margin:auto;border:2px solid #ffd700;border-radius:10px;background:white;overflow:hidden;}
         body.dark-mode .invoice-box{background:#1a1a2e;color:#e0e0e0;}
@@ -109,10 +112,19 @@
         .invoice-box th{background:#1a1a2e;color:#ffd700;padding:6px;text-align:center;}
         .invoice-box td{padding:6px;text-align:center;border-bottom:1px solid #ddd;}
         body.dark-mode .invoice-box td{border-color:#444;}
-        .customer-profile{background:#f8fafc;padding:10px;border-radius:8px;margin-bottom:8px;}
-        body.dark-mode .customer-profile{background:#1a1a2e;}
-        .customer-profile .stat{display:inline-block;margin:4px 10px 4px 0;font-size:11px;}
-        .expense-edit-btn{font-size:7px;padding:1px 5px;}
+        .customer-card{background:white;border:1px solid #ddd;border-radius:8px;padding:10px;margin-bottom:6px;cursor:pointer;transition:0.2s;}
+        body.dark-mode .customer-card{background:#1a1a2e;border-color:#444;color:#e0e0e0;}
+        .customer-card:hover{box-shadow:0 2px 8px rgba(0,0,0,0.1);}
+        .customer-card .name{font-size:13px;font-weight:bold;}
+        .customer-card .stats{display:flex;flex-wrap:wrap;gap:8px;font-size:9px;margin-top:4px;}
+        .customer-card .stats span{background:#f0f2f5;padding:2px 6px;border-radius:3px;}
+        body.dark-mode .customer-card .stats span{background:#2d2d44;}
+        .customer-invoices{display:none;margin-top:8px;padding-top:8px;border-top:1px solid #ddd;}
+        body.dark-mode .customer-invoices{border-color:#444;}
+        .customer-invoices.active{display:block;}
+        .date-filter{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px;}
+        .date-filter input{padding:4px 8px;border:1px solid #ddd;border-radius:4px;font-size:10px;width:auto;}
+        body.dark-mode .date-filter input{background:#1a1a2e;color:#e0e0e0;border-color:#444;}
     </style>
 </head>
 <body>
@@ -150,7 +162,7 @@
 
     <!-- ===== POS TAB ===== -->
     <div id="tab-pos" class="tab-content active">
-        <div class="grid-2">
+        <div class="pos-layout">
             <div class="panel">
                 <h3>📦 Products</h3>
                 <div class="cat-tabs">
@@ -237,15 +249,14 @@
             </div>
             
             <div class="stock-in-out">
-                <h4 style="font-size:11px;margin-bottom:3px;">📦 Stock In / Out</h4>
+                <h4 style="font-size:11px;margin-bottom:3px;">📦 Stock In</h4>
                 <div class="row">
                     <select id="stockSelect"><option value="">Select Item</option></select>
                     <input type="number" id="stockQty" placeholder="Qty">
                     <input type="number" id="stockPriceIn" placeholder="Price">
                 </div>
                 <div class="row" style="margin-top:3px;">
-                    <button class="btn-success" onclick="stockIn()" style="flex:1;padding:3px;font-size:9px;">➕ In</button>
-                    <button class="btn-danger" onclick="stockOut()" style="flex:1;padding:3px;font-size:9px;">➖ Out</button>
+                    <button class="btn-success" onclick="stockIn()" style="flex:1;padding:3px;font-size:9px;">➕ Stock In</button>
                 </div>
                 <div style="margin-top:4px;font-size:9px;color:#666;" id="stockHistoryPreview"></div>
             </div>
@@ -256,7 +267,10 @@
     <div id="tab-customers" class="tab-content">
         <div class="panel">
             <h3>👥 Customers</h3>
-            <input type="text" id="searchCustomer" placeholder="🔍 Search..." onkeyup="renderCustomers()">
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
+                <input type="text" id="searchCustomer" placeholder="🔍 Search by name or phone..." style="flex:1;min-width:150px;" onkeyup="renderCustomers()">
+                <button onclick="renderCustomers()" class="btn-info" style="padding:3px 10px;">🔄 Refresh</button>
+            </div>
             <div id="customerList" style="max-height:500px;overflow-y:auto;"></div>
         </div>
     </div>
@@ -265,7 +279,14 @@
     <div id="tab-invoices" class="tab-content">
         <div class="panel">
             <h3>📄 All Invoices</h3>
-            <input type="text" id="searchInvoice" placeholder="🔍 Search..." onkeyup="renderInvoices()">
+            <div class="date-filter">
+                <label style="font-size:10px;">From:</label>
+                <input type="date" id="invoiceFromDate" onchange="renderInvoices()">
+                <label style="font-size:10px;">To:</label>
+                <input type="date" id="invoiceToDate" onchange="renderInvoices()">
+                <button onclick="document.getElementById('invoiceFromDate').value='';document.getElementById('invoiceToDate').value='';renderInvoices();" class="btn-warning" style="padding:2px 8px;">Clear</button>
+                <input type="text" id="searchInvoice" placeholder="🔍 Search..." style="flex:1;min-width:120px;" onkeyup="renderInvoices()">
+            </div>
             <div style="overflow-x:auto;max-height:400px;overflow-y:auto;">
                 <table>
                     <thead><tr><th>Invoice</th><th>Date</th><th>Customer</th><th>Total</th><th>Paid</th><th>Balance</th><th>Status</th><th>Actions</th></tr></thead>
@@ -279,6 +300,11 @@
     <div id="tab-summary" class="tab-content">
         <div class="panel">
             <h3>📊 Daily Summary</h3>
+            <div class="date-filter">
+                <label style="font-size:10px;">Select Date:</label>
+                <input type="date" id="summaryDate" onchange="updateSummary()">
+                <button onclick="document.getElementById('summaryDate').value='';updateSummary();" class="btn-warning" style="padding:2px 8px;">Today</button>
+            </div>
             <div class="summary-grid" id="summaryGrid">
                 <div class="summary-box positive"><div class="num" id="sumTodaySale">0.00</div><div class="lbl">Today's Sale (Bills)</div></div>
                 <div class="summary-box positive"><div class="num" id="sumCashIn">0.00</div><div class="lbl">Cash In Today</div></div>
@@ -448,6 +474,7 @@ let editCartIndex = -1;
 let currentInvoiceNo = null;
 let darkMode = false;
 let editExpenseId = null;
+let currentViewingCustomer = null;
 
 // ==================== ALL PRODUCTS ====================
 function initProducts() {
@@ -707,12 +734,17 @@ function renderProducts() {
     );
     let c = document.getElementById('productList');
     c.innerHTML = '';
-    if(filtered.length === 0) { c.innerHTML = '<div style="text-align:center;padding:10px;color:#666;font-size:11px;">No products</div>'; return; }
+    if(filtered.length === 0) { c.innerHTML = '<div style="text-align:center;padding:20px;color:#666;font-size:11px;">No products found</div>'; return; }
     filtered.forEach(p => {
         let div = document.createElement('div');
         div.className = 'product-card';
         let catEmoji = p.category === 'mwad' ? '🧱' : '🪨';
-        div.innerHTML = `<div class="name">${catEmoji} ${p.name}</div><div class="price">${p.selling > 0 ? formatCurrency(p.selling) : 'Set Price'}</div><div class="stock">Stock: ${p.stock} ${p.type === 'sqm' ? 'm²' : 'pcs'}</div>`;
+        div.innerHTML = `
+            <div class="name">${catEmoji} ${p.name}</div>
+            <div class="size">📏 ${p.size}</div>
+            <div class="price">${p.selling > 0 ? formatCurrency(p.selling) : 'Set Price'}</div>
+            <div class="stock">📦 Stock: ${p.stock} ${p.type === 'sqm' ? 'm²' : 'pcs'}</div>
+        `;
         div.onclick = () => {
             document.getElementById('itemName').value = p.name;
             document.getElementById('costPrice').value = p.cost;
@@ -765,7 +797,7 @@ function renderStock() {
     );
     let tb = document.getElementById('stockBody');
     tb.innerHTML = '';
-    if(filtered.length === 0) { tb.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:10px;color:#666;">No products</td></tr>'; return; }
+    if(filtered.length === 0) { tb.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:20px;color:#666;">No products</td></tr>'; return; }
     filtered.forEach(p => {
         let r = tb.insertRow();
         let catName = p.category === 'mwad' ? '🧱 Materials' : '🪨 Stone';
@@ -855,32 +887,12 @@ function stockIn() {
     showToast('✅ Stock added: +' + qty);
 }
 
-function stockOut() {
-    if(!isAdmin) return showToast('🔒 Admin only!');
-    let id = parseInt(document.getElementById('stockSelect').value);
-    let qty = parseFloat(document.getElementById('stockQty').value);
-    if(!id || !qty || qty <= 0) return showToast('Select item and quantity');
-    let p = products.find(x => x.id === id);
-    if(!p) return showToast('Item not found');
-    if(p.stock < qty) return showToast('⚠️ Not enough stock! Available: ' + p.stock);
-    p.stock -= qty;
-    stockHistory.push({ date: new Date().toISOString(), item: p.name, qty: qty, type: 'Out', price: p.cost });
-    saveData();
-    renderStock();
-    renderProducts();
-    updateSummary();
-    document.getElementById('stockQty').value = '';
-    document.getElementById('stockPriceIn').value = '';
-    showStockHistory();
-    showToast('✅ Stock removed: -' + qty);
-}
-
 function showStockHistory() {
     let container = document.getElementById('stockHistoryPreview');
     let recent = stockHistory.slice(-5).reverse();
     container.innerHTML = '<strong>Recent:</strong> ';
     recent.forEach(h => {
-        container.innerHTML += `<span style="margin:0 4px;">${h.type === 'In' ? '➕' : '➖'} ${h.item} (${h.qty})</span>`;
+        container.innerHTML += `<span style="margin:0 4px;">➕ ${h.item} (${h.qty})</span>`;
     });
 }
 
@@ -1129,6 +1141,8 @@ function renderCustomers() {
     let container = document.getElementById('customerList');
     container.innerHTML = '';
     if(filtered.length === 0) { container.innerHTML = '<div style="text-align:center;padding:20px;color:#666;">No customers found</div>'; return; }
+    
+    let totalCustomerProfit = 0;
     filtered.forEach(c => {
         let due = c.invoices.reduce((s, i) => s + (i.amount - i.paid), 0);
         let totalSales = c.invoices.reduce((s, i) => s + i.amount, 0);
@@ -1137,55 +1151,62 @@ function renderCustomers() {
             let o = orders.find(ord => ord.invoiceNo === i.invoiceNo);
             return s + (o ? o.profit : 0);
         }, 0);
+        totalCustomerProfit += profit;
         
         let div = document.createElement('div');
-        div.className = 'customer-profile';
+        div.className = 'customer-card';
         if(darkMode) div.style.cssText += 'background:#1a1a2e;border-color:#444;color:#e0e0e0;';
+        
         div.innerHTML = `
-            <div style="display:flex;justify-content:space-between;flex-wrap:wrap;margin-bottom:4px;">
-                <strong style="font-size:13px;">${c.name}</strong>
+            <div style="display:flex;justify-content:space-between;flex-wrap:wrap;align-items:center;">
+                <span class="name">${c.name}</span>
                 <span style="font-size:11px;">📞 ${c.phone || 'N/A'}</span>
             </div>
-            <div style="display:flex;flex-wrap:wrap;gap:8px;font-size:10px;">
-                <span class="stat">💰 Total Sales: ${formatCurrency(totalSales)}</span>
-                <span class="stat">✅ Paid: ${formatCurrency(totalPaid)}</span>
-                <span class="stat ${due > 0 ? 'badge-unpaid' : 'badge-paid'}">${due > 0 ? 'Due: ' + formatCurrency(due) : 'Settled'}</span>
-                <span class="stat">📈 Profit: ${formatCurrency(profit)}</span>
-                ${c.advance > 0 ? `<span class="stat" style="color:#f39c12;">Advance: ${formatCurrency(c.advance)}</span>` : ''}
+            <div class="stats">
+                <span>💰 Sales: ${formatCurrency(totalSales)}</span>
+                <span>✅ Paid: ${formatCurrency(totalPaid)}</span>
+                <span class="${due > 0 ? 'badge-unpaid' : 'badge-paid'}" style="padding:2px 6px;border-radius:4px;">${due > 0 ? 'Due: ' + formatCurrency(due) : '✅ Settled'}</span>
+                <span>📈 Profit: ${formatCurrency(profit)}</span>
+                ${c.advance > 0 ? `<span style="color:#f39c12;">Advance: ${formatCurrency(c.advance)}</span>` : ''}
+                <span style="font-size:8px;color:#666;cursor:pointer;" onclick="toggleCustomerInvoices('${c.phone}')">📄 Click to view invoices ▼</span>
             </div>
-            <div style="margin-top:4px;font-size:9px;display:flex;flex-wrap:wrap;gap:4px;">
-                ${c.invoices.slice(-5).map(i => {
-                    let bal = i.amount - i.paid;
-                    return `<span style="background:#f0f2f5;padding:2px 6px;border-radius:3px;">${i.invoiceNo}: ${formatCurrency(i.amount)} ${bal > 0 ? '⚠️' : '✅'}</span>`;
-                }).join('')}
-            </div>
-            <div class="action-btns" style="margin-top:4px;">
-                <button class="btn-info" style="font-size:8px;padding:2px 8px;" onclick="viewCustomerInvoices('${c.phone}')">📄 Invoices</button>
-                <button class="btn-success" style="font-size:8px;padding:2px 8px;" onclick="payCustomer('${c.phone}')">💰 Pay</button>
-                <button class="btn-warning" style="font-size:8px;padding:2px 8px;" onclick="editCustomer('${c.phone}')">✏️ Edit</button>
-                <button class="btn-danger" style="font-size:8px;padding:2px 8px;" onclick="deleteCustomer('${c.phone}')">🗑️ Delete</button>
+            <div class="customer-invoices" id="cinv_${c.phone}">
+                <div style="margin-top:6px;font-size:9px;max-height:200px;overflow-y:auto;">
+                    ${c.invoices.slice(-10).reverse().map(i => {
+                        let bal = i.amount - i.paid;
+                        let o = orders.find(ord => ord.invoiceNo === i.invoiceNo);
+                        return `<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #eee;flex-wrap:wrap;">
+                            <span><strong>${i.invoiceNo}</strong> | ${new Date(i.date).toLocaleDateString()}</span>
+                            <span>Total: ${formatCurrency(i.amount)} | Paid: ${formatCurrency(i.paid)}</span>
+                            <span>${bal > 0 ? '⚠️ Due: ' + formatCurrency(bal) : '✅ Paid'}</span>
+                            <span>
+                                <button onclick="event.stopPropagation();viewInvoice('${i.invoiceNo}')" class="btn-info" style="padding:1px 6px;font-size:7px;">👁️</button>
+                                <button onclick="event.stopPropagation();editInvoice('${i.invoiceNo}')" class="btn-warning" style="padding:1px 6px;font-size:7px;">✏️</button>
+                                <button onclick="event.stopPropagation();payInvoice('${i.invoiceNo}')" class="btn-success" style="padding:1px 6px;font-size:7px;">💰</button>
+                            </span>
+                        </div>`;
+                    }).join('')}
+                </div>
+                <div class="action-btns" style="margin-top:4px;">
+                    <button class="btn-success" style="font-size:8px;padding:2px 8px;" onclick="payCustomer('${c.phone}')">💰 Pay</button>
+                    <button class="btn-warning" style="font-size:8px;padding:2px 8px;" onclick="editCustomer('${c.phone}')">✏️ Edit</button>
+                    <button class="btn-danger" style="font-size:8px;padding:2px 8px;" onclick="deleteCustomer('${c.phone}')">🗑️ Delete</button>
+                </div>
             </div>
         `;
         container.appendChild(div);
     });
+    
+    // Total profit from all customers
+    let totalDiv = document.createElement('div');
+    totalDiv.style.cssText = 'background:#1a2a4a;padding:8px;border-radius:6px;color:white;text-align:center;margin-top:8px;font-size:12px;';
+    totalDiv.innerHTML = `📊 Total Profit from All Customers: <strong style="color:#ffd700;">${formatCurrency(totalCustomerProfit)}</strong>`;
+    container.appendChild(totalDiv);
 }
 
-function viewCustomerInvoices(phone) {
-    let cust = customers.find(c => c.phone === phone);
-    if(!cust) { showToast('Customer not found'); return; }
-    let msg = '📄 INVOICES FOR ' + cust.name.toUpperCase() + '\n';
-    msg += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n';
-    let totalDue = 0;
-    cust.invoices.forEach(i => {
-        let bal = i.amount - i.paid;
-        totalDue += bal;
-        msg += `${i.invoiceNo} | ${new Date(i.date).toLocaleDateString()} | Total: ${formatCurrency(i.amount)} | Paid: ${formatCurrency(i.paid)} | ${bal > 0 ? 'Due: ' + formatCurrency(bal) : '✅ Paid'}\n`;
-    });
-    msg += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n';
-    msg += `Total Due: ${formatCurrency(totalDue)}\n`;
-    msg += `Advance: ${formatCurrency(cust.advance || 0)}\n`;
-    msg += `Total Paid: ${formatCurrency(cust.totalPaid || 0)}`;
-    alert(msg);
+function toggleCustomerInvoices(phone) {
+    let el = document.getElementById('cinv_' + phone);
+    if(el) el.classList.toggle('active');
 }
 
 function payCustomer(phone) {
@@ -1252,7 +1273,16 @@ function deleteCustomer(phone) {
 // ==================== INVOICES ====================
 function renderInvoices() {
     let search = document.getElementById('searchInvoice').value.toLowerCase();
-    let filtered = orders.filter(o => o.invoiceNo.toLowerCase().includes(search) || o.customer.toLowerCase().includes(search)).reverse();
+    let fromDate = document.getElementById('invoiceFromDate').value;
+    let toDate = document.getElementById('invoiceToDate').value;
+    
+    let filtered = orders.filter(o => {
+        let match = o.invoiceNo.toLowerCase().includes(search) || o.customer.toLowerCase().includes(search);
+        if(fromDate) match = match && o.date.substring(0,10) >= fromDate;
+        if(toDate) match = match && o.date.substring(0,10) <= toDate;
+        return match;
+    }).reverse();
+    
     let tb = document.getElementById('invoiceBody');
     tb.innerHTML = '';
     if(filtered.length === 0) { tb.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:20px;color:#666;">No invoices found</td></tr>'; return; }
@@ -1339,7 +1369,6 @@ function editInvoice(invNo) {
     if(cust !== null && cust.trim() !== '') o.customer = cust.trim();
     let phone = prompt('Phone Number:', o.phone || '');
     if(phone !== null) o.phone = phone.trim();
-    // Update customer record
     let custObj = customers.find(c => c.phone === o.phone);
     if(custObj) {
         let inv = custObj.invoices.find(i => i.invoiceNo === invNo);
@@ -1422,8 +1451,8 @@ function renderExpenses() {
             <span><strong>${e.head}</strong> ${e.note ? '- ' + e.note : ''}</span>
             <span>
                 ${formatCurrency(e.amount)}
-                <button onclick="editExpense(${e.id})" class="btn-warning expense-edit-btn" style="font-size:7px;padding:1px 5px;">✏️</button>
-                <button onclick="deleteExpense(${e.id})" class="btn-danger expense-edit-btn" style="font-size:7px;padding:1px 5px;">✕</button>
+                <button onclick="editExpense(${e.id})" class="btn-warning" style="font-size:7px;padding:1px 5px;">✏️</button>
+                <button onclick="deleteExpense(${e.id})" class="btn-danger" style="font-size:7px;padding:1px 5px;">✕</button>
             </span>
         `;
         container.appendChild(div);
@@ -1490,7 +1519,8 @@ function deleteExpense(id) {
 
 // ==================== SUMMARY ====================
 function updateSummary() {
-    const today = getToday();
+    let date = document.getElementById('summaryDate').value || getToday();
+    const today = date;
     
     const todaySales = orders.filter(o => o.date.substring(0,10) === today);
     const todayCash = todaySales.reduce((s,o) => s + (o.paid || 0), 0);
@@ -1512,7 +1542,7 @@ function updateSummary() {
     document.getElementById('sumAdvanceWusool').textContent = formatCurrency(advanceWusool);
     document.getElementById('sumTotalJamma').textContent = formatCurrency(totalCashJamma);
     
-    // Net Profit
+    // Net Profit - Formula: Total Sales - (Opening Stock + Stock In - Closing Stock + Ikhrajat)
     const openingStock = products.reduce((sum, p) => sum + (p.stock * p.cost), 0);
     const stockIn = stockHistory.filter(h => h.date.substring(0,10) === today && h.type === 'In').reduce((s,h) => s + (h.qty * (h.price || 0)), 0);
     const closingStock = products.reduce((sum, p) => sum + (p.stock * p.cost), 0);
@@ -1669,6 +1699,7 @@ function renderAll() {
     document.getElementById('taxRate').value = taxRate;
     document.getElementById('taxName').value = taxName;
     updateOnlineStatus();
+    document.getElementById('summaryDate').value = getToday();
 }
 
 // ==================== INIT ====================
