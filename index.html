@@ -4,70 +4,119 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>Warda Marble</title>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/12.15.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.15.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.15.0/firebase-database-compat.js"></script>
     <style>
         *{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif;}
-        body{background:#0f2027;padding:10px;min-height:100vh;}
-        .container{max-width:1200px;margin:0 auto;background:white;border-radius:20px;overflow:hidden;padding:15px;box-shadow:0 10px 30px rgba(0,0,0,0.3);}
-        .header{background:linear-gradient(135deg,#0f2027,#203a43);color:#ffd700;padding:12px;text-align:center;border-radius:10px;margin-bottom:10px;}
+        body{background:#0f2027;padding:10px;min-height:100vh;transition:0.3s;}
+        body.dark-mode{background:#0a0a15;}
+        .container{max-width:1200px;margin:0 auto;background:white;border-radius:20px;overflow:hidden;padding:15px;box-shadow:0 10px 30px rgba(0,0,0,0.3);transition:0.3s;}
+        body.dark-mode .container{background:#1a1a2e;}
+        .header{background:linear-gradient(135deg,#0f2027,#203a43);color:#ffd700;padding:12px;text-align:center;border-radius:10px;margin-bottom:10px;position:relative;}
+        body.dark-mode .header{background:linear-gradient(135deg,#0a0a15,#1a1a2e);}
         .header h1{font-size:20px;}
+        .status-bar{display:flex;justify-content:center;align-items:center;flex-wrap:wrap;font-size:9px;color:#a0c4e0;gap:10px;margin-top:3px;}
+        .status-bar .online{color:#4ade80;}
+        .status-bar .offline{color:#f87171;}
         .tabs{display:flex;gap:3px;margin-bottom:8px;flex-wrap:wrap;background:#1a1a2e;padding:4px;border-radius:8px;}
+        body.dark-mode .tabs{background:#0a0a15;}
         .tab{padding:6px 12px;background:transparent;color:white;border:none;border-radius:5px;cursor:pointer;font-weight:bold;font-size:11px;}
         .tab.active{background:#ffd700;color:#1a1a2e;}
         .tab-content{display:none;padding:10px;background:#f0f2f5;border-radius:8px;min-height:300px;}
+        body.dark-mode .tab-content{background:#1a1a2e;}
         .tab-content.active{display:block;}
         .panel{background:white;padding:10px;border-radius:8px;margin-bottom:8px;}
+        body.dark-mode .panel{background:#2d2d44;}
         .panel h3{color:#0f2027;margin-bottom:6px;border-left:3px solid #ffd700;padding-left:8px;font-size:14px;}
+        body.dark-mode .panel h3{color:#ffd700;}
         .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
         .grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;}
+        .grid-4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;}
         input,select{width:100%;padding:5px 7px;border:1px solid #ddd;border-radius:4px;font-size:11px;margin-bottom:4px;}
-        button{padding:5px 10px;border:none;border-radius:4px;cursor:pointer;font-weight:bold;font-size:10px;margin:2px;}
+        body.dark-mode input,body.dark-mode select{background:#1a1a2e;color:#e0e0e0;border-color:#444;}
+        button{padding:5px 10px;border:none;border-radius:4px;cursor:pointer;font-weight:bold;font-size:10px;margin:2px;transition:0.2s;}
+        button:hover{transform:translateY(-1px);}
         .btn-success{background:#27ae60;color:white;}
         .btn-danger{background:#e74c3c;color:white;}
         .btn-warning{background:#f39c12;color:white;}
         .btn-info{background:#3498db;color:white;}
         .btn-primary{background:#0f2027;color:white;}
+        body.dark-mode .btn-primary{background:#ffd700;color:#1a1a2e;}
         table{width:100%;border-collapse:collapse;font-size:10px;}
         th,td{padding:4px;border-bottom:1px solid #ddd;text-align:left;}
         th{background:#0f2027;color:#ffd700;}
+        body.dark-mode th{background:#1a1a2e;}
+        body.dark-mode td{color:#e0e0e0;}
         .badge{padding:2px 6px;border-radius:8px;font-size:8px;font-weight:bold;display:inline-block;}
         .badge-paid{background:#27ae60;color:white;}
         .badge-unpaid{background:#e74c3c;color:white;}
         .badge-partial{background:#f39c12;color:white;}
+        .badge-settled{background:#2c3e50;color:white;}
         .total-box{background:#1a1a2e;color:white;padding:8px;border-radius:6px;margin-top:6px;text-align:right;}
+        body.dark-mode .total-box{background:#0a0a15;}
         .total-box p{margin:2px 0;font-size:11px;}
         .summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:5px;margin-bottom:8px;}
-        .summary-box{background:white;padding:6px;border-radius:5px;text-align:center;border:1px solid #ddd;}
+        .summary-box{background:white;padding:6px;border-radius:5px;text-align:center;border:1px solid #ddd;transition:0.2s;}
+        body.dark-mode .summary-box{background:#2d2d44;border-color:#444;color:#e0e0e0;}
+        .summary-box:hover{transform:scale(1.02);}
         .summary-box .num{font-size:16px;font-weight:bold;}
         .summary-box .lbl{font-size:8px;color:#666;}
+        body.dark-mode .summary-box .lbl{color:#999;}
         .summary-box.positive .num{color:#27ae60;}
         .summary-box.negative .num{color:#e74c3c;}
+        .summary-box.warning .num{color:#f39c12;}
         .action-btns{display:flex;flex-wrap:wrap;gap:3px;margin-top:4px;}
         .product-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:5px;max-height:250px;overflow-y:auto;}
-        .product-card{background:#f7fafc;padding:5px;border:1px solid #ddd;border-radius:5px;cursor:pointer;text-align:center;}
-        .product-card:hover{border-color:#ffd700;}
+        .product-card{background:#f7fafc;padding:5px;border:1px solid #ddd;border-radius:5px;cursor:pointer;text-align:center;transition:0.2s;}
+        body.dark-mode .product-card{background:#1a1a2e;border-color:#444;color:#e0e0e0;}
+        .product-card:hover{border-color:#ffd700;transform:scale(1.02);}
         .product-card .name{font-weight:bold;font-size:11px;}
         .product-card .price{color:#27ae60;font-size:10px;}
         .product-card .stock{font-size:8px;color:#666;}
+        body.dark-mode .product-card .stock{color:#999;}
         .cat-tabs{display:flex;gap:3px;margin-bottom:4px;flex-wrap:wrap;}
         .cat-tab{padding:2px 8px;background:#e2e8f0;border:none;border-radius:12px;cursor:pointer;font-size:8px;font-weight:bold;}
+        body.dark-mode .cat-tab{background:#444;color:#e0e0e0;}
         .cat-tab.active{background:#ffd700;}
+        body.dark-mode .cat-tab.active{color:#1a1a2e;}
         .stock-in-out{background:#f7fafc;padding:6px;border-radius:5px;margin-top:4px;}
+        body.dark-mode .stock-in-out{background:#1a1a2e;}
         .stock-in-out .row{display:flex;gap:4px;flex-wrap:wrap;}
         .stock-in-out .row select,.stock-in-out .row input{flex:1;min-width:60px;}
         .toast{position:fixed;bottom:20px;right:20px;background:#0f2027;color:#ffd700;padding:6px 14px;border-radius:5px;z-index:999;font-size:11px;}
+        body.dark-mode .toast{background:#1a1a2e;}
         .login-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);display:none;justify-content:center;align-items:center;z-index:9999;}
         .login-box{background:white;padding:20px;border-radius:10px;max-width:320px;width:90%;text-align:center;}
+        body.dark-mode .login-box{background:#2d2d44;color:#e0e0e0;}
         .login-box input{width:100%;padding:6px;margin:4px 0;border:1px solid #ddd;border-radius:4px;}
+        body.dark-mode .login-box input{background:#1a1a2e;color:#e0e0e0;border-color:#444;}
         .login-box .error{color:#e74c3c;font-size:10px;display:none;}
-        .view-only .btn,.view-only input,.view-only select{opacity:0.5;pointer-events:none;}
+        .view-only .btn:not(.no-disable),.view-only input:not(.no-disable),.view-only select:not(.no-disable){opacity:0.5;pointer-events:none;}
         .view-only .product-card{cursor:default;}
         .modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);z-index:1000;justify-content:center;align-items:center;}
-        .modal-content{background:white;padding:20px;border-radius:10px;max-width:450px;width:95%;}
+        .modal-content{background:white;padding:20px;border-radius:10px;max-width:550px;width:95%;}
+        body.dark-mode .modal-content{background:#2d2d44;color:#e0e0e0;}
         .date-filter{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px;}
         .date-filter input{padding:4px 8px;border:1px solid #ddd;border-radius:4px;font-size:10px;width:auto;}
-        @media(max-width:600px){.grid-2{grid-template-columns:1fr;}.grid-3{grid-template-columns:1fr 1fr;}}
+        body.dark-mode .date-filter input{background:#1a1a2e;color:#e0e0e0;border-color:#444;}
+        @media(max-width:600px){.grid-2{grid-template-columns:1fr;}.grid-3{grid-template-columns:1fr 1fr;}.grid-4{grid-template-columns:1fr 1fr;}}
         .monthly-table{font-size:9px;}
         .monthly-table th,.monthly-table td{padding:3px 4px;}
+        .label-text{font-size:10px;font-weight:bold;color:#555;margin-bottom:2px;display:block;}
+        body.dark-mode .label-text{color:#aaa;}
+        .profit-loss-box{background:#1a2a4a;padding:8px;border-radius:6px;color:white;text-align:center;margin-top:6px;}
+        .profit-loss-box .profit{color:#4ade80;font-weight:bold;}
+        .profit-loss-box .loss{color:#f87171;font-weight:bold;}
+        .settings-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:15px;}
+        .settings-card{background:#f8fafc;padding:12px;border-radius:8px;}
+        body.dark-mode .settings-card{background:#1a1a2e;}
+        .device-card{background:#f0f2f5;padding:8px 12px;border-radius:6px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;}
+        body.dark-mode .device-card{background:#1a1a2e;border-color:#444;}
+        .device-card .device-name{font-weight:bold;font-size:11px;}
+        .device-card .device-time{font-size:9px;color:#666;}
+        body.dark-mode .device-card .device-time{color:#999;}
     </style>
 </head>
 <body>
@@ -77,7 +126,16 @@
     <div class="header">
         <h1>🏢 WARDA MARBLE <span id="roleBadge" style="font-size:11px;background:#6b7a8a;padding:2px 8px;border-radius:8px;">👁️ Viewer</span></h1>
         <p>Premium Marble Solutions</p>
+        <div class="status-bar">
+            <span id="onlineStatus">🟢 Online</span>
+            <span id="lastSync">Sync: Just now</span>
+            <span id="deviceInfo"></span>
+        </div>
         <div style="display:flex;gap:4px;justify-content:center;flex-wrap:wrap;margin-top:3px;">
+            <button onclick="toggleDarkMode()" style="background:transparent;color:#ffd700;border:1px solid #ffd700;padding:2px 8px;border-radius:4px;cursor:pointer;font-size:10px;">🌓</button>
+            <button onclick="backupData()" style="background:#3498db;color:white;border:none;padding:2px 8px;border-radius:4px;cursor:pointer;font-size:9px;">💾 Backup</button>
+            <button onclick="document.getElementById('restoreFile').click()" style="background:#f39c12;color:white;border:none;padding:2px 8px;border-radius:4px;cursor:pointer;font-size:9px;">📂 Restore</button>
+            <input type="file" id="restoreFile" style="display:none" onchange="restoreData(this)">
             <button onclick="showLogin()" id="loginBtn" style="background:#27ae60;color:white;border:none;padding:2px 10px;border-radius:4px;cursor:pointer;font-weight:bold;font-size:10px;">🔑 Login</button>
             <button onclick="logout()" id="logoutBtn" style="display:none;background:#e74c3c;color:white;border:none;padding:2px 10px;border-radius:4px;cursor:pointer;font-weight:bold;font-size:10px;">🚪 Logout</button>
         </div>
@@ -91,6 +149,7 @@
         <button class="tab" onclick="showTab('invoices')">📄 Invoices</button>
         <button class="tab" onclick="showTab('summary')">📊 Summary</button>
         <button class="tab" onclick="showTab('expenses')">💸 Expenses</button>
+        <button class="tab" onclick="showTab('settings')">⚙️ Settings</button>
     </div>
 
     <!-- ===== POS TAB ===== -->
@@ -238,7 +297,7 @@
                 <div class="summary-box positive"><div class="num" id="sumTotalJamma">0.00</div><div class="lbl">Total Cash</div></div>
             </div>
             
-            <div style="background:#1a2a4a;padding:8px;border-radius:6px;color:white;text-align:center;">
+            <div class="profit-loss-box">
                 <h4 style="color:#ffd700;font-size:13px;">📈 Net Profit / Loss</h4>
                 <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:4px;font-size:10px;margin:4px 0;">
                     <div><span style="color:#a0c4e0;">Opening:</span><br><strong id="plOpening">0</strong></div>
@@ -278,10 +337,9 @@
         <div class="panel">
             <h3>💸 Expenses (Ikhrajat)</h3>
             
-            <!-- DATE FILTER -->
             <div class="date-filter">
                 <label style="font-size:10px;">Select Date:</label>
-                <input type="date" id="expenseDate" onchange="renderExpenses()" style="padding:4px 8px;border:1px solid #ddd;border-radius:4px;font-size:10px;width:auto;">
+                <input type="date" id="expenseDate" onchange="renderExpenses()">
                 <button onclick="document.getElementById('expenseDate').value='';renderExpenses();" class="btn-warning" style="padding:2px 8px;font-size:9px;">Today</button>
             </div>
 
@@ -297,6 +355,47 @@
             
             <h4 style="font-size:12px;margin-top:6px;">📊 Expense Summary</h4>
             <div id="expenseSummary" style="font-size:10px;"></div>
+        </div>
+    </div>
+
+    <!-- ===== SETTINGS TAB ===== -->
+    <div id="tab-settings" class="tab-content">
+        <div class="panel">
+            <h3>⚙️ Settings</h3>
+            
+            <!-- Devices Section -->
+            <div style="margin-bottom:15px;">
+                <h4 style="font-size:12px;margin-bottom:8px;">📱 Connected Devices</h4>
+                <div id="deviceList" style="max-height:200px;overflow-y:auto;"></div>
+            </div>
+
+            <div class="settings-grid">
+                <div class="settings-card">
+                    <h4 style="font-size:12px;margin-bottom:8px;">🏢 Company Info</h4>
+                    <input type="text" id="companyName" placeholder="Company Name" value="Warda Marble">
+                    <input type="text" id="companyPhone" placeholder="Phone" value="+966 59 807 4287">
+                    <input type="text" id="companyAddress" placeholder="Address" value="Tabuk, Saudi Arabia">
+                    <button onclick="saveSettings()" class="btn-success" style="width:100%;margin-top:4px;">💾 Save Settings</button>
+                </div>
+
+                <div class="settings-card">
+                    <h4 style="font-size:12px;margin-bottom:8px;">💰 Tax Settings</h4>
+                    <label style="font-size:10px;display:flex;align-items:center;gap:5px;">
+                        <input type="checkbox" id="taxEnable" checked> Enable Tax
+                    </label>
+                    <input type="number" id="taxRate" placeholder="Tax Rate %" value="15" step="0.5">
+                    <input type="text" id="taxName" placeholder="Tax Name" value="VAT">
+                    <button onclick="saveTaxSettings()" class="btn-success" style="width:100%;margin-top:4px;">💾 Save Tax</button>
+                </div>
+
+                <div class="settings-card">
+                    <h4 style="font-size:12px;margin-bottom:8px;">💾 Data Management</h4>
+                    <button onclick="backupData()" class="btn-info" style="width:100%;">📥 Backup Data</button>
+                    <button onclick="document.getElementById('restoreFile2').click()" class="btn-warning" style="width:100%;margin-top:4px;">📤 Restore Data</button>
+                    <input type="file" id="restoreFile2" style="display:none" onchange="restoreData(this)">
+                    <button onclick="resetAll()" class="btn-danger" style="width:100%;margin-top:4px;">⚠️ Reset All Data</button>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -330,6 +429,117 @@
 </div>
 
 <script>
+// ==================== FIREBASE CONFIG ====================
+const firebaseConfig = {
+    apiKey: "AIzaSyB7Qrx6BYTJD9fGGfYuNZRj3gNor9hthYo",
+    authDomain: "warda-marblesa.firebaseapp.com",
+    databaseURL: "https://warda-marblesa-default-rtdb.firebaseio.com",
+    projectId: "warda-marblesa",
+    storageBucket: "warda-marblesa.firebasestorage.app",
+    messagingSenderId: "454278153344",
+    appId: "1:454278153344:web:60de60da7e50047a72d265"
+};
+
+// ==================== INIT FIREBASE ====================
+let firebaseInitialized = false;
+let db = null;
+let auth = null;
+
+try {
+    firebase.initializeApp(firebaseConfig);
+    db = firebase.database();
+    auth = firebase.auth();
+    firebaseInitialized = true;
+    console.log('✅ Firebase Connected!');
+} catch(e) {
+    console.warn('⚠️ Firebase not configured:', e.message);
+}
+
+// ==================== DEVICE MANAGEMENT ====================
+function getDeviceId() {
+    let deviceId = localStorage.getItem('warda_device_id');
+    if(!deviceId) {
+        deviceId = 'device_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
+        localStorage.setItem('warda_device_id', deviceId);
+    }
+    return deviceId;
+}
+
+function getDeviceName() {
+    let ua = navigator.userAgent;
+    let name = '';
+    if(ua.includes('Mobile')) name += '📱 ';
+    else if(ua.includes('Tablet')) name += '📱 ';
+    else name += '💻 ';
+    if(ua.includes('Windows')) name += 'Windows';
+    else if(ua.includes('Mac')) name += 'Mac';
+    else if(ua.includes('Linux')) name += 'Linux';
+    else if(ua.includes('Android')) name += 'Android';
+    else if(ua.includes('iPhone') || ua.includes('iPad')) name += 'iOS';
+    else name += 'Unknown';
+    return name;
+}
+
+function updateDeviceStatus() {
+    if(!firebaseInitialized || !db || !isAdmin) return;
+    
+    const deviceId = getDeviceId();
+    const deviceName = getDeviceName();
+    
+    db.ref('warda_devices/' + deviceId).set({
+        name: deviceName,
+        lastSeen: firebase.database.ServerValue.TIMESTAMP,
+        isAdmin: isAdmin,
+        userAgent: navigator.userAgent
+    });
+}
+
+function loadDevices() {
+    if(!firebaseInitialized || !db) return;
+    
+    db.ref('warda_devices').on('value', (snapshot) => {
+        const devices = snapshot.val();
+        const container = document.getElementById('deviceList');
+        container.innerHTML = '';
+        
+        if(!devices) {
+            container.innerHTML = '<div style="color:#666;font-size:10px;">No devices connected</div>';
+            return;
+        }
+        
+        const now = Date.now();
+        Object.keys(devices).forEach(key => {
+            const device = devices[key];
+            const isOnline = (now - device.lastSeen) < 60000;
+            const isCurrent = key === getDeviceId();
+            
+            const div = document.createElement('div');
+            div.className = 'device-card';
+            div.innerHTML = `
+                <div>
+                    <span class="device-name">${device.name || 'Unknown Device'}</span>
+                    <span style="font-size:8px;margin-left:6px;${isOnline ? 'color:#27ae60;' : 'color:#e74c3c;'}">${isOnline ? '🟢 Online' : '🔴 Offline'}</span>
+                    ${isCurrent ? '<span style="font-size:8px;color:#ffd700;margin-left:6px;">(You)</span>' : ''}
+                    <div class="device-time">${new Date(device.lastSeen).toLocaleString()}</div>
+                </div>
+                ${isAdmin && !isCurrent ? `<button onclick="logoutDevice('${key}')" class="btn-danger" style="font-size:7px;padding:2px 8px;">🚪 Logout</button>` : ''}
+            `;
+            container.appendChild(div);
+        });
+    });
+}
+
+function logoutDevice(deviceId) {
+    if(!isAdmin) return showToast('🔒 Admin only!');
+    if(!confirm('Logout this device?')) return;
+    
+    db.ref('warda_devices/' + deviceId).remove().then(() => {
+        showToast('✅ Device logged out');
+    }).catch(() => {
+        showToast('❌ Failed to logout device');
+    });
+}
+
 // ==================== DATA ====================
 let products = [];
 let orders = [];
@@ -343,6 +553,10 @@ let currentFilter = 'all';
 let stockFilter = 'all';
 let currentMode = 'sqm';
 let editExpenseId = null;
+let darkMode = false;
+let taxEnabled = true;
+let taxRate = 15;
+let taxName = "VAT";
 
 // ==================== INIT PRODUCTS ====================
 function initProducts() {
@@ -368,6 +582,12 @@ function saveData() {
     localStorage.setItem('warda_customers', JSON.stringify(customers));
     localStorage.setItem('warda_expenses', JSON.stringify(expenses));
     localStorage.setItem('warda_stockHistory', JSON.stringify(stockHistory));
+    localStorage.setItem('warda_taxEnabled', taxEnabled);
+    localStorage.setItem('warda_taxRate', taxRate);
+    localStorage.setItem('warda_taxName', taxName);
+    localStorage.setItem('warda_darkmode', darkMode);
+    document.getElementById('lastSync').textContent = 'Sync: ' + new Date().toLocaleTimeString();
+    updateDeviceStatus();
 }
 
 function loadData() {
@@ -382,6 +602,14 @@ function loadData() {
     if(e) expenses = JSON.parse(e);
     let sh = localStorage.getItem('warda_stockHistory');
     if(sh) stockHistory = JSON.parse(sh);
+    let te = localStorage.getItem('warda_taxEnabled');
+    if(te !== null) taxEnabled = te === 'true';
+    let tr = localStorage.getItem('warda_taxRate');
+    if(tr) taxRate = parseFloat(tr);
+    let tn = localStorage.getItem('warda_taxName');
+    if(tn) taxName = tn;
+    let dm = localStorage.getItem('warda_darkmode');
+    if(dm !== null) darkMode = dm === 'true';
 }
 
 // ==================== HELPERS ====================
@@ -405,25 +633,77 @@ function closeModal(id) {
     document.getElementById(id).style.display = 'none';
 }
 
+function toggleDarkMode() {
+    darkMode = !darkMode;
+    document.body.classList.toggle('dark-mode', darkMode);
+    saveData();
+    showToast(darkMode ? '🌙 Dark Mode' : '☀️ Light Mode');
+}
+
+function updateOnlineStatus() {
+    const status = document.getElementById('onlineStatus');
+    if(navigator.onLine) {
+        status.textContent = '🟢 Online';
+        status.className = 'online';
+    } else {
+        status.textContent = '🔴 Offline';
+        status.className = 'offline';
+    }
+}
+window.addEventListener('online', updateOnlineStatus);
+window.addEventListener('offline', updateOnlineStatus);
+
+function getDeviceInfo() {
+    let info = '';
+    let ua = navigator.userAgent;
+    if(ua.includes('Mobile')) info += '📱 Mobile';
+    else if(ua.includes('Tablet')) info += '📱 Tablet';
+    else info += '💻 Desktop';
+    document.getElementById('deviceInfo').textContent = info;
+}
+
 // ==================== LOGIN ====================
 function login() {
     let email = document.getElementById('loginEmail').value;
     let pass = document.getElementById('loginPassword').value;
     let error = document.getElementById('loginError');
-    if(email === 'admin@warda.com' && pass === 'Hamdani5') {
-        isAdmin = true;
-        document.getElementById('loginOverlay').style.display = 'none';
-        document.getElementById('roleBadge').textContent = '👑 Admin';
-        document.getElementById('roleBadge').style.background = '#ffd700';
-        document.getElementById('roleBadge').style.color = '#1a1a2e';
-        document.getElementById('loginBtn').style.display = 'none';
-        document.getElementById('logoutBtn').style.display = 'inline-block';
-        document.querySelector('.container').classList.remove('view-only');
-        showToast('✅ Admin Login Successful!');
-        renderAll();
+    
+    if(firebaseInitialized && auth) {
+        auth.signInWithEmailAndPassword(email, pass)
+        .then(() => {
+            isAdmin = true;
+            document.getElementById('loginOverlay').style.display = 'none';
+            document.getElementById('roleBadge').textContent = '👑 Admin';
+            document.getElementById('roleBadge').style.background = '#ffd700';
+            document.getElementById('roleBadge').style.color = '#1a1a2e';
+            document.getElementById('loginBtn').style.display = 'none';
+            document.getElementById('logoutBtn').style.display = 'inline-block';
+            document.querySelector('.container').classList.remove('view-only');
+            showToast('✅ Admin Login Successful!');
+            updateDeviceStatus();
+            renderAll();
+        })
+        .catch(() => {
+            error.style.display = 'block';
+            setTimeout(() => error.style.display = 'none', 3000);
+        });
     } else {
-        error.style.display = 'block';
-        setTimeout(() => error.style.display = 'none', 3000);
+        if(email === 'admin@warda.com' && pass === 'Hamdani5') {
+            isAdmin = true;
+            document.getElementById('loginOverlay').style.display = 'none';
+            document.getElementById('roleBadge').textContent = '👑 Admin';
+            document.getElementById('roleBadge').style.background = '#ffd700';
+            document.getElementById('roleBadge').style.color = '#1a1a2e';
+            document.getElementById('loginBtn').style.display = 'none';
+            document.getElementById('logoutBtn').style.display = 'inline-block';
+            document.querySelector('.container').classList.remove('view-only');
+            showToast('✅ Admin Login Successful!');
+            updateDeviceStatus();
+            renderAll();
+        } else {
+            error.style.display = 'block';
+            setTimeout(() => error.style.display = 'none', 3000);
+        }
     }
 }
 
@@ -444,15 +724,31 @@ function showLogin() {
 }
 
 function logout() {
-    isAdmin = false;
-    document.getElementById('roleBadge').textContent = '👁️ Viewer';
-    document.getElementById('roleBadge').style.background = '#6b7a8a';
-    document.getElementById('roleBadge').style.color = 'white';
-    document.getElementById('loginBtn').style.display = 'inline-block';
-    document.getElementById('logoutBtn').style.display = 'none';
-    document.querySelector('.container').classList.add('view-only');
-    showToast('👁️ Viewer Mode');
-    renderAll();
+    if(firebaseInitialized && auth) {
+        auth.signOut().then(() => {
+            isAdmin = false;
+            document.getElementById('roleBadge').textContent = '👁️ Viewer';
+            document.getElementById('roleBadge').style.background = '#6b7a8a';
+            document.getElementById('roleBadge').style.color = 'white';
+            document.getElementById('loginBtn').style.display = 'inline-block';
+            document.getElementById('logoutBtn').style.display = 'none';
+            document.querySelector('.container').classList.add('view-only');
+            showToast('👁️ Viewer Mode');
+            updateDeviceStatus();
+            renderAll();
+        });
+    } else {
+        isAdmin = false;
+        document.getElementById('roleBadge').textContent = '👁️ Viewer';
+        document.getElementById('roleBadge').style.background = '#6b7a8a';
+        document.getElementById('roleBadge').style.color = 'white';
+        document.getElementById('loginBtn').style.display = 'inline-block';
+        document.getElementById('logoutBtn').style.display = 'none';
+        document.querySelector('.container').classList.add('view-only');
+        showToast('👁️ Viewer Mode');
+        updateDeviceStatus();
+        renderAll();
+    }
 }
 
 // ==================== TABS ====================
@@ -467,6 +763,7 @@ function showTab(tab) {
     if(tab === 'invoices') renderInvoices();
     if(tab === 'summary') updateSummary();
     if(tab === 'expenses') renderExpenses();
+    if(tab === 'settings') { loadDevices(); }
 }
 
 // ==================== MODE ====================
@@ -1119,7 +1416,6 @@ function updateSummary() {
     });
     document.getElementById('soldItems').innerHTML = soldHtml || '<div style="padding:6px;color:#666;font-size:10px;">No items sold today</div>';
     
-    // Monthly Summary
     const month = today.substring(0,7);
     const monthSales = orders.filter(o => o.date.substring(0,7) === month);
     const monthExp = expenses.filter(e => e.date.substring(0,7) === month);
@@ -1185,6 +1481,74 @@ function updateSummary() {
     document.getElementById('monthlyBody').innerHTML = mhtml || '<tr><td colspan="6" style="text-align:center;color:#666;">No data</td></tr>';
 }
 
+// ==================== SETTINGS ====================
+function saveSettings() {
+    let name = document.getElementById('companyName').value;
+    let phone = document.getElementById('companyPhone').value;
+    let address = document.getElementById('companyAddress').value;
+    localStorage.setItem('warda_company', JSON.stringify({name, phone, address}));
+    document.querySelector('.header h1').innerHTML = '🏢 ' + name + ' <span id="roleBadge" style="font-size:11px;background:#6b7a8a;padding:2px 8px;border-radius:8px;">' + (isAdmin ? '👑 Admin' : '👁️ Viewer') + '</span>';
+    showToast('✅ Settings saved');
+}
+
+function saveTaxSettings() {
+    taxEnabled = document.getElementById('taxEnable').checked;
+    taxRate = parseFloat(document.getElementById('taxRate').value) || 15;
+    taxName = document.getElementById('taxName').value || 'VAT';
+    saveData();
+    showToast('✅ Tax settings saved');
+}
+
+function backupData() {
+    let data = { products, orders, customers, expenses, stockHistory, taxEnabled, taxRate, taxName, date: new Date().toISOString(), version: '3.0' };
+    let blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+    let url = URL.createObjectURL(blob);
+    let a = document.createElement('a');
+    a.href = url;
+    a.download = 'warda_backup_' + getToday() + '.json';
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('✅ Backup downloaded');
+}
+
+function restoreData(input) {
+    let file = input.files[0];
+    if(!file) return;
+    let reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            let data = JSON.parse(e.target.result);
+            if(confirm('Restore will replace all current data. Continue?')) {
+                if(data.products) products = data.products;
+                if(data.orders) orders = data.orders;
+                if(data.customers) customers = data.customers;
+                if(data.expenses) expenses = data.expenses;
+                if(data.stockHistory) stockHistory = data.stockHistory;
+                if(data.taxEnabled !== undefined) taxEnabled = data.taxEnabled;
+                if(data.taxRate) taxRate = data.taxRate;
+                if(data.taxName) taxName = data.taxName;
+                saveData();
+                renderAll();
+                showToast('✅ Data restored successfully');
+            }
+        } catch(err) {
+            showToast('❌ Invalid backup file');
+        }
+    };
+    reader.readAsText(file);
+    input.value = '';
+}
+
+function resetAll() {
+    if(!isAdmin) return showToast('🔒 Admin only!');
+    if(confirm('⚠️ This will delete ALL data! Are you sure?')) {
+        if(prompt('Type RESET to confirm:') === 'RESET') {
+            localStorage.clear();
+            location.reload();
+        }
+    }
+}
+
 // ==================== RENDER ALL ====================
 function renderAll() {
     renderProducts();
@@ -1195,22 +1559,47 @@ function renderAll() {
     renderExpenses();
     updateSummary();
     populateStockSelect();
+    loadDevices();
     
-    // Set expense date to today
+    let comp = localStorage.getItem('warda_company');
+    if(comp) {
+        try {
+            let c = JSON.parse(comp);
+            document.getElementById('companyName').value = c.name || 'Warda Marble';
+            document.getElementById('companyPhone').value = c.phone || '';
+            document.getElementById('companyAddress').value = c.address || '';
+        } catch(e) {}
+    }
+    document.getElementById('taxEnable').checked = taxEnabled;
+    document.getElementById('taxRate').value = taxRate;
+    document.getElementById('taxName').value = taxName;
+    updateOnlineStatus();
+    document.getElementById('summaryDate').value = getToday();
     document.getElementById('expenseDate').value = getToday();
 }
 
 // ==================== INIT ====================
 loadData();
+if(darkMode) document.body.classList.add('dark-mode');
 renderAll();
+getDeviceInfo();
+updateOnlineStatus();
+updateDeviceStatus();
 
-// No login popup - directly viewer mode
-document.querySelector('.container').classList.add('view-only');
+// Update device status every 30 seconds
+setInterval(() => {
+    updateDeviceStatus();
+    document.getElementById('lastSync').textContent = 'Sync: ' + new Date().toLocaleTimeString();
+}, 30000);
+
+// Auto-save every 30 seconds
+setInterval(saveData, 30000);
 
 console.log('✅ Warda Marble System Loaded!');
 console.log('📦 Products:', products.length);
 console.log('📄 Orders:', orders.length);
 console.log('👥 Customers:', customers.length);
+console.log('🔥 Firebase:', firebaseInitialized ? 'Connected' : 'Not configured');
 </script>
 </body>
 </html>
