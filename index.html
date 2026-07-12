@@ -55,7 +55,7 @@
         .stock-in-out .row{display:flex;gap:4px;flex-wrap:wrap;}
         .stock-in-out .row select,.stock-in-out .row input{flex:1;min-width:60px;}
         .toast{position:fixed;bottom:20px;right:20px;background:#0f2027;color:#ffd700;padding:6px 14px;border-radius:5px;z-index:999;font-size:11px;}
-        .login-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);display:flex;justify-content:center;align-items:center;z-index:9999;}
+        .login-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);display:none;justify-content:center;align-items:center;z-index:9999;}
         .login-box{background:white;padding:20px;border-radius:10px;max-width:320px;width:90%;text-align:center;}
         .login-box input{width:100%;padding:6px;margin:4px 0;border:1px solid #ddd;border-radius:4px;}
         .login-box .error{color:#e74c3c;font-size:10px;display:none;}
@@ -277,6 +277,14 @@
     <div id="tab-expenses" class="tab-content">
         <div class="panel">
             <h3>💸 Expenses (Ikhrajat)</h3>
+            
+            <!-- DATE FILTER -->
+            <div class="date-filter">
+                <label style="font-size:10px;">Select Date:</label>
+                <input type="date" id="expenseDate" onchange="renderExpenses()" style="padding:4px 8px;border:1px solid #ddd;border-radius:4px;font-size:10px;width:auto;">
+                <button onclick="document.getElementById('expenseDate').value='';renderExpenses();" class="btn-warning" style="padding:2px 8px;font-size:9px;">Today</button>
+            </div>
+
             <div class="grid-2">
                 <input type="text" id="expenseHead" placeholder="Expense Head">
                 <input type="number" id="expenseAmount" placeholder="Amount" step="0.01">
@@ -284,7 +292,7 @@
             <input type="text" id="expenseNote" placeholder="Note (optional)">
             <button class="btn-success" onclick="addExpense()" style="width:100%;padding:4px;font-size:10px;">➕ Add Expense</button>
             
-            <h4 style="font-size:12px;margin-top:6px;">📋 Today's Expenses</h4>
+            <h4 style="font-size:12px;margin-top:6px;">📋 Expenses for <span id="expenseDateLabel">Today</span></h4>
             <div id="expenseList" style="max-height:250px;overflow-y:auto;"></div>
             
             <h4 style="font-size:12px;margin-top:6px;">📊 Expense Summary</h4>
@@ -335,7 +343,6 @@ let currentFilter = 'all';
 let stockFilter = 'all';
 let currentMode = 'sqm';
 let editExpenseId = null;
-let darkMode = false;
 
 // ==================== INIT PRODUCTS ====================
 function initProducts() {
@@ -923,7 +930,15 @@ function viewInvoice(invNo) {
     alert(msg);
 }
 
-// ==================== EXPENSES (IKHRAJAT) - FIXED ====================
+// ==================== EXPENSES ====================
+function getExpenseDate() {
+    let date = document.getElementById('expenseDate').value;
+    if(!date) {
+        date = getToday();
+        document.getElementById('expenseDate').value = date;
+    }
+    return date;
+}
 
 function addExpense() {
     if(!isAdmin) return showToast('🔒 Admin only!');
@@ -931,24 +946,44 @@ function addExpense() {
     let amount = parseFloat(document.getElementById('expenseAmount').value);
     let note = document.getElementById('expenseNote').value.trim();
     if(!head || !amount || amount <= 0) { showToast('Enter valid expense'); return; }
-    expenses.push({ id: Date.now(), head, amount, note, date: new Date().toISOString() });
+    
+    let expenseDate = getExpenseDate();
+    let dateTime = expenseDate + 'T' + new Date().toTimeString();
+    
+    expenses.push({ 
+        id: Date.now(), 
+        head, 
+        amount, 
+        note, 
+        date: dateTime 
+    });
+    
     saveData();
     renderExpenses();
     updateSummary();
     document.getElementById('expenseHead').value = '';
     document.getElementById('expenseAmount').value = '';
     document.getElementById('expenseNote').value = '';
-    showToast('✅ Expense added');
+    showToast('✅ Expense added for ' + expenseDate);
 }
 
 function renderExpenses() {
     let container = document.getElementById('expenseList');
-    let today = getToday();
-    let todayExp = expenses.filter(e => e.date.substring(0,10) === today);
+    let selectedDate = getExpenseDate();
+    
+    document.getElementById('expenseDateLabel').textContent = selectedDate;
+    
+    let filteredExp = expenses.filter(e => e.date.substring(0,10) === selectedDate);
+    
     container.innerHTML = '';
-    if(todayExp.length === 0) { container.innerHTML = '<div style="color:#666;padding:10px;font-size:11px;">No expenses today</div>'; return; }
+    if(filteredExp.length === 0) { 
+        container.innerHTML = '<div style="color:#666;padding:10px;font-size:11px;">No expenses for ' + selectedDate + '</div>'; 
+        document.getElementById('expenseSummary').innerHTML = '';
+        return; 
+    }
+    
     let total = 0;
-    todayExp.forEach(e => {
+    filteredExp.forEach(e => {
         total += e.amount;
         let div = document.createElement('div');
         div.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid #eee;font-size:10px;';
@@ -962,15 +997,15 @@ function renderExpenses() {
         `;
         container.appendChild(div);
     });
+    
     let totalDiv = document.createElement('div');
     totalDiv.style.cssText = 'font-weight:bold;padding:4px 0;border-top:2px solid #ddd;font-size:11px;';
     totalDiv.innerHTML = 'Total: ' + formatCurrency(total);
     container.appendChild(totalDiv);
     
-    // Expense summary by head
     let summary = document.getElementById('expenseSummary');
     let heads = {};
-    todayExp.forEach(e => {
+    filteredExp.forEach(e => {
         if(!heads[e.head]) heads[e.head] = 0;
         heads[e.head] += e.amount;
     });
@@ -1021,26 +1056,22 @@ function deleteExpense(id) {
     }
 }
 
-// ==================== SUMMARY - FIXED ====================
-
+// ==================== SUMMARY ====================
 function updateSummary() {
     let date = document.getElementById('summaryDate').value || getToday();
     const today = date;
     
-    // Daily Sales
     const todaySales = orders.filter(o => o.date.substring(0,10) === today);
     const todayCash = todaySales.reduce((s,o) => s + (o.paid || 0), 0);
     const todayUdhar = todaySales.reduce((s,o) => s + (o.total - (o.paid || 0)), 0);
     const todayIkhrajat = expenses.filter(e => e.date.substring(0,10) === today).reduce((s,e) => s + e.amount, 0);
     const todayTotalSale = todaySales.reduce((s,o) => s + o.total, 0);
     
-    // Sabqa Wusool & Advance
     const sabqaWusool = orders.filter(o => o.date.substring(0,10) < today).reduce((s,o) => s + (o.paid || 0), 0);
     const advanceWusool = customers.reduce((s, c) => s + (c.advance || 0), 0);
     const totalCashJamma = todayCash + sabqaWusool + advanceWusool;
     const netCash = totalCashJamma - todayIkhrajat;
     
-    // Update Daily Summary Boxes
     document.getElementById('sumTodaySale').textContent = formatCurrency(todayTotalSale);
     document.getElementById('sumCashIn').textContent = formatCurrency(todayCash);
     document.getElementById('sumCashOut').textContent = formatCurrency(todayIkhrajat);
@@ -1050,7 +1081,6 @@ function updateSummary() {
     document.getElementById('sumAdvanceWusool').textContent = formatCurrency(advanceWusool);
     document.getElementById('sumTotalJamma').textContent = formatCurrency(totalCashJamma);
     
-    // Net Profit
     const openingStock = products.reduce((sum, p) => sum + (p.stock * p.cost), 0);
     const stockIn = stockHistory.filter(h => h.date.substring(0,10) === today && h.type === 'In').reduce((s,h) => s + (h.qty * (h.price || 0)), 0);
     const closingStock = products.reduce((sum, p) => sum + (p.stock * p.cost), 0);
@@ -1070,7 +1100,6 @@ function updateSummary() {
         profitEl.style.color = '#f87171';
     }
     
-    // Sold Items
     let soldItems = {};
     todaySales.forEach(o => {
         o.items.forEach(i => {
@@ -1090,7 +1119,7 @@ function updateSummary() {
     });
     document.getElementById('soldItems').innerHTML = soldHtml || '<div style="padding:6px;color:#666;font-size:10px;">No items sold today</div>';
     
-    // ===== MONTHLY SUMMARY (FIXED) =====
+    // Monthly Summary
     const month = today.substring(0,7);
     const monthSales = orders.filter(o => o.date.substring(0,7) === month);
     const monthExp = expenses.filter(e => e.date.substring(0,7) === month);
@@ -1166,19 +1195,17 @@ function renderAll() {
     renderExpenses();
     updateSummary();
     populateStockSelect();
+    
+    // Set expense date to today
+    document.getElementById('expenseDate').value = getToday();
 }
 
 // ==================== INIT ====================
 loadData();
 renderAll();
 
-// Show login if not admin
-setTimeout(() => {
-    if(!isAdmin) {
-        document.getElementById('loginOverlay').style.display = 'flex';
-        document.querySelector('.container').classList.add('view-only');
-    }
-}, 500);
+// No login popup - directly viewer mode
+document.querySelector('.container').classList.add('view-only');
 
 console.log('✅ Warda Marble System Loaded!');
 console.log('📦 Products:', products.length);
