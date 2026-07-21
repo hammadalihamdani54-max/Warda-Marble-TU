@@ -12,6 +12,9 @@
         *{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif;}
         body{background:#0f2027;padding:10px;min-height:100vh;transition:0.3s;}
         body.dark-mode{background:#0a0a15;}
+        body.rtl{direction:rtl;text-align:right;}
+        body.rtl .panel h3{border-left:none;border-right:3px solid #ffd700;padding-left:0;padding-right:8px;}
+        body.rtl .total-box{text-align:left;}
         .container{max-width:1200px;margin:0 auto;background:white;border-radius:20px;overflow:hidden;padding:15px;box-shadow:0 10px 30px rgba(0,0,0,0.3);transition:0.3s;}
         body.dark-mode .container{background:#1a1a2e;}
         .header{background:linear-gradient(135deg,#0f2027,#203a43);color:#ffd700;padding:12px;text-align:center;border-radius:10px;margin-bottom:10px;position:relative;}
@@ -20,6 +23,9 @@
         .status-bar{display:flex;justify-content:center;align-items:center;flex-wrap:wrap;font-size:9px;color:#a0c4e0;gap:10px;margin-top:3px;}
         .status-bar .online{color:#4ade80;}
         .status-bar .offline{color:#f87171;}
+        .lang-btns{display:flex;gap:3px;}
+        .lang-btn{padding:2px 8px;background:rgba(255,255,255,0.1);color:white;border:1px solid #ffd700;border-radius:4px;cursor:pointer;font-size:9px;font-weight:bold;}
+        .lang-btn.active{background:#ffd700;color:#1a1a2e;}
         .tabs{display:flex;gap:3px;margin-bottom:8px;flex-wrap:wrap;background:#1a1a2e;padding:4px;border-radius:8px;}
         body.dark-mode .tabs{background:#0a0a15;}
         .tab{padding:6px 12px;background:transparent;color:white;border:none;border-radius:5px;cursor:pointer;font-weight:bold;font-size:11px;}
@@ -96,7 +102,7 @@
         .view-only .btn:not(.no-disable),.view-only input:not(.no-disable),.view-only select:not(.no-disable){opacity:0.5;pointer-events:none;}
         .view-only .product-card{cursor:default;}
         .modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);z-index:1000;justify-content:center;align-items:center;}
-        .modal-content{background:white;padding:20px;border-radius:10px;max-width:550px;width:95%;}
+        .modal-content{background:white;padding:20px;border-radius:10px;max-width:600px;width:95%;max-height:85vh;overflow:auto;}
         body.dark-mode .modal-content{background:#2d2d44;color:#e0e0e0;}
         .date-filter{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px;}
         .date-filter input{padding:4px 8px;border:1px solid #ddd;border-radius:4px;font-size:10px;width:auto;}
@@ -112,11 +118,28 @@
         .settings-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:15px;}
         .settings-card{background:#f8fafc;padding:12px;border-radius:8px;}
         body.dark-mode .settings-card{background:#1a1a2e;}
-        .device-card{background:#f0f2f5;padding:8px 12px;border-radius:6px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;}
-        body.dark-mode .device-card{background:#1a1a2e;border-color:#444;}
-        .device-card .device-name{font-weight:bold;font-size:11px;}
-        .device-card .device-time{font-size:9px;color:#666;}
-        body.dark-mode .device-card .device-time{color:#999;}
+        .editable-field{cursor:pointer;padding:2px 4px;border-radius:3px;transition:0.2s;}
+        .editable-field:hover{background:#ffd70020;}
+        .editable-field.editing{background:#ffd70040;border:1px solid #ffd700;}
+        .invoice-box{font-family:Arial;max-width:650px;margin:auto;border:2px solid #ffd700;border-radius:10px;background:white;overflow:hidden;}
+        body.dark-mode .invoice-box{background:#1a1a2e;color:#e0e0e0;}
+        .invoice-box .header{background:linear-gradient(135deg,#0f2027,#203a43);color:#ffd700;padding:12px;text-align:center;border-radius:10px 10px 0 0;}
+        body.dark-mode .invoice-box .header{background:linear-gradient(135deg,#0a0a15,#1a1a2e);}
+        .invoice-box .body{padding:15px;}
+        .invoice-box table{width:100%;margin-top:10px;}
+        .invoice-box th{background:#1a1a2e;color:#ffd700;padding:6px;text-align:center;}
+        .invoice-box td{padding:6px;text-align:center;border-bottom:1px solid #ddd;}
+        body.dark-mode .invoice-box td{border-color:#444;}
+        .customer-card{background:white;border:1px solid #ddd;border-radius:8px;padding:10px;margin-bottom:6px;cursor:pointer;transition:0.2s;}
+        body.dark-mode .customer-card{background:#1a1a2e;border-color:#444;color:#e0e0e0;}
+        .customer-card:hover{box-shadow:0 2px 8px rgba(0,0,0,0.1);}
+        .customer-card .name{font-size:13px;font-weight:bold;}
+        .customer-card .stats{display:flex;flex-wrap:wrap;gap:8px;font-size:9px;margin-top:4px;}
+        .customer-card .stats span{background:#f0f2f5;padding:2px 6px;border-radius:3px;}
+        body.dark-mode .customer-card .stats span{background:#2d2d44;}
+        .customer-invoices{display:none;margin-top:8px;padding-top:8px;border-top:1px solid #ddd;}
+        body.dark-mode .customer-invoices{border-color:#444;}
+        .customer-invoices.active{display:block;}
     </style>
 </head>
 <body>
@@ -130,9 +153,15 @@
             <span id="onlineStatus">🟢 Online</span>
             <span id="lastSync">Sync: Just now</span>
             <span id="deviceInfo"></span>
+            <div class="lang-btns">
+                <button class="lang-btn active" onclick="setLanguage('en')">EN</button>
+                <button class="lang-btn" onclick="setLanguage('ur')">اردو</button>
+                <button class="lang-btn" onclick="setLanguage('ar')">عربي</button>
+            </div>
         </div>
         <div style="display:flex;gap:4px;justify-content:center;flex-wrap:wrap;margin-top:3px;">
             <button onclick="toggleDarkMode()" style="background:transparent;color:#ffd700;border:1px solid #ffd700;padding:2px 8px;border-radius:4px;cursor:pointer;font-size:10px;">🌓</button>
+            <button onclick="syncToFirebase()" style="background:#3498db;color:white;border:none;padding:2px 8px;border-radius:4px;cursor:pointer;font-size:9px;">🔄 Sync</button>
             <button onclick="backupData()" style="background:#3498db;color:white;border:none;padding:2px 8px;border-radius:4px;cursor:pointer;font-size:9px;">💾 Backup</button>
             <button onclick="document.getElementById('restoreFile').click()" style="background:#f39c12;color:white;border:none;padding:2px 8px;border-radius:4px;cursor:pointer;font-size:9px;">📂 Restore</button>
             <input type="file" id="restoreFile" style="display:none" onchange="restoreData(this)">
@@ -142,80 +171,80 @@
     </div>
 
     <!-- Tabs -->
-    <div class="tabs">
-        <button class="tab active" onclick="showTab('pos')">🛒 POS</button>
-        <button class="tab" onclick="showTab('stock')">📦 Stock</button>
-        <button class="tab" onclick="showTab('customers')">👥 Customers</button>
-        <button class="tab" onclick="showTab('invoices')">📄 Invoices</button>
-        <button class="tab" onclick="showTab('summary')">📊 Summary</button>
-        <button class="tab" onclick="showTab('expenses')">💸 Expenses</button>
-        <button class="tab" onclick="showTab('settings')">⚙️ Settings</button>
+    <div class="tabs" id="tabContainer">
+        <button class="tab active" onclick="showTab('pos')" data-key="pos">🛒 POS</button>
+        <button class="tab" onclick="showTab('stock')" data-key="stock">📦 Stock</button>
+        <button class="tab" onclick="showTab('customers')" data-key="customers">👥 Customers</button>
+        <button class="tab" onclick="showTab('invoices')" data-key="invoices">📄 Invoices</button>
+        <button class="tab" onclick="showTab('summary')" data-key="summary">📊 Summary</button>
+        <button class="tab" onclick="showTab('expenses')" data-key="expenses">💸 Expenses</button>
+        <button class="tab" onclick="showTab('settings')" data-key="settings">⚙️ Settings</button>
     </div>
 
     <!-- ===== POS TAB ===== -->
     <div id="tab-pos" class="tab-content active">
         <div class="grid-2">
             <div class="panel">
-                <h3>📦 Products</h3>
+                <h3 data-key="products">📦 Products</h3>
                 <div class="cat-tabs">
-                    <button class="cat-tab active" onclick="filterProducts('all')">All</button>
-                    <button class="cat-tab" onclick="filterProducts('mwad')">Materials</button>
-                    <button class="cat-tab" onclick="filterProducts('stone')">Stone</button>
+                    <button class="cat-tab active" onclick="filterProducts('all')" data-key="all">All</button>
+                    <button class="cat-tab" onclick="filterProducts('mwad')" data-key="materials">Materials</button>
+                    <button class="cat-tab" onclick="filterProducts('stone')" data-key="stone">Stone</button>
                 </div>
-                <input type="text" id="searchProduct" placeholder="🔍 Search..." onkeyup="renderProducts()">
+                <input type="text" id="searchProduct" placeholder="🔍 Search..." onkeyup="renderProducts()" data-key="search_products">
                 <div class="product-list" id="productList"></div>
             </div>
             <div class="panel">
-                <h3>🛒 Cart</h3>
+                <h3 data-key="cart">🛒 Cart</h3>
                 <div style="display:flex;gap:3px;margin-bottom:4px;flex-wrap:wrap;">
-                    <button class="btn-success" onclick="setMode('sqm')" style="font-size:9px;padding:3px 8px;">📐 SQM</button>
-                    <button class="btn-info" onclick="setMode('manual')" style="font-size:9px;padding:3px 8px;">📏 Manual</button>
-                    <button class="btn-warning" onclick="setMode('pieces')" style="font-size:9px;padding:3px 8px;">🔧 Pieces</button>
+                    <button class="btn-success" onclick="setMode('sqm')" style="font-size:9px;padding:3px 8px;" data-key="sqm">📐 SQM</button>
+                    <button class="btn-info" onclick="setMode('manual')" style="font-size:9px;padding:3px 8px;" data-key="manual">📏 Manual</button>
+                    <button class="btn-warning" onclick="setMode('pieces')" style="font-size:9px;padding:3px 8px;" data-key="pieces">🔧 Pieces</button>
                 </div>
                 <div class="grid-2">
-                    <input type="text" id="itemName" placeholder="Item name">
-                    <input type="number" id="costPrice" placeholder="Cost" step="0.01">
+                    <div><label class="label-text" data-key="item_name">Item Name</label><input type="text" id="itemName" placeholder="Item name"></div>
+                    <div><label class="label-text" data-key="cost_price">Cost Price</label><input type="number" id="costPrice" placeholder="Cost" step="0.01"></div>
                 </div>
                 <div id="sqmInputs">
                     <div class="grid-3">
-                        <input type="number" id="sqmWidth" placeholder="Width" step="0.01" value="0.40">
-                        <input type="number" id="sqmLength" placeholder="Length" step="0.01" value="0.80">
-                        <input type="number" id="sqmPrice" placeholder="Price/m²" step="0.01">
+                        <div><label class="label-text" data-key="width">Width (m)</label><input type="number" id="sqmWidth" placeholder="Width" step="0.01" value="0.40"></div>
+                        <div><label class="label-text" data-key="length">Length (m)</label><input type="number" id="sqmLength" placeholder="Length" step="0.01" value="0.80"></div>
+                        <div><label class="label-text" data-key="price_sqm">Price/m²</label><input type="number" id="sqmPrice" placeholder="Price/m²" step="0.01"></div>
                     </div>
                 </div>
                 <div id="manualInputs" style="display:none;">
                     <div class="grid-2">
-                        <input type="number" id="manualArea" placeholder="Area (m²)" step="0.01">
-                        <input type="number" id="manualPrice" placeholder="Price/m²" step="0.01">
+                        <div><label class="label-text" data-key="area">Area (m²)</label><input type="number" id="manualArea" placeholder="Area" step="0.01"></div>
+                        <div><label class="label-text" data-key="price_sqm">Price/m²</label><input type="number" id="manualPrice" placeholder="Price/m²" step="0.01"></div>
                     </div>
                 </div>
                 <div id="piecesInputs" style="display:none;">
                     <div class="grid-3">
-                        <input type="text" id="pieceSize" placeholder="Size">
-                        <input type="number" id="pieceQty" placeholder="Qty" value="1">
-                        <input type="number" id="piecePrice" placeholder="Price/pc" step="0.01">
+                        <div><label class="label-text" data-key="size">Size</label><input type="text" id="pieceSize" placeholder="Size"></div>
+                        <div><label class="label-text" data-key="qty">Qty</label><input type="number" id="pieceQty" placeholder="Qty" value="1"></div>
+                        <div><label class="label-text" data-key="price_pc">Price/pc</label><input type="number" id="piecePrice" placeholder="Price/pc" step="0.01"></div>
                     </div>
                 </div>
-                <button class="btn-success" onclick="addToCart()" style="width:100%;padding:4px;font-size:10px;">➕ Add to Cart</button>
+                <button class="btn-success" onclick="addToCart()" style="width:100%;padding:4px;font-size:10px;" data-key="add_cart">➕ Add to Cart</button>
                 <div style="margin-top:4px;">
-                    <input type="text" id="custName" placeholder="Customer Name">
-                    <input type="text" id="custPhone" placeholder="Phone">
-                    <input type="number" id="amountReceived" placeholder="Received" value="0" step="0.01" oninput="updateTotals()">
+                    <div><label class="label-text" data-key="customer_name">Customer Name</label><input type="text" id="custName" placeholder="Customer Name"></div>
+                    <div><label class="label-text" data-key="phone">Phone</label><input type="text" id="custPhone" placeholder="Phone"></div>
+                    <div><label class="label-text" data-key="amount_received">Amount Received</label><input type="number" id="amountReceived" placeholder="Received" value="0" step="0.01" oninput="updateTotals()"></div>
                 </div>
                 <div style="max-height:150px;overflow:auto;margin-top:4px;">
                     <table>
-                        <thead><tr><th>Item</th><th>Qty</th><th>Price</th><th>Total</th><th></th></tr></thead>
+                        <thead><tr><th data-key="item">Item</th><th data-key="size">Size</th><th data-key="qty">Qty</th><th data-key="price">Price</th><th data-key="total">Total</th><th></th></tr></thead>
                         <tbody id="cartBody"></tbody>
                     </table>
                 </div>
                 <div class="total-box">
-                    <p><strong>Total:</strong> <span id="cartTotal">SAR 0.00</span></p>
+                    <p><strong data-key="total_label">Total:</strong> <span id="cartTotal">SAR 0.00</span></p>
                     <p id="balanceMsg"></p>
                 </div>
                 <div style="display:flex;flex-wrap:wrap;gap:3px;justify-content:center;margin-top:4px;">
-                    <button class="btn-primary" onclick="confirmOrder()" style="padding:4px 12px;font-size:10px;">✅ Confirm</button>
-                    <button class="btn-danger" onclick="clearCart()" style="padding:4px 12px;font-size:10px;">🗑️ Clear</button>
-                    <button class="btn-warning" onclick="undoCart()" style="padding:4px 12px;font-size:10px;">↩️ Undo</button>
+                    <button class="btn-primary" onclick="confirmOrder()" style="padding:4px 12px;font-size:10px;" data-key="confirm_order">✅ Confirm</button>
+                    <button class="btn-danger" onclick="clearCart()" style="padding:4px 12px;font-size:10px;" data-key="clear">🗑️ Clear</button>
+                    <button class="btn-warning" onclick="undoCart()" style="padding:4px 12px;font-size:10px;" data-key="undo">↩️ Undo</button>
                 </div>
             </div>
         </div>
@@ -224,31 +253,31 @@
     <!-- ===== STOCK TAB ===== -->
     <div id="tab-stock" class="tab-content">
         <div class="panel">
-            <h3>📦 Stock Management</h3>
+            <h3 data-key="stock_management">📦 Stock Management</h3>
             <div class="cat-tabs">
-                <button class="cat-tab active" onclick="filterStock('all')">All</button>
-                <button class="cat-tab" onclick="filterStock('mwad')">Materials</button>
-                <button class="cat-tab" onclick="filterStock('stone')">Stone</button>
+                <button class="cat-tab active" onclick="filterStock('all')" data-key="all">All</button>
+                <button class="cat-tab" onclick="filterStock('mwad')" data-key="materials">Materials</button>
+                <button class="cat-tab" onclick="filterStock('stone')" data-key="stone">Stone</button>
             </div>
-            <input type="text" id="searchStock" placeholder="🔍 Search..." onkeyup="renderStock()">
-            <button class="btn-success" onclick="addProduct()" style="margin:3px 0;padding:3px 8px;font-size:9px;">➕ Add Product</button>
+            <input type="text" id="searchStock" placeholder="🔍 Search..." onkeyup="renderStock()" data-key="search_stock">
+            <button class="btn-success" onclick="addProduct()" style="margin:3px 0;padding:3px 8px;font-size:9px;" data-key="add_product">➕ Add Product</button>
             <div style="overflow-x:auto;max-height:250px;overflow-y:auto;">
                 <table>
-                    <thead><tr><th>Category</th><th>Name</th><th>Size</th><th>Price</th><th>Cost</th><th>Stock</th><th>Actions</th></tr></thead>
+                    <thead><tr><th data-key="category">Category</th><th data-key="name">Name</th><th data-key="size">Size</th><th data-key="price">Price</th><th data-key="cost">Cost</th><th data-key="stock">Stock</th><th data-key="actions">Actions</th></tr></thead>
                     <tbody id="stockBody"></tbody>
                 </table>
             </div>
             
             <div class="stock-in-out">
-                <h4 style="font-size:11px;margin-bottom:3px;">📦 Stock In / Out</h4>
+                <h4 style="font-size:11px;margin-bottom:3px;" data-key="stock_in">📦 Stock In / Out</h4>
                 <div class="row">
-                    <select id="stockSelect"><option value="">Select Item</option></select>
-                    <input type="number" id="stockQty" placeholder="Qty">
-                    <input type="number" id="stockPriceIn" placeholder="Price">
+                    <select id="stockSelect"><option value="" data-key="select_item">Select Item</option></select>
+                    <input type="number" id="stockQty" placeholder="Qty" data-key="qty">
+                    <input type="number" id="stockPriceIn" placeholder="Price" data-key="price">
                 </div>
                 <div class="row" style="margin-top:3px;">
-                    <button class="btn-success" onclick="stockIn()" style="flex:1;padding:3px;font-size:9px;">➕ In</button>
-                    <button class="btn-danger" onclick="stockOut()" style="flex:1;padding:3px;font-size:9px;">➖ Out</button>
+                    <button class="btn-success" onclick="stockIn()" style="flex:1;padding:3px;font-size:9px;" data-key="stock_in_btn">➕ In</button>
+                    <button class="btn-danger" onclick="stockOut()" style="flex:1;padding:3px;font-size:9px;" data-key="stock_out_btn">➖ Out</button>
                 </div>
             </div>
         </div>
@@ -257,20 +286,27 @@
     <!-- ===== CUSTOMERS TAB ===== -->
     <div id="tab-customers" class="tab-content">
         <div class="panel">
-            <h3>👥 Customers</h3>
-            <input type="text" id="searchCustomer" placeholder="🔍 Search..." onkeyup="renderCustomers()">
-            <div id="customerList" style="max-height:350px;overflow-y:auto;"></div>
+            <h3 data-key="customers_title">👥 Customers</h3>
+            <input type="text" id="searchCustomer" placeholder="🔍 Search..." onkeyup="renderCustomers()" data-key="search_customer">
+            <div id="customerList" style="max-height:400px;overflow-y:auto;"></div>
         </div>
     </div>
 
     <!-- ===== INVOICES TAB ===== -->
     <div id="tab-invoices" class="tab-content">
         <div class="panel">
-            <h3>📄 Invoices</h3>
-            <input type="text" id="searchInvoice" placeholder="🔍 Search..." onkeyup="renderInvoices()">
-            <div style="overflow-x:auto;max-height:350px;overflow-y:auto;">
+            <h3 data-key="all_invoices">📄 All Invoices</h3>
+            <div class="date-filter">
+                <label style="font-size:10px;" data-key="from">From:</label>
+                <input type="date" id="invoiceFromDate" onchange="renderInvoices()">
+                <label style="font-size:10px;" data-key="to">To:</label>
+                <input type="date" id="invoiceToDate" onchange="renderInvoices()">
+                <button onclick="document.getElementById('invoiceFromDate').value='';document.getElementById('invoiceToDate').value='';renderInvoices();" class="btn-warning" style="padding:2px 8px;" data-key="clear">Clear</button>
+                <input type="text" id="searchInvoice" placeholder="🔍 Search..." style="flex:1;min-width:120px;" onkeyup="renderInvoices()" data-key="search_invoice">
+            </div>
+            <div style="overflow-x:auto;max-height:400px;overflow-y:auto;">
                 <table>
-                    <thead><tr><th>Invoice</th><th>Date</th><th>Customer</th><th>Total</th><th>Status</th><th>Actions</th></tr></thead>
+                    <thead><tr><th data-key="invoice">Invoice</th><th data-key="date">Date</th><th data-key="customer">Customer</th><th data-key="total">Total</th><th data-key="paid">Paid</th><th data-key="balance">Balance</th><th data-key="status">Status</th><th data-key="actions">Actions</th></tr></thead>
                     <tbody id="invoiceBody"></tbody>
                 </table>
             </div>
@@ -280,50 +316,50 @@
     <!-- ===== SUMMARY TAB ===== -->
     <div id="tab-summary" class="tab-content">
         <div class="panel">
-            <h3>📊 Daily Summary</h3>
+            <h3 data-key="daily_summary">📊 Daily Summary</h3>
             <div class="date-filter">
-                <label style="font-size:10px;">Select Date:</label>
+                <label style="font-size:10px;" data-key="select_date">Select Date:</label>
                 <input type="date" id="summaryDate" onchange="updateSummary()">
-                <button onclick="document.getElementById('summaryDate').value='';updateSummary();" class="btn-warning" style="padding:2px 8px;font-size:9px;">Today</button>
+                <button onclick="document.getElementById('summaryDate').value='';updateSummary();" class="btn-warning" style="padding:2px 8px;" data-key="today">Today</button>
             </div>
             <div class="summary-grid" id="summaryGrid">
-                <div class="summary-box positive"><div class="num" id="sumTodaySale">0.00</div><div class="lbl">Today's Sale</div></div>
-                <div class="summary-box positive"><div class="num" id="sumCashIn">0.00</div><div class="lbl">Cash In</div></div>
-                <div class="summary-box negative"><div class="num" id="sumCashOut">0.00</div><div class="lbl">Cash Out</div></div>
-                <div class="summary-box positive"><div class="num" id="sumNetCash">0.00</div><div class="lbl">Net Cash</div></div>
-                <div class="summary-box warning"><div class="num" id="sumUdharSale">0.00</div><div class="lbl">Udhar</div></div>
-                <div class="summary-box positive"><div class="num" id="sumSabqaWusool">0.00</div><div class="lbl">Sabqa Wusool</div></div>
-                <div class="summary-box positive"><div class="num" id="sumAdvanceWusool">0.00</div><div class="lbl">Advance</div></div>
-                <div class="summary-box positive"><div class="num" id="sumTotalJamma">0.00</div><div class="lbl">Total Cash</div></div>
+                <div class="summary-box positive"><div class="num" id="sumTodaySale">0.00</div><div class="lbl" data-key="today_sale">Today's Sale</div></div>
+                <div class="summary-box positive"><div class="num" id="sumCashIn">0.00</div><div class="lbl" data-key="cash_in">Cash In</div></div>
+                <div class="summary-box negative"><div class="num" id="sumCashOut">0.00</div><div class="lbl" data-key="cash_out">Cash Out</div></div>
+                <div class="summary-box positive"><div class="num" id="sumNetCash">0.00</div><div class="lbl" data-key="net_cash">Net Cash</div></div>
+                <div class="summary-box warning"><div class="num" id="sumUdharSale">0.00</div><div class="lbl" data-key="udhar">Udhar</div></div>
+                <div class="summary-box positive"><div class="num" id="sumSabqaWusool">0.00</div><div class="lbl" data-key="sabqa_wusool">Sabqa Wusool</div></div>
+                <div class="summary-box positive"><div class="num" id="sumAdvanceWusool">0.00</div><div class="lbl" data-key="advance_received">Advance</div></div>
+                <div class="summary-box positive"><div class="num" id="sumTotalJamma">0.00</div><div class="lbl" data-key="total_cash">Total Cash</div></div>
             </div>
             
             <div class="profit-loss-box">
-                <h4 style="color:#ffd700;font-size:13px;">📈 Net Profit / Loss</h4>
+                <h4 style="color:#ffd700;font-size:13px;" data-key="daily_profit_loss">📈 Net Profit / Loss</h4>
                 <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:4px;font-size:10px;margin:4px 0;">
-                    <div><span style="color:#a0c4e0;">Opening:</span><br><strong id="plOpening">0</strong></div>
-                    <div><span style="color:#a0c4e0;">Stock In:</span><br><strong id="plStockIn">0</strong></div>
-                    <div><span style="color:#a0c4e0;">Closing:</span><br><strong id="plClosing">0</strong></div>
-                    <div><span style="color:#a0c4e0;">Ikhrajat:</span><br><strong id="plIkhrajat">0</strong></div>
+                    <div><span style="color:#a0c4e0;" data-key="opening_stock">Opening:</span><br><strong id="plOpening">0</strong></div>
+                    <div><span style="color:#a0c4e0;" data-key="stock_in_label">Stock In:</span><br><strong id="plStockIn">0</strong></div>
+                    <div><span style="color:#a0c4e0;" data-key="closing_stock">Closing:</span><br><strong id="plClosing">0</strong></div>
+                    <div><span style="color:#a0c4e0;" data-key="ikhrajat">Ikhrajat:</span><br><strong id="plIkhrajat">0</strong></div>
                 </div>
                 <div style="font-size:14px;font-weight:bold;border-top:1px solid #ffd700;padding-top:4px;">
-                    <span id="plTotalProfit" style="color:#ffd700;">Profit: 0.00</span>
+                    <span id="plTotalProfit" style="color:#ffd700;" data-key="profit_label">Profit: 0.00</span>
                 </div>
             </div>
             
-            <h4 style="font-size:12px;margin-top:6px;">📦 Recently Sold</h4>
+            <h4 style="font-size:12px;margin-top:6px;" data-key="recently_sold">📦 Recently Sold</h4>
             <div id="soldItems" style="background:#f8fafc;padding:6px;border-radius:5px;max-height:150px;overflow-y:auto;"></div>
             
-            <h4 style="font-size:12px;margin-top:6px;">📅 Monthly Summary</h4>
+            <h4 style="font-size:12px;margin-top:6px;" data-key="monthly_summary">📅 Monthly Summary</h4>
             <div style="overflow-x:auto;max-height:200px;overflow-y:auto;">
                 <table class="monthly-table">
                     <thead>
                         <tr>
-                            <th>Date</th>
-                            <th>Sale</th>
-                            <th>Cash</th>
-                            <th>Udhar</th>
-                            <th>Ikhrajat</th>
-                            <th>Balance</th>
+                            <th data-key="date">Date</th>
+                            <th data-key="sale">Sale</th>
+                            <th data-key="cash">Cash</th>
+                            <th data-key="udhar">Udhar</th>
+                            <th data-key="ikhrajat">Ikhrajat</th>
+                            <th data-key="balance">Balance</th>
                         </tr>
                     </thead>
                     <tbody id="monthlyBody"></tbody>
@@ -335,25 +371,25 @@
     <!-- ===== EXPENSES TAB ===== -->
     <div id="tab-expenses" class="tab-content">
         <div class="panel">
-            <h3>💸 Expenses (Ikhrajat)</h3>
+            <h3 data-key="expenses_title">💸 Expenses (Ikhrajat)</h3>
             
             <div class="date-filter">
-                <label style="font-size:10px;">Select Date:</label>
+                <label style="font-size:10px;" data-key="select_date">Select Date:</label>
                 <input type="date" id="expenseDate" onchange="renderExpenses()">
-                <button onclick="document.getElementById('expenseDate').value='';renderExpenses();" class="btn-warning" style="padding:2px 8px;font-size:9px;">Today</button>
+                <button onclick="document.getElementById('expenseDate').value='';renderExpenses();" class="btn-warning" style="padding:2px 8px;" data-key="today">Today</button>
             </div>
 
             <div class="grid-2">
-                <input type="text" id="expenseHead" placeholder="Expense Head">
-                <input type="number" id="expenseAmount" placeholder="Amount" step="0.01">
+                <input type="text" id="expenseHead" placeholder="Expense Head" data-key="expense_head">
+                <input type="number" id="expenseAmount" placeholder="Amount" step="0.01" data-key="amount">
             </div>
-            <input type="text" id="expenseNote" placeholder="Note (optional)">
-            <button class="btn-success" onclick="addExpense()" style="width:100%;padding:4px;font-size:10px;">➕ Add Expense</button>
+            <input type="text" id="expenseNote" placeholder="Note (optional)" data-key="note">
+            <button class="btn-success" onclick="addExpense()" style="width:100%;padding:4px;font-size:10px;" data-key="add_expense">➕ Add Expense</button>
             
-            <h4 style="font-size:12px;margin-top:6px;">📋 Expenses for <span id="expenseDateLabel">Today</span></h4>
+            <h4 style="font-size:12px;margin-top:6px;" data-key="today_expenses">📋 Expenses for <span id="expenseDateLabel">Today</span></h4>
             <div id="expenseList" style="max-height:250px;overflow-y:auto;"></div>
             
-            <h4 style="font-size:12px;margin-top:6px;">📊 Expense Summary</h4>
+            <h4 style="font-size:12px;margin-top:6px;" data-key="expense_summary">📊 Expense Summary</h4>
             <div id="expenseSummary" style="font-size:10px;"></div>
         </div>
     </div>
@@ -361,39 +397,32 @@
     <!-- ===== SETTINGS TAB ===== -->
     <div id="tab-settings" class="tab-content">
         <div class="panel">
-            <h3>⚙️ Settings</h3>
-            
-            <!-- Devices Section -->
-            <div style="margin-bottom:15px;">
-                <h4 style="font-size:12px;margin-bottom:8px;">📱 Connected Devices</h4>
-                <div id="deviceList" style="max-height:200px;overflow-y:auto;"></div>
-            </div>
-
+            <h3 data-key="settings_title">⚙️ Settings</h3>
             <div class="settings-grid">
                 <div class="settings-card">
-                    <h4 style="font-size:12px;margin-bottom:8px;">🏢 Company Info</h4>
-                    <input type="text" id="companyName" placeholder="Company Name" value="Warda Marble">
-                    <input type="text" id="companyPhone" placeholder="Phone" value="+966 59 807 4287">
-                    <input type="text" id="companyAddress" placeholder="Address" value="Tabuk, Saudi Arabia">
-                    <button onclick="saveSettings()" class="btn-success" style="width:100%;margin-top:4px;">💾 Save Settings</button>
+                    <h4 style="font-size:12px;margin-bottom:8px;" data-key="company_info">🏢 Company Info</h4>
+                    <input type="text" id="companyName" placeholder="Company Name" value="Warda Marble" data-key="company_name_placeholder">
+                    <input type="text" id="companyPhone" placeholder="Phone" value="+966 59 807 4287" data-key="phone_placeholder">
+                    <input type="text" id="companyAddress" placeholder="Address" value="Tabuk, Saudi Arabia" data-key="address_placeholder">
+                    <button onclick="saveSettings()" class="btn-success" style="width:100%;margin-top:4px;" data-key="save_settings">💾 Save Settings</button>
                 </div>
 
                 <div class="settings-card">
-                    <h4 style="font-size:12px;margin-bottom:8px;">💰 Tax Settings</h4>
+                    <h4 style="font-size:12px;margin-bottom:8px;" data-key="tax_settings">💰 Tax Settings</h4>
                     <label style="font-size:10px;display:flex;align-items:center;gap:5px;">
-                        <input type="checkbox" id="taxEnable" checked> Enable Tax
+                        <input type="checkbox" id="taxEnable" checked> <span data-key="enable_tax">Enable Tax</span>
                     </label>
-                    <input type="number" id="taxRate" placeholder="Tax Rate %" value="15" step="0.5">
-                    <input type="text" id="taxName" placeholder="Tax Name" value="VAT">
-                    <button onclick="saveTaxSettings()" class="btn-success" style="width:100%;margin-top:4px;">💾 Save Tax</button>
+                    <input type="number" id="taxRate" placeholder="Tax Rate %" value="15" step="0.5" data-key="tax_rate">
+                    <input type="text" id="taxName" placeholder="Tax Name" value="VAT" data-key="tax_name">
+                    <button onclick="saveTaxSettings()" class="btn-success" style="width:100%;margin-top:4px;" data-key="save_tax">💾 Save Tax</button>
                 </div>
 
                 <div class="settings-card">
-                    <h4 style="font-size:12px;margin-bottom:8px;">💾 Data Management</h4>
-                    <button onclick="backupData()" class="btn-info" style="width:100%;">📥 Backup Data</button>
-                    <button onclick="document.getElementById('restoreFile2').click()" class="btn-warning" style="width:100%;margin-top:4px;">📤 Restore Data</button>
+                    <h4 style="font-size:12px;margin-bottom:8px;" data-key="data_management">💾 Data Management</h4>
+                    <button onclick="backupData()" class="btn-info" style="width:100%;" data-key="backup">📥 Backup Data</button>
+                    <button onclick="document.getElementById('restoreFile2').click()" class="btn-warning" style="width:100%;margin-top:4px;" data-key="restore">📤 Restore Data</button>
                     <input type="file" id="restoreFile2" style="display:none" onchange="restoreData(this)">
-                    <button onclick="resetAll()" class="btn-danger" style="width:100%;margin-top:4px;">⚠️ Reset All Data</button>
+                    <button onclick="resetAll()" class="btn-danger" style="width:100%;margin-top:4px;" data-key="reset">⚠️ Reset All Data</button>
                 </div>
             </div>
         </div>
@@ -401,15 +430,47 @@
 </div>
 
 <!-- ===== MODALS ===== -->
+<div id="invoiceModal" class="modal">
+    <div class="modal-content">
+        <div id="invoiceDetails"></div>
+        <div style="text-align:center;margin-top:15px;display:flex;flex-wrap:wrap;justify-content:center;gap:5px;">
+            <button onclick="closeModal('invoiceModal')" class="btn-danger" data-key="close">Close</button>
+            <button onclick="printInvoice()" class="btn-info" data-key="print">🖨️ Print</button>
+            <button onclick="shareInvoiceImage()" class="btn-warning" data-key="share">📷 Share</button>
+            <button onclick="editInvoiceFromModal()" class="btn-success" data-key="edit">✏️ Edit</button>
+            <button onclick="deleteInvoiceFromModal()" class="btn-danger" data-key="delete">🗑️ Delete</button>
+        </div>
+    </div>
+</div>
+
+<div id="editCartModal" class="modal">
+    <div class="modal-content">
+        <h3 data-key="edit_cart_item">✏️ Edit Cart Item</h3>
+        <div class="grid-2">
+            <div><label class="label-text" data-key="item_name">Item Name</label><input type="text" id="editItemName"></div>
+            <div><label class="label-text" data-key="size">Size</label><input type="text" id="editItemSize"></div>
+        </div>
+        <div class="grid-2">
+            <div><label class="label-text" data-key="qty">Qty</label><input type="number" id="editItemQty" step="0.01"></div>
+            <div><label class="label-text" data-key="price">Price</label><input type="number" id="editItemPrice" step="0.01"></div>
+        </div>
+        <div><label class="label-text" data-key="cost">Cost</label><input type="number" id="editItemCost" step="0.01"></div>
+        <div style="text-align:center;margin-top:10px;">
+            <button onclick="saveCartEdit()" class="btn-success" data-key="save">💾 Save</button>
+            <button onclick="closeModal('editCartModal')" class="btn-danger" data-key="cancel">Cancel</button>
+        </div>
+    </div>
+</div>
+
 <div id="editExpenseModal" class="modal">
     <div class="modal-content">
-        <h3>✏️ Edit Expense</h3>
-        <input type="text" id="editExpenseHead" placeholder="Expense Head" style="width:100%;padding:6px;margin:4px 0;border:1px solid #ddd;border-radius:4px;">
-        <input type="number" id="editExpenseAmount" placeholder="Amount" step="0.01" style="width:100%;padding:6px;margin:4px 0;border:1px solid #ddd;border-radius:4px;">
-        <input type="text" id="editExpenseNote" placeholder="Note" style="width:100%;padding:6px;margin:4px 0;border:1px solid #ddd;border-radius:4px;">
+        <h3 data-key="edit_expense">✏️ Edit Expense</h3>
+        <input type="text" id="editExpenseHead" placeholder="Expense Head" data-key="expense_head">
+        <input type="number" id="editExpenseAmount" placeholder="Amount" step="0.01" data-key="amount">
+        <input type="text" id="editExpenseNote" placeholder="Note" data-key="note">
         <div style="text-align:center;margin-top:10px;">
-            <button onclick="saveExpenseEdit()" class="btn-success">💾 Save</button>
-            <button onclick="closeModal('editExpenseModal')" class="btn-danger">Cancel</button>
+            <button onclick="saveExpenseEdit()" class="btn-success" data-key="save">💾 Save</button>
+            <button onclick="closeModal('editExpenseModal')" class="btn-danger" data-key="cancel">Cancel</button>
         </div>
     </div>
 </div>
@@ -417,13 +478,13 @@
 <!-- ===== LOGIN OVERLAY ===== -->
 <div id="loginOverlay" class="login-overlay">
     <div class="login-box">
-        <h2>🔐 Admin Login</h2>
-        <p style="color:#666;font-size:12px;">Login to manage system</p>
-        <input type="email" id="loginEmail" placeholder="Email" value="admin@warda.com">
-        <input type="password" id="loginPassword" placeholder="Password">
-        <button onclick="login()" style="background:#27ae60;color:white;border:none;padding:6px 12px;border-radius:4px;cursor:pointer;font-weight:bold;width:100%;">🔓 Login</button>
-        <button onclick="skipLogin()" style="background:#6b7a8a;color:white;border:none;padding:5px 10px;border-radius:4px;cursor:pointer;font-weight:bold;width:100%;margin-top:3px;">👁️ Continue as Viewer</button>
-        <div id="loginError" class="error">❌ Invalid credentials!</div>
+        <h2 data-key="admin_login">🔐 Admin Login</h2>
+        <p style="color:#666;font-size:12px;" data-key="login_desc">Login to manage system</p>
+        <input type="email" id="loginEmail" placeholder="Email" value="admin@warda.com" data-key="email">
+        <input type="password" id="loginPassword" placeholder="Password" data-key="password">
+        <button onclick="login()" style="background:#27ae60;color:white;border:none;padding:6px 12px;border-radius:4px;cursor:pointer;font-weight:bold;width:100%;" data-key="login_btn">🔓 Login</button>
+        <button onclick="skipLogin()" style="background:#6b7a8a;color:white;border:none;padding:5px 10px;border-radius:4px;cursor:pointer;font-weight:bold;width:100%;margin-top:3px;" data-key="viewer_mode">👁️ Continue as Viewer</button>
+        <div id="loginError" class="error" data-key="invalid_credentials">❌ Invalid credentials!</div>
         <div style="margin-top:6px;font-size:10px;color:#999;">Email: admin@warda.com | Pass: Hamdani5</div>
     </div>
 </div>
@@ -455,90 +516,150 @@ try {
     console.warn('⚠️ Firebase not configured:', e.message);
 }
 
-// ==================== DEVICE MANAGEMENT ====================
-function getDeviceId() {
-    let deviceId = localStorage.getItem('warda_device_id');
-    if(!deviceId) {
-        deviceId = 'device_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
-        localStorage.setItem('warda_device_id', deviceId);
+// ==================== TRANSLATIONS ====================
+const translations = {
+    en: {
+        pos: '🛒 POS', stock: '📦 Stock', customers: '👥 Customers',
+        invoices: '📄 Invoices', summary: '📊 Summary', expenses: '💸 Expenses',
+        settings: '⚙️ Settings', products: '📦 Products', all: 'All',
+        materials: 'Materials', stone: 'Stone', search_products: '🔍 Search...',
+        cart: '🛒 Cart', sqm: '📐 SQM', manual: '📏 Manual', pieces: '🔧 Pieces',
+        item_name: 'Item Name', cost_price: 'Cost Price', width: 'Width (m)',
+        length: 'Length (m)', price_sqm: 'Price/m²', area: 'Area (m²)',
+        size: 'Size', qty: 'Qty', price_pc: 'Price/pc', add_cart: '➕ Add to Cart',
+        customer_name: 'Customer Name', phone: 'Phone', amount_received: 'Amount Received',
+        item: 'Item', price: 'Price', total: 'Total', total_label: 'Total:',
+        confirm_order: '✅ Confirm', clear: '🗑️ Clear', undo: '↩️ Undo',
+        stock_management: '📦 Stock Management', search_stock: '🔍 Search...',
+        add_product: '➕ Add Product', category: 'Category', name: 'Name',
+        cost: 'Cost', stock: 'Stock', actions: 'Actions',
+        stock_in: '📦 Stock In / Out', select_item: 'Select Item',
+        stock_in_btn: '➕ In', stock_out_btn: '➖ Out',
+        customers_title: '👥 Customers', search_customer: '🔍 Search...',
+        all_invoices: '📄 All Invoices', from: 'From:', to: 'To:',
+        search_invoice: '🔍 Search...', invoice: 'Invoice', date: 'Date',
+        customer: 'Customer', paid: 'Paid', balance: 'Balance', status: 'Status',
+        daily_summary: '📊 Daily Summary', select_date: 'Select Date:', today: 'Today',
+        today_sale: "Today's Sale", cash_in: 'Cash In', cash_out: 'Cash Out',
+        net_cash: 'Net Cash', udhar: 'Udhar', sabqa_wusool: 'Sabqa Wusool',
+        advance_received: 'Advance', total_cash: 'Total Cash',
+        daily_profit_loss: '📈 Net Profit / Loss', opening_stock: 'Opening:',
+        stock_in_label: 'Stock In:', closing_stock: 'Closing:', ikhrajat: 'Ikhrajat:',
+        profit_label: 'Profit:', recently_sold: '📦 Recently Sold',
+        monthly_summary: '📅 Monthly Summary', sale: 'Sale', cash: 'Cash',
+        profit: 'Profit', expenses_title: '💸 Expenses (Ikhrajat)',
+        expense_head: 'Expense Head', amount: 'Amount', note: 'Note (optional)',
+        add_expense: '➕ Add Expense', today_expenses: "📋 Expenses for",
+        expense_summary: '📊 Expense Summary', settings_title: '⚙️ Settings',
+        company_info: '🏢 Company Info', company_name_placeholder: 'Company Name',
+        phone_placeholder: 'Phone', address_placeholder: 'Address',
+        save_settings: '💾 Save Settings', tax_settings: '💰 Tax Settings',
+        enable_tax: 'Enable Tax', tax_rate: 'Tax Rate %', tax_name: 'Tax Name',
+        save_tax: '💾 Save Tax', data_management: '💾 Data Management',
+        backup: '📥 Backup Data', restore: '📤 Restore Data',
+        reset: '⚠️ Reset All Data', close: 'Close', print: '🖨️ Print',
+        share: '📷 Share', edit: '✏️ Edit', delete: '🗑️ Delete',
+        edit_cart_item: '✏️ Edit Cart Item', save: '💾 Save', cancel: 'Cancel',
+        edit_expense: '✏️ Edit Expense', admin_login: '🔐 Admin Login',
+        login_desc: 'Login to manage system', email: 'Email', password: 'Password',
+        login_btn: '🔓 Login', viewer_mode: '👁️ Continue as Viewer',
+        invalid_credentials: '❌ Invalid credentials!'
+    },
+    ur: {
+        pos: '🛒 پوائنٹ آف سیل', stock: '📦 اسٹاک', customers: '👥 گاہک',
+        invoices: '📄 رسیدیں', summary: '📊 خلاصہ', expenses: '💸 اخراجات',
+        settings: '⚙️ ترتیبات', products: '📦 مصنوعات', all: 'سب',
+        materials: 'مواد', stone: 'پتھر', search_products: '🔍 تلاش کریں...',
+        cart: '🛒 کارٹ', sqm: '📐 مربع میٹر', manual: '📏 دستی', pieces: '🔧 ٹکڑے',
+        item_name: 'آئٹم کا نام', cost_price: 'لاگت قیمت', width: 'چوڑائی (م)',
+        length: 'لمبائی (م)', price_sqm: 'قیمت/مربع میٹر', area: 'رقبہ (م²)',
+        size: 'سائز', qty: 'مقدار', price_pc: 'قیمت/ٹکڑا', add_cart: '➕ کارٹ میں شامل کریں',
+        customer_name: 'گاہک کا نام', phone: 'فون', amount_received: 'وصول شدہ رقم',
+        item: 'آئٹم', price: 'قیمت', total: 'کل', total_label: 'کل:',
+        confirm_order: '✅ تصدیق', clear: '🗑️ صاف', undo: '↩️ واپس',
+        stock_management: '📦 اسٹاک مینجمنٹ', search_stock: '🔍 تلاش کریں...',
+        add_product: '➕ مصنوعات شامل', category: 'زمرہ', name: 'نام',
+        cost: 'لاگت', stock: 'اسٹاک', actions: 'اعمال',
+        stock_in: '📦 اسٹاک اندر/باہر', select_item: 'آئٹم منتخب',
+        stock_in_btn: '➕ اندر', stock_out_btn: '➖ باہر',
+        customers_title: '👥 گاہک', search_customer: '🔍 تلاش...',
+        all_invoices: '📄 تمام رسیدیں', from: 'سے:', to: 'تک:',
+        search_invoice: '🔍 تلاش...', invoice: 'رسید', date: 'تاریخ',
+        customer: 'گاہک', paid: 'ادا', balance: 'باقی', status: 'حالت',
+        daily_summary: '📊 روزانہ خلاصہ', select_date: 'تاریخ منتخب:', today: 'آج',
+        today_sale: "آج کی فروخت", cash_in: 'نقد آمد', cash_out: 'نقد اخراج',
+        net_cash: 'خالص نقد', udhar: 'ادھار', sabqa_wusool: 'سابقہ وصول',
+        advance_received: 'پیشگی', total_cash: 'کل نقد',
+        daily_profit_loss: '📈 روزانہ منافع/نقصان', opening_stock: 'ابتدائی:',
+        stock_in_label: 'اسٹاک اندر:', closing_stock: 'اختتامی:', ikhrajat: 'اخراجات:',
+        profit_label: 'منافع:', recently_sold: '📦 حالیہ فروخت',
+        monthly_summary: '📅 ماہانہ خلاصہ', sale: 'فروخت', cash: 'نقد',
+        profit: 'منافع', expenses_title: '💸 اخراجات (اخراجات)',
+        expense_head: 'خرچ کا عنوان', amount: 'رقم', note: 'نوٹ (اختیاری)',
+        add_expense: '➕ خرچ شامل', today_expenses: "📋 اخراجات برائے",
+        expense_summary: '📊 اخراجات کا خلاصہ', settings_title: '⚙️ ترتیبات',
+        company_info: '🏢 کمپنی کی معلومات', company_name_placeholder: 'کمپنی کا نام',
+        phone_placeholder: 'فون', address_placeholder: 'پتہ',
+        save_settings: '💾 ترتیبات محفوظ', tax_settings: '💰 ٹیکس کی ترتیبات',
+        enable_tax: 'ٹیکس فعال', tax_rate: 'ٹیکس کی شرح %', tax_name: 'ٹیکس کا نام',
+        save_tax: '💾 ٹیکس محفوظ', data_management: '💾 ڈیٹا مینجمنٹ',
+        backup: '📥 بیک اپ', restore: '📤 بحال', reset: '⚠️ ری سیٹ',
+        close: 'بند', print: '🖨️ پرنٹ', share: '📷 شیئر',
+        edit: '✏️ ترمیم', delete: '🗑️ حذف',
+        edit_cart_item: '✏️ کارٹ آئٹم میں ترمیم', save: '💾 محفوظ', cancel: 'منسوخ',
+        edit_expense: '✏️ خرچ میں ترمیم', admin_login: '🔐 ایڈمن لاگ ان',
+        login_desc: 'سسٹم مینج کرنے کے لیے لاگ ان', email: 'ای میل',
+        password: 'پاس ورڈ', login_btn: '🔓 لاگ ان',
+        viewer_mode: '👁️ بطور دیکھنے والا', invalid_credentials: '❌ غلط معلومات!'
+    },
+    ar: {
+        pos: '🛒 نقطة البيع', stock: '📦 المخزون', customers: '👥 العملاء',
+        invoices: '📄 الفواتير', summary: '📊 ملخص', expenses: '💸 المصروفات',
+        settings: '⚙️ الإعدادات', products: '📦 المنتجات', all: 'الكل',
+        materials: 'المواد', stone: 'الحجر', search_products: '🔍 بحث...',
+        cart: '🛒 السلة', sqm: '📐 متر مربع', manual: '📏 يدوي', pieces: '🔧 قطع',
+        item_name: 'اسم المنتج', cost_price: 'سعر التكلفة', width: 'العرض (م)',
+        length: 'الطول (م)', price_sqm: 'السعر/م²', area: 'المساحة (م²)',
+        size: 'المقاس', qty: 'الكمية', price_pc: 'السعر/قطعة', add_cart: '➕ أضف إلى السلة',
+        customer_name: 'اسم العميل', phone: 'الهاتف', amount_received: 'المبلغ المستلم',
+        item: 'المنتج', price: 'السعر', total: 'المجموع', total_label: 'المجموع:',
+        confirm_order: '✅ تأكيد', clear: '🗑️ مسح', undo: '↩️ تراجع',
+        stock_management: '📦 إدارة المخزون', search_stock: '🔍 بحث...',
+        add_product: '➕ أضف منتج', category: 'الفئة', name: 'الاسم',
+        cost: 'التكلفة', stock: 'المخزون', actions: 'الإجراءات',
+        stock_in: '📦 إدخال/إخراج مخزون', select_item: 'اختر المنتج',
+        stock_in_btn: '➕ إدخال', stock_out_btn: '➖ إخراج',
+        customers_title: '👥 العملاء', search_customer: '🔍 بحث...',
+        all_invoices: '📄 جميع الفواتير', from: 'من:', to: 'إلى:',
+        search_invoice: '🔍 بحث...', invoice: 'الفاتورة', date: 'التاريخ',
+        customer: 'العميل', paid: 'المدفوع', balance: 'الرصيد', status: 'الحالة',
+        daily_summary: '📊 الملخص اليومي', select_date: 'اختر التاريخ:', today: 'اليوم',
+        today_sale: "مبيعات اليوم", cash_in: 'النقد الوارد', cash_out: 'النقد الصادر',
+        net_cash: 'صافي النقد', udhar: 'الدين', sabqa_wusool: 'التحصيلات السابقة',
+        advance_received: 'السلف', total_cash: 'إجمالي النقد',
+        daily_profit_loss: '📈 الربح / الخسارة', opening_stock: 'الافتتاحي:',
+        stock_in_label: 'المخزون الوارد:', closing_stock: 'الختامي:', ikhrajat: 'المصروفات:',
+        profit_label: 'الربح:', recently_sold: '📦 المبيعات الأخيرة',
+        monthly_summary: '📅 الملخص الشهري', sale: 'المبيعات', cash: 'النقد',
+        profit: 'الربح', expenses_title: '💸 المصروفات (الإخراجات)',
+        expense_head: 'بند المصروف', amount: 'المبلغ', note: 'ملاحظة (اختياري)',
+        add_expense: '➕ أضف مصروف', today_expenses: "📋 مصروفات اليوم",
+        expense_summary: '📊 ملخص المصروفات', settings_title: '⚙️ الإعدادات',
+        company_info: '🏢 معلومات الشركة', company_name_placeholder: 'اسم الشركة',
+        phone_placeholder: 'الهاتف', address_placeholder: 'العنوان',
+        save_settings: '💾 حفظ الإعدادات', tax_settings: '💰 إعدادات الضريبة',
+        enable_tax: 'تفعيل الضريبة', tax_rate: 'نسبة الضريبة %', tax_name: 'اسم الضريبة',
+        save_tax: '💾 حفظ الضريبة', data_management: '💾 إدارة البيانات',
+        backup: '📥 نسخ احتياطي', restore: '📤 استعادة البيانات',
+        reset: '⚠️ إعادة تعيين الكل', close: 'إغلاق', print: '🖨️ طباعة',
+        share: '📷 مشاركة', edit: '✏️ تعديل', delete: '🗑️ حذف',
+        edit_cart_item: '✏️ تعديل عنصر السلة', save: '💾 حفظ', cancel: 'إلغاء',
+        edit_expense: '✏️ تعديل المصروف', admin_login: '🔐 تسجيل الدخول',
+        login_desc: 'تسجيل الدخول لإدارة النظام', email: 'البريد الإلكتروني',
+        password: 'كلمة المرور', login_btn: '🔓 تسجيل الدخول',
+        viewer_mode: '👁️ متابعة كمشاهد', invalid_credentials: '❌ بيانات غير صحيحة!'
     }
-    return deviceId;
-}
-
-function getDeviceName() {
-    let ua = navigator.userAgent;
-    let name = '';
-    if(ua.includes('Mobile')) name += '📱 ';
-    else if(ua.includes('Tablet')) name += '📱 ';
-    else name += '💻 ';
-    if(ua.includes('Windows')) name += 'Windows';
-    else if(ua.includes('Mac')) name += 'Mac';
-    else if(ua.includes('Linux')) name += 'Linux';
-    else if(ua.includes('Android')) name += 'Android';
-    else if(ua.includes('iPhone') || ua.includes('iPad')) name += 'iOS';
-    else name += 'Unknown';
-    return name;
-}
-
-function updateDeviceStatus() {
-    if(!firebaseInitialized || !db || !isAdmin) return;
-    
-    const deviceId = getDeviceId();
-    const deviceName = getDeviceName();
-    
-    db.ref('warda_devices/' + deviceId).set({
-        name: deviceName,
-        lastSeen: firebase.database.ServerValue.TIMESTAMP,
-        isAdmin: isAdmin,
-        userAgent: navigator.userAgent
-    });
-}
-
-function loadDevices() {
-    if(!firebaseInitialized || !db) return;
-    
-    db.ref('warda_devices').on('value', (snapshot) => {
-        const devices = snapshot.val();
-        const container = document.getElementById('deviceList');
-        container.innerHTML = '';
-        
-        if(!devices) {
-            container.innerHTML = '<div style="color:#666;font-size:10px;">No devices connected</div>';
-            return;
-        }
-        
-        const now = Date.now();
-        Object.keys(devices).forEach(key => {
-            const device = devices[key];
-            const isOnline = (now - device.lastSeen) < 60000;
-            const isCurrent = key === getDeviceId();
-            
-            const div = document.createElement('div');
-            div.className = 'device-card';
-            div.innerHTML = `
-                <div>
-                    <span class="device-name">${device.name || 'Unknown Device'}</span>
-                    <span style="font-size:8px;margin-left:6px;${isOnline ? 'color:#27ae60;' : 'color:#e74c3c;'}">${isOnline ? '🟢 Online' : '🔴 Offline'}</span>
-                    ${isCurrent ? '<span style="font-size:8px;color:#ffd700;margin-left:6px;">(You)</span>' : ''}
-                    <div class="device-time">${new Date(device.lastSeen).toLocaleString()}</div>
-                </div>
-                ${isAdmin && !isCurrent ? `<button onclick="logoutDevice('${key}')" class="btn-danger" style="font-size:7px;padding:2px 8px;">🚪 Logout</button>` : ''}
-            `;
-            container.appendChild(div);
-        });
-    });
-}
-
-function logoutDevice(deviceId) {
-    if(!isAdmin) return showToast('🔒 Admin only!');
-    if(!confirm('Logout this device?')) return;
-    
-    db.ref('warda_devices/' + deviceId).remove().then(() => {
-        showToast('✅ Device logged out');
-    }).catch(() => {
-        showToast('❌ Failed to logout device');
-    });
-}
+};
 
 // ==================== DATA ====================
 let products = [];
@@ -552,25 +673,81 @@ let isAdmin = false;
 let currentFilter = 'all';
 let stockFilter = 'all';
 let currentMode = 'sqm';
-let editExpenseId = null;
+let editCartIndex = -1;
+let currentInvoiceNo = null;
 let darkMode = false;
-let taxEnabled = true;
-let taxRate = 15;
-let taxName = "VAT";
+let editExpenseId = null;
+let currentLang = 'en';
+let isSyncing = false;
+let syncTimeout = null;
 
 // ==================== INIT PRODUCTS ====================
 function initProducts() {
     products = [
-        { id: 1, name: 'زاویہ اپ ڈاون', size: '4*4*3mm', category: 'mwad', selling: 0, cost: 0, stock: 9200, type: 'pieces' },
-        { id: 2, name: 'زاویہ اپ ڈاون', size: '4*4*2mm', category: 'mwad', selling: 0, cost: 0, stock: 6600, type: 'pieces' },
-        { id: 3, name: 'مسمار مغلوب', size: '10*40', category: 'mwad', selling: 0, cost: 0, stock: 4800, type: 'pieces' },
-        { id: 4, name: 'مسمار مغلوب', size: '10*50', category: 'mwad', selling: 0, cost: 0, stock: 4800, type: 'pieces' },
-        { id: 5, name: 'ابیض مجلی مبروم', size: '3*7', category: 'stone', selling: 65, cost: 50, stock: 50, type: 'sqm' },
-        { id: 6, name: 'ابیض مجلی مبروم', size: '3*10', category: 'stone', selling: 65, cost: 50, stock: 50, type: 'sqm' },
-        { id: 7, name: 'ابیض مجلی سادہ', size: '3*7', category: 'stone', selling: 60, cost: 45, stock: 50, type: 'sqm' },
-        { id: 8, name: 'ابیض مصنفر مبروم', size: '3*7', category: 'stone', selling: 55, cost: 42, stock: 50, type: 'sqm' },
-        { id: 9, name: 'ابیض مصنفر سادہ', size: '3*7', category: 'stone', selling: 50, cost: 38, stock: 50, type: 'sqm' },
-        { id: 10, name: '(A) ابیض مجلی فرزا', size: '3*40*80', category: 'stone', selling: 75, cost: 63, stock: 50, type: 'sqm' }
+        { id: 1, name: 'مسمار مغلوب', size: '10*40', category: 'mwad', selling: 0, cost: 0, stock: 4800, type: 'pieces' },
+        { id: 2, name: 'مسمار مغلوب', size: '10*50', category: 'mwad', selling: 0, cost: 0, stock: 4800, type: 'pieces' },
+        { id: 3, name: 'مسمار مغلوب', size: '10*60', category: 'mwad', selling: 0, cost: 0, stock: 3500, type: 'pieces' },
+        { id: 4, name: 'مسمار مغلوب', size: '10*80', category: 'mwad', selling: 0, cost: 0, stock: 1500, type: 'pieces' },
+        { id: 5, name: 'مسمار مغلوب', size: '10*100', category: 'mwad', selling: 0, cost: 0, stock: 1440, type: 'pieces' },
+        { id: 6, name: 'زاویہ اپ ڈاون', size: '4*4*3mm', category: 'mwad', selling: 0, cost: 0, stock: 9200, type: 'pieces' },
+        { id: 7, name: 'زاویہ اپ ڈاون', size: '4*4*2mm', category: 'mwad', selling: 0, cost: 0, stock: 6600, type: 'pieces' },
+        { id: 8, name: 'زاویہ اپ ڈاون', size: '4*3*2mm', category: 'mwad', selling: 0, cost: 0, stock: 2500, type: 'pieces' },
+        { id: 9, name: 'زاویہ اپ ڈاون', size: '4*3*3mm', category: 'mwad', selling: 0, cost: 0, stock: 4300, type: 'pieces' },
+        { id: 10, name: 'زاویہ اپ ڈاون', size: '4*5*3mm', category: 'mwad', selling: 0, cost: 0, stock: 1200, type: 'pieces' },
+        { id: 11, name: 'زاویہ اپ ڈاون', size: '4*6*3mm', category: 'mwad', selling: 0, cost: 0, stock: 850, type: 'pieces' },
+        { id: 12, name: 'زاویہ اپ ڈاون', size: '4*8*3mm', category: 'mwad', selling: 0, cost: 0, stock: 420, type: 'pieces' },
+        { id: 13, name: 'زاویہ اپ ڈاون', size: '4*10*3mm', category: 'mwad', selling: 0, cost: 0, stock: 400, type: 'pieces' },
+        { id: 14, name: 'براغی سقف', size: '10*72', category: 'mwad', selling: 0, cost: 0, stock: 2200, type: 'pieces' },
+        { id: 15, name: 'براغی سقف', size: '10*92', category: 'mwad', selling: 0, cost: 0, stock: 2100, type: 'pieces' },
+        { id: 16, name: 'براغی سقف', size: '10*112', category: 'mwad', selling: 0, cost: 0, stock: 1920, type: 'pieces' },
+        { id: 17, name: 'براغی سقف', size: '10*115', category: 'mwad', selling: 0, cost: 0, stock: 2200, type: 'pieces' },
+        { id: 18, name: 'براغی سقف', size: '10*202', category: 'mwad', selling: 0, cost: 0, stock: 1040, type: 'pieces' },
+        { id: 19, name: 'گمتا چوڑی', size: 'Standard', category: 'mwad', selling: 0, cost: 0, stock: 7, type: 'pieces' },
+        { id: 20, name: 'گمتا سادہ', size: 'Standard', category: 'mwad', selling: 0, cost: 0, stock: 7, type: 'pieces' },
+        { id: 21, name: 'جولی ابو جمل', size: 'Standard', category: 'mwad', selling: 0, cost: 0, stock: 5, type: 'pieces' },
+        { id: 22, name: 'جولی گلیڈتیر', size: 'Standard', category: 'mwad', selling: 0, cost: 0, stock: 0, type: 'pieces' },
+        { id: 23, name: 'دسک حجر احمر', size: '7 بوسہ', category: 'mwad', selling: 0, cost: 0, stock: 0, type: 'pieces' },
+        { id: 24, name: 'دسک حجر احمر', size: '4.50 بوسہ', category: 'mwad', selling: 0, cost: 0, stock: 7, type: 'pieces' },
+        { id: 25, name: 'دسک جرانیت', size: '7 بوسہ', category: 'mwad', selling: 0, cost: 0, stock: 3, type: 'pieces' },
+        { id: 26, name: 'دسک بوش', size: '9 بوسہ', category: 'mwad', selling: 0, cost: 0, stock: 20, type: 'pieces' },
+        { id: 27, name: 'ریشہ ہلتی', size: '20cm', category: 'mwad', selling: 0, cost: 0, stock: 0, type: 'pieces' },
+        { id: 28, name: 'ریشہ ہلتی', size: '15cm', category: 'mwad', selling: 0, cost: 0, stock: 24, type: 'pieces' },
+        { id: 29, name: 'ریشہ ہلتی', size: '10cm', category: 'mwad', selling: 0, cost: 0, stock: 1, type: 'pieces' },
+        { id: 30, name: 'ریشہ دریل', size: '4mm', category: 'mwad', selling: 0, cost: 0, stock: 12, type: 'pieces' },
+        { id: 31, name: 'ریشہ دریل', size: '6mm', category: 'mwad', selling: 0, cost: 0, stock: 10, type: 'pieces' },
+        { id: 32, name: 'ریشہ دریل', size: '10mm', category: 'mwad', selling: 0, cost: 0, stock: 16, type: 'pieces' },
+        { id: 33, name: 'بکرا', size: 'Standard', category: 'mwad', selling: 0, cost: 0, stock: 1, type: 'pieces' },
+        { id: 34, name: 'ابیض مجلی', size: '20cm', category: 'stone', selling: 65, cost: 50, stock: 50, type: 'sqm' },
+        { id: 35, name: 'ابیض مجلی', size: '30cm', category: 'stone', selling: 65, cost: 50, stock: 50, type: 'sqm' },
+        { id: 36, name: 'ابیض مجلی', size: '40cm', category: 'stone', selling: 65, cost: 50, stock: 50, type: 'sqm' },
+        { id: 37, name: 'ابیض مجلی مبروم', size: '20cm', category: 'stone', selling: 70, cost: 55, stock: 50, type: 'sqm' },
+        { id: 38, name: 'ابیض مجلی مبروم', size: '30cm', category: 'stone', selling: 70, cost: 55, stock: 50, type: 'sqm' },
+        { id: 39, name: 'ابیض مجلی مبروم', size: '40cm', category: 'stone', selling: 70, cost: 55, stock: 50, type: 'sqm' },
+        { id: 40, name: 'ابیض مجلی فرزا', size: '20cm', category: 'stone', selling: 75, cost: 60, stock: 50, type: 'sqm' },
+        { id: 41, name: 'ابیض مجلی فرزا', size: '30cm', category: 'stone', selling: 75, cost: 60, stock: 50, type: 'sqm' },
+        { id: 42, name: 'ابیض مجلی فرزا', size: '40cm', category: 'stone', selling: 75, cost: 60, stock: 50, type: 'sqm' },
+        { id: 43, name: 'ابیض مجلی فرزا', size: '40*80', category: 'stone', selling: 85, cost: 68, stock: 50, type: 'sqm' },
+        { id: 44, name: 'ابیض مجلی مشطوف', size: '30cm', category: 'stone', selling: 70, cost: 55, stock: 50, type: 'sqm' },
+        { id: 45, name: 'ابیض مصنفر', size: '20cm', category: 'stone', selling: 55, cost: 42, stock: 50, type: 'sqm' },
+        { id: 46, name: 'ابیض مصنفر', size: '30cm', category: 'stone', selling: 55, cost: 42, stock: 50, type: 'sqm' },
+        { id: 47, name: 'ابیض مصنفر', size: '40cm', category: 'stone', selling: 55, cost: 42, stock: 50, type: 'sqm' },
+        { id: 48, name: 'ابیض مصنفر مبروم', size: '20cm', category: 'stone', selling: 60, cost: 46, stock: 50, type: 'sqm' },
+        { id: 49, name: 'ابیض مصنفر مبروم', size: '30cm', category: 'stone', selling: 60, cost: 46, stock: 50, type: 'sqm' },
+        { id: 50, name: 'ابیض مصنفر مبروم', size: '40cm', category: 'stone', selling: 60, cost: 46, stock: 50, type: 'sqm' },
+        { id: 51, name: 'ابیض مصنفر فرزا', size: '20cm', category: 'stone', selling: 65, cost: 50, stock: 50, type: 'sqm' },
+        { id: 52, name: 'ابیض مصنفر فرزا', size: '30cm', category: 'stone', selling: 65, cost: 50, stock: 50, type: 'sqm' },
+        { id: 53, name: 'ابیض مصنفر فرزا', size: '40cm', category: 'stone', selling: 65, cost: 50, stock: 50, type: 'sqm' },
+        { id: 54, name: 'ابیض مصنفر فرزا', size: '40*80', category: 'stone', selling: 75, cost: 58, stock: 50, type: 'sqm' },
+        { id: 55, name: 'واجھہ جبل', size: '20cm', category: 'stone', selling: 45, cost: 35, stock: 50, type: 'sqm' },
+        { id: 56, name: 'واجھہ جبل', size: '30cm', category: 'stone', selling: 45, cost: 35, stock: 50, type: 'sqm' },
+        { id: 57, name: 'واجھہ جبل', size: '40cm', category: 'stone', selling: 45, cost: 35, stock: 50, type: 'sqm' },
+        { id: 58, name: 'واجھہ جبل مبروم', size: '20cm', category: 'stone', selling: 50, cost: 40, stock: 50, type: 'sqm' },
+        { id: 59, name: 'واجھہ جبل مبروم', size: '30cm', category: 'stone', selling: 50, cost: 40, stock: 50, type: 'sqm' },
+        { id: 60, name: 'واجھہ جبل مبروم', size: '40cm', category: 'stone', selling: 50, cost: 40, stock: 50, type: 'sqm' },
+        { id: 61, name: 'واجھہ جبل فرزا', size: '20cm', category: 'stone', selling: 55, cost: 44, stock: 50, type: 'sqm' },
+        { id: 62, name: 'واجھہ جبل فرزا', size: '30cm', category: 'stone', selling: 55, cost: 44, stock: 50, type: 'sqm' },
+        { id: 63, name: 'واجھہ جبل فرزا', size: '40cm', category: 'stone', selling: 55, cost: 44, stock: 50, type: 'sqm' },
+        { id: 64, name: 'واجھہ جبل فرزا', size: '40*80', category: 'stone', selling: 65, cost: 52, stock: 50, type: 'sqm' }
     ];
     saveData();
 }
@@ -582,12 +759,14 @@ function saveData() {
     localStorage.setItem('warda_customers', JSON.stringify(customers));
     localStorage.setItem('warda_expenses', JSON.stringify(expenses));
     localStorage.setItem('warda_stockHistory', JSON.stringify(stockHistory));
-    localStorage.setItem('warda_taxEnabled', taxEnabled);
-    localStorage.setItem('warda_taxRate', taxRate);
-    localStorage.setItem('warda_taxName', taxName);
     localStorage.setItem('warda_darkmode', darkMode);
+    localStorage.setItem('warda_lang', currentLang);
     document.getElementById('lastSync').textContent = 'Sync: ' + new Date().toLocaleTimeString();
-    updateDeviceStatus();
+    
+    if(firebaseInitialized && isAdmin) {
+        clearTimeout(syncTimeout);
+        syncTimeout = setTimeout(syncToFirebase, 2000);
+    }
 }
 
 function loadData() {
@@ -602,14 +781,10 @@ function loadData() {
     if(e) expenses = JSON.parse(e);
     let sh = localStorage.getItem('warda_stockHistory');
     if(sh) stockHistory = JSON.parse(sh);
-    let te = localStorage.getItem('warda_taxEnabled');
-    if(te !== null) taxEnabled = te === 'true';
-    let tr = localStorage.getItem('warda_taxRate');
-    if(tr) taxRate = parseFloat(tr);
-    let tn = localStorage.getItem('warda_taxName');
-    if(tn) taxName = tn;
     let dm = localStorage.getItem('warda_darkmode');
     if(dm !== null) darkMode = dm === 'true';
+    let lang = localStorage.getItem('warda_lang');
+    if(lang) currentLang = lang;
 }
 
 // ==================== HELPERS ====================
@@ -633,6 +808,49 @@ function closeModal(id) {
     document.getElementById(id).style.display = 'none';
 }
 
+function openModal(id) {
+    document.getElementById(id).style.display = 'flex';
+}
+
+// ==================== LANGUAGE ====================
+function setLanguage(lang) {
+    currentLang = lang;
+    document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+    document.querySelector(`.lang-btn[onclick*="${lang}"]`)?.classList.add('active');
+    
+    if(lang === 'ur' || lang === 'ar') {
+        document.body.classList.add('rtl');
+    } else {
+        document.body.classList.remove('rtl');
+    }
+    
+    document.querySelectorAll('[data-key]').forEach(el => {
+        const key = el.getAttribute('data-key');
+        if(translations[lang] && translations[lang][key]) {
+            if(el.tagName === 'INPUT' || el.tagName === 'SELECT') {
+                el.placeholder = translations[lang][key];
+            } else if(el.tagName === 'BUTTON') {
+                // Keep emojis
+                const emoji = el.textContent.match(/[^\w\s]/g)?.join('') || '';
+                el.textContent = emoji + ' ' + translations[lang][key];
+            } else {
+                el.textContent = translations[lang][key];
+            }
+        }
+    });
+    
+    document.querySelectorAll('.label-text').forEach(el => {
+        const key = el.getAttribute('data-key');
+        if(translations[lang] && translations[lang][key]) {
+            el.textContent = translations[lang][key];
+        }
+    });
+    
+    saveData();
+    showToast('Language: ' + lang.toUpperCase());
+}
+
+// ==================== DARK MODE ====================
 function toggleDarkMode() {
     darkMode = !darkMode;
     document.body.classList.toggle('dark-mode', darkMode);
@@ -640,6 +858,7 @@ function toggleDarkMode() {
     showToast(darkMode ? '🌙 Dark Mode' : '☀️ Light Mode');
 }
 
+// ==================== ONLINE STATUS ====================
 function updateOnlineStatus() {
     const status = document.getElementById('onlineStatus');
     if(navigator.onLine) {
@@ -680,7 +899,6 @@ function login() {
             document.getElementById('logoutBtn').style.display = 'inline-block';
             document.querySelector('.container').classList.remove('view-only');
             showToast('✅ Admin Login Successful!');
-            updateDeviceStatus();
             renderAll();
         })
         .catch(() => {
@@ -698,7 +916,6 @@ function login() {
             document.getElementById('logoutBtn').style.display = 'inline-block';
             document.querySelector('.container').classList.remove('view-only');
             showToast('✅ Admin Login Successful!');
-            updateDeviceStatus();
             renderAll();
         } else {
             error.style.display = 'block';
@@ -734,7 +951,6 @@ function logout() {
             document.getElementById('logoutBtn').style.display = 'none';
             document.querySelector('.container').classList.add('view-only');
             showToast('👁️ Viewer Mode');
-            updateDeviceStatus();
             renderAll();
         });
     } else {
@@ -746,7 +962,6 @@ function logout() {
         document.getElementById('logoutBtn').style.display = 'none';
         document.querySelector('.container').classList.add('view-only');
         showToast('👁️ Viewer Mode');
-        updateDeviceStatus();
         renderAll();
     }
 }
@@ -763,7 +978,6 @@ function showTab(tab) {
     if(tab === 'invoices') renderInvoices();
     if(tab === 'summary') updateSummary();
     if(tab === 'expenses') renderExpenses();
-    if(tab === 'settings') { loadDevices(); }
 }
 
 // ==================== MODE ====================
@@ -1007,19 +1221,66 @@ function renderCart() {
         total += item.total;
         let r = tb.insertRow();
         r.insertCell(0).textContent = item.name;
-        r.insertCell(1).textContent = item.qtyDisplay;
-        r.insertCell(2).textContent = formatCurrency(item.price);
-        r.insertCell(3).textContent = formatCurrency(item.total);
-        let btn = document.createElement('button');
-        btn.textContent = '✖';
-        btn.className = 'btn-danger';
-        btn.style.fontSize = '7px';
-        btn.style.padding = '1px 5px';
-        btn.onclick = () => { cart.splice(idx, 1); renderCart(); updateTotals(); };
-        r.insertCell(4).appendChild(btn);
+        r.insertCell(1).textContent = item.size;
+        r.insertCell(2).textContent = item.qtyDisplay;
+        r.insertCell(3).textContent = formatCurrency(item.price);
+        r.insertCell(4).textContent = formatCurrency(item.total);
+        let c = r.insertCell(5);
+        let editBtn = document.createElement('button');
+        editBtn.textContent = '✏️';
+        editBtn.className = 'btn-warning';
+        editBtn.style.fontSize = '7px';
+        editBtn.style.padding = '1px 5px';
+        editBtn.onclick = () => { editCartIndex = idx; openEditCartModal(); };
+        c.appendChild(editBtn);
+        let delBtn = document.createElement('button');
+        delBtn.textContent = '✖';
+        delBtn.className = 'btn-danger';
+        delBtn.style.fontSize = '7px';
+        delBtn.style.padding = '1px 5px';
+        delBtn.onclick = () => { 
+            cartHistory.push(JSON.parse(JSON.stringify(cart)));
+            cart.splice(idx, 1); 
+            renderCart(); 
+            updateTotals(); 
+        };
+        c.appendChild(delBtn);
     });
     document.getElementById('cartTotal').textContent = formatCurrency(total);
     updateTotals();
+}
+
+function openEditCartModal() {
+    if(editCartIndex < 0 || editCartIndex >= cart.length) return;
+    let item = cart[editCartIndex];
+    document.getElementById('editItemName').value = item.name;
+    document.getElementById('editItemSize').value = item.size || '';
+    document.getElementById('editItemQty').value = item.qty;
+    document.getElementById('editItemPrice').value = item.price;
+    document.getElementById('editItemCost').value = item.cost || 0;
+    openModal('editCartModal');
+}
+
+function saveCartEdit() {
+    if(editCartIndex < 0 || editCartIndex >= cart.length) return;
+    let item = cart[editCartIndex];
+    let name = document.getElementById('editItemName').value;
+    let size = document.getElementById('editItemSize').value;
+    let qty = parseFloat(document.getElementById('editItemQty').value);
+    let price = parseFloat(document.getElementById('editItemPrice').value);
+    let cost = parseFloat(document.getElementById('editItemCost').value);
+    if(!name || !qty || !price) { showToast('Fill all fields'); return; }
+    item.name = name;
+    item.size = size;
+    item.qty = qty;
+    item.price = price;
+    item.cost = cost;
+    item.total = qty * price;
+    if(item.qtyDisplay.includes('m²')) item.qtyDisplay = qty.toFixed(2) + ' m²';
+    else item.qtyDisplay = qty + ' pcs';
+    closeModal('editCartModal');
+    renderCart();
+    showToast('✅ Item updated');
 }
 
 function updateTotals() {
@@ -1027,7 +1288,13 @@ function updateTotals() {
     let rec = parseFloat(document.getElementById('amountReceived').value) || 0;
     let bal = total - rec;
     document.getElementById('cartTotal').textContent = formatCurrency(total);
-    document.getElementById('balanceMsg').textContent = bal > 0 ? 'Due: ' + formatCurrency(bal) : bal < 0 ? 'Refund: ' + formatCurrency(Math.abs(bal)) : 'Fully Paid ✓';
+    if(bal > 0) {
+        document.getElementById('balanceMsg').innerHTML = `<span style="color:#e74c3c;font-weight:bold;">Due: ${formatCurrency(bal)}</span>`;
+    } else if(bal < 0) {
+        document.getElementById('balanceMsg').textContent = 'Refund: ' + formatCurrency(Math.abs(bal));
+    } else {
+        document.getElementById('balanceMsg').textContent = '✅ Fully Paid';
+    }
 }
 
 function clearCart() {
@@ -1052,7 +1319,10 @@ function confirmOrder() {
     let stockError = false;
     cart.forEach(i => {
         let p = products.find(pr => pr.name === i.name);
-        if(p && p.stock < i.qty) { showToast('⚠️ Not enough stock for ' + i.name + '! Available: ' + p.stock); stockError = true; }
+        if(p && p.stock < i.qty) { 
+            showToast('⚠️ Not enough stock for ' + i.name + '! Available: ' + p.stock); 
+            stockError = true; 
+        }
     });
     if(stockError) return;
     
@@ -1067,20 +1337,24 @@ function confirmOrder() {
         invoiceNo: invNo,
         date: new Date().toISOString(),
         customer: cust,
-        phone,
+        phone: phone,
         items: cart.map(i => ({...i})),
-        total,
+        total: total,
         cost: totalCost,
         profit: profit,
-        status,
-        paid,
+        status: status,
+        paid: paid,
         payments: paid > 0 ? [{amount: paid, notes: 'POS Payment', date: new Date().toISOString()}] : []
     };
     orders.push(order);
     
     let custObj = customers.find(c => c.phone === phone);
-    if(!custObj) { custObj = { name: cust, phone, invoices: [], advance: 0 }; customers.push(custObj); }
+    if(!custObj) { 
+        custObj = { name: cust, phone: phone, invoices: [], advance: 0, totalPaid: 0 }; 
+        customers.push(custObj); 
+    }
     custObj.invoices.push({ invoiceNo: invNo, date: order.date, amount: total, paid: paid, status: status });
+    custObj.totalPaid = (custObj.totalPaid || 0) + paid;
     
     if(rec > total) {
         custObj.advance = (custObj.advance || 0) + (rec - total);
@@ -1107,33 +1381,76 @@ function renderCustomers() {
     let filtered = customers.filter(c => c.name.toLowerCase().includes(search) || (c.phone && c.phone.includes(search)));
     let container = document.getElementById('customerList');
     container.innerHTML = '';
-    if(filtered.length === 0) { container.innerHTML = '<div style="text-align:center;padding:10px;color:#666;">No customers</div>'; return; }
+    if(filtered.length === 0) { container.innerHTML = '<div style="text-align:center;padding:20px;color:#666;">No customers found</div>'; return; }
+    
+    let totalCustomerProfit = 0;
     filtered.forEach(c => {
         let due = c.invoices.reduce((s, i) => s + (i.amount - i.paid), 0);
+        let totalSales = c.invoices.reduce((s, i) => s + i.amount, 0);
+        let totalPaid = c.invoices.reduce((s, i) => s + i.paid, 0);
+        let profit = c.invoices.reduce((s, i) => {
+            let o = orders.find(ord => ord.invoiceNo === i.invoiceNo);
+            return s + (o ? o.profit : 0);
+        }, 0);
+        totalCustomerProfit += profit;
+        
         let div = document.createElement('div');
-        div.style.cssText = 'background:white;border:1px solid #ddd;border-radius:6px;padding:8px;margin-bottom:4px;';
-        let status = due > 0 ? 'Due: ' + formatCurrency(due) : (c.advance > 0 ? 'Advance: ' + formatCurrency(c.advance) : 'Settled');
-        let statusClass = due > 0 ? 'badge-unpaid' : (c.advance > 0 ? 'badge-partial' : 'badge-paid');
-        div.innerHTML = `<div style="display:flex;justify-content:space-between;"><strong>${c.name}</strong> <span class="badge ${statusClass}">${status}</span></div>
-            <div style="font-size:9px;color:#666;">${c.phone || ''} | Total Paid: ${formatCurrency(c.invoices.reduce((s,i) => s + i.paid, 0))}</div>
-            <div class="action-btns">
-                <button class="btn-info" style="font-size:8px;padding:1px 6px;" onclick="viewCustomerInvoices('${c.phone}')">📄</button>
-                <button class="btn-success" style="font-size:8px;padding:1px 6px;" onclick="payCustomer('${c.phone}')">💰</button>
-            </div>`;
+        div.className = 'customer-card';
+        if(darkMode) div.style.cssText += 'background:#1a1a2e;border-color:#444;color:#e0e0e0;';
+        
+        let dueHtml = due > 0 ? `<span style="color:#e74c3c;font-weight:bold;">Due: ${formatCurrency(due)}</span>` : 
+                       (due < 0 ? `<span style="color:#27ae60;">Advance: ${formatCurrency(Math.abs(due))}</span>` : 
+                       `<span style="color:#27ae60;">Settled</span>`);
+        
+        div.innerHTML = `
+            <div style="display:flex;justify-content:space-between;flex-wrap:wrap;align-items:center;">
+                <span class="name">${c.name}</span>
+                <span style="font-size:11px;">📞 ${c.phone || 'N/A'}</span>
+            </div>
+            <div class="stats">
+                <span>💰 Sales: ${formatCurrency(totalSales)}</span>
+                <span>✅ Paid: ${formatCurrency(totalPaid)}</span>
+                <span>${dueHtml}</span>
+                <span>📈 Profit: ${formatCurrency(profit)}</span>
+                ${c.advance > 0 ? `<span style="color:#f39c12;">Advance: ${formatCurrency(c.advance)}</span>` : ''}
+                <span style="font-size:8px;color:#666;cursor:pointer;" onclick="toggleCustomerInvoices('${c.phone}')">📄 Click to view invoices ▼</span>
+            </div>
+            <div class="customer-invoices" id="cinv_${c.phone}">
+                <div style="margin-top:6px;font-size:9px;max-height:200px;overflow-y:auto;border-top:1px solid #ddd;padding-top:6px;">
+                    ${c.invoices.slice(-10).reverse().map(i => {
+                        let bal = i.amount - i.paid;
+                        let o = orders.find(ord => ord.invoiceNo === i.invoiceNo);
+                        return `<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #eee;flex-wrap:wrap;">
+                            <span><strong>${i.invoiceNo}</strong> | ${new Date(i.date).toLocaleDateString()}</span>
+                            <span>Total: ${formatCurrency(i.amount)} | Paid: ${formatCurrency(i.paid)}</span>
+                            <span>${bal > 0 ? '<span class="due-amount">Due: ' + formatCurrency(bal) + '</span>' : '✅ Paid'}</span>
+                            <span>
+                                <button onclick="event.stopPropagation();viewInvoice('${i.invoiceNo}')" class="btn-info" style="padding:1px 6px;font-size:7px;">👁️</button>
+                                <button onclick="event.stopPropagation();editInvoice('${i.invoiceNo}')" class="btn-warning" style="padding:1px 6px;font-size:7px;">✏️</button>
+                                <button onclick="event.stopPropagation();payInvoice('${i.invoiceNo}')" class="btn-success" style="padding:1px 6px;font-size:7px;">💰</button>
+                            </span>
+                        </div>`;
+                    }).join('')}
+                </div>
+                <div class="action-btns" style="margin-top:6px;">
+                    <button class="btn-success" style="font-size:8px;padding:2px 8px;" onclick="payCustomer('${c.phone}')">💰 Pay</button>
+                    <button class="btn-warning" style="font-size:8px;padding:2px 8px;" onclick="editCustomer('${c.phone}')">✏️ Edit</button>
+                    <button class="btn-danger" style="font-size:8px;padding:2px 8px;" onclick="deleteCustomer('${c.phone}')">🗑️ Delete</button>
+                </div>
+            </div>
+        `;
         container.appendChild(div);
     });
+    
+    let totalDiv = document.createElement('div');
+    totalDiv.style.cssText = 'background:#1a2a4a;padding:8px;border-radius:6px;color:white;text-align:center;margin-top:8px;font-size:12px;';
+    totalDiv.innerHTML = `📊 Total Profit from All Customers: <strong style="color:#ffd700;">${formatCurrency(totalCustomerProfit)}</strong>`;
+    container.appendChild(totalDiv);
 }
 
-function viewCustomerInvoices(phone) {
-    let cust = customers.find(c => c.phone === phone);
-    if(!cust) { showToast('Customer not found'); return; }
-    let msg = '📄 Invoices for ' + cust.name + '\n━━━━━━━━━━━━━━━\n';
-    cust.invoices.forEach(i => {
-        let bal = i.amount - i.paid;
-        msg += i.invoiceNo + ' | ' + new Date(i.date).toLocaleDateString() + ' | ' + formatCurrency(i.amount) + ' | ' + (bal > 0 ? 'Due: ' + formatCurrency(bal) : 'Paid') + '\n';
-    });
-    msg += '━━━━━━━━━━━━━━━\nAdvance: ' + formatCurrency(cust.advance || 0);
-    alert(msg);
+function toggleCustomerInvoices(phone) {
+    let el = document.getElementById('cinv_' + phone);
+    if(el) el.classList.toggle('active');
 }
 
 function payCustomer(phone) {
@@ -1157,6 +1474,7 @@ function payCustomer(phone) {
     unpaid.status = unpaid.paid >= unpaid.amount ? 'paid' : 'partial';
     let order = orders.find(o => o.invoiceNo === unpaid.invoiceNo);
     if(order) { order.paid = unpaid.paid; order.status = unpaid.status; }
+    cust.totalPaid = (cust.totalPaid || 0) + payAmt;
     if(amt > payAmt) {
         cust.advance = (cust.advance || 0) + (amt - payAmt);
     }
@@ -1167,64 +1485,181 @@ function payCustomer(phone) {
     showToast('✅ Received ' + formatCurrency(payAmt));
 }
 
+function editCustomer(phone) {
+    if(!isAdmin) return showToast('🔒 Admin only!');
+    let cust = customers.find(c => c.phone === phone);
+    if(!cust) { showToast('Customer not found'); return; }
+    let name = prompt('Customer Name:', cust.name);
+    if(name !== null && name.trim() !== '') cust.name = name.trim();
+    let newPhone = prompt('Phone Number:', cust.phone);
+    if(newPhone !== null && newPhone.trim() !== '') {
+        orders.forEach(o => { if(o.phone === cust.phone) o.phone = newPhone.trim(); });
+        cust.phone = newPhone.trim();
+    }
+    saveData();
+    renderCustomers();
+    renderInvoices();
+    showToast('✅ Customer updated');
+}
+
+function deleteCustomer(phone) {
+    if(!isAdmin) return showToast('🔒 Admin only!');
+    if(!confirm('Delete this customer and all their invoices?')) return;
+    customers = customers.filter(c => c.phone !== phone);
+    orders = orders.filter(o => o.phone !== phone);
+    saveData();
+    renderCustomers();
+    renderInvoices();
+    updateSummary();
+    showToast('✅ Customer deleted');
+}
+
 // ==================== INVOICES ====================
 function renderInvoices() {
     let search = document.getElementById('searchInvoice').value.toLowerCase();
-    let filtered = orders.filter(o => o.invoiceNo.toLowerCase().includes(search) || o.customer.toLowerCase().includes(search)).reverse();
+    let fromDate = document.getElementById('invoiceFromDate').value;
+    let toDate = document.getElementById('invoiceToDate').value;
+    
+    let filtered = orders.filter(o => {
+        let match = o.invoiceNo.toLowerCase().includes(search) || o.customer.toLowerCase().includes(search);
+        if(fromDate) match = match && o.date.substring(0,10) >= fromDate;
+        if(toDate) match = match && o.date.substring(0,10) <= toDate;
+        return match;
+    }).reverse();
+    
     let tb = document.getElementById('invoiceBody');
     tb.innerHTML = '';
-    if(filtered.length === 0) { tb.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:10px;color:#666;">No invoices</td></tr>'; return; }
+    if(filtered.length === 0) { tb.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:20px;color:#666;">No invoices found</td></tr>'; return; }
     filtered.forEach(o => {
         let r = tb.insertRow();
+        let bal = o.total - (o.paid || 0);
         r.insertCell(0).textContent = o.invoiceNo;
         r.insertCell(1).textContent = new Date(o.date).toLocaleDateString();
         r.insertCell(2).textContent = o.customer;
         r.insertCell(3).textContent = formatCurrency(o.total);
-        r.insertCell(4).innerHTML = `<span class="badge badge-${o.status}">${o.status}</span>`;
-        let c = r.insertCell(5);
-        let view = document.createElement('button');
-        view.textContent = '👁️';
-        view.className = 'btn-info';
-        view.style.fontSize = '7px';
-        view.style.padding = '1px 5px';
-        view.onclick = () => viewInvoice(o.invoiceNo);
-        c.appendChild(view);
-        let del = document.createElement('button');
-        del.textContent = '✕';
-        del.className = 'btn-danger';
-        del.style.fontSize = '7px';
-        del.style.padding = '1px 5px';
-        del.onclick = () => {
-            if(!isAdmin) return showToast('🔒 Admin only!');
-            if(confirm('Delete invoice?')) {
-                orders = orders.filter(x => x.invoiceNo !== o.invoiceNo);
-                customers.forEach(c => c.invoices = c.invoices.filter(i => i.invoiceNo !== o.invoiceNo));
-                saveData();
-                renderInvoices();
-                renderCustomers();
-                updateSummary();
-                showToast('✅ Invoice deleted');
-            }
-        };
-        c.appendChild(del);
+        r.insertCell(4).textContent = formatCurrency(o.paid || 0);
+        r.insertCell(5).innerHTML = bal > 0 ? `<span class="due-amount">Due: ${formatCurrency(bal)}</span>` : (bal < 0 ? `<span style="color:#27ae60;">Advance: ${formatCurrency(Math.abs(bal))}</span>` : '✅ Settled');
+        r.insertCell(6).innerHTML = `<span class="badge badge-${o.status}">${o.status}</span>`;
+        let c = r.insertCell(7);
+        c.innerHTML = `<div class="action-btns">
+            <button onclick="viewInvoice('${o.invoiceNo}')" class="btn-info" style="padding:2px 8px;font-size:7px;">👁️</button>
+            <button onclick="editInvoice('${o.invoiceNo}')" class="btn-warning" style="padding:2px 8px;font-size:7px;">✏️</button>
+            <button onclick="payInvoice('${o.invoiceNo}')" class="btn-success" style="padding:2px 8px;font-size:7px;">💰</button>
+            <button onclick="deleteInvoice('${o.invoiceNo}')" class="btn-danger" style="padding:2px 8px;font-size:7px;">🗑️</button>
+        </div>`;
     });
 }
 
 function viewInvoice(invNo) {
     let o = orders.find(x => x.invoiceNo === invNo);
     if(!o) { showToast('Invoice not found'); return; }
-    let items = o.items.map(i => i.name + ' x' + i.qtyDisplay + ' = ' + formatCurrency(i.total)).join('\n');
-    let msg = '📄 INVOICE: ' + o.invoiceNo + '\n';
-    msg += 'Date: ' + new Date(o.date).toLocaleString() + '\n';
-    msg += 'Customer: ' + o.customer + '\n';
-    msg += 'Phone: ' + (o.phone || 'N/A') + '\n';
-    msg += '━━━━━━━━━━━━━━━\n';
-    msg += items + '\n';
-    msg += '━━━━━━━━━━━━━━━\n';
-    msg += 'Total: ' + formatCurrency(o.total) + '\n';
-    msg += 'Paid: ' + formatCurrency(o.paid || 0) + '\n';
-    msg += 'Balance: ' + formatCurrency(o.total - (o.paid || 0));
-    alert(msg);
+    currentInvoiceNo = invNo;
+    let items = '';
+    o.items.forEach(i => {
+        items += `<tr><td style="padding:4px;">${i.name}</td><td style="padding:4px;">${i.size || ''}</td><td style="padding:4px;">${i.qtyDisplay}</td><td style="padding:4px;">${formatCurrency(i.price)}</td><td style="padding:4px;">${formatCurrency(i.total)}</td></tr>`;
+    });
+    let bal = o.total - (o.paid || 0);
+    let html = `<div id="invoicePrint" class="invoice-box">
+        <div class="header"><h2>🏢 Warda Marble</h2><p>Premium Marble Solutions</p><p style="font-size:10px;">${new Date().toLocaleString()}</p></div>
+        <div class="body">
+            <div style="display:flex;justify-content:space-between;flex-wrap:wrap;margin-bottom:10px;">
+                <div><strong>Invoice:</strong> ${o.invoiceNo}<br><strong>Date:</strong> ${new Date(o.date).toLocaleString()}</div>
+                <div><strong>Customer:</strong> ${o.customer}<br><strong>Phone:</strong> ${o.phone || 'N/A'}</div>
+            </div>
+            <table><thead><tr><th>Item</th><th>Size</th><th>Qty</th><th>Price</th><th>Total</th></tr></thead><tbody>${items}</tbody></table>
+            <div style="text-align:right;margin-top:10px;">
+                <p><strong>Total: ${formatCurrency(o.total)}</strong></p>
+                <p>Paid: ${formatCurrency(o.paid || 0)}</p>
+                <p><strong>${bal > 0 ? '<span class="due-amount">Due: ' + formatCurrency(bal) + '</span>' : (bal < 0 ? 'Advance: ' + formatCurrency(Math.abs(bal)) : '✅ Fully Paid')}</strong></p>
+                <p style="font-size:8px;color:#666;margin-top:5px;">Thank you for your business!</p>
+            </div>
+        </div>
+    </div>`;
+    document.getElementById('invoiceDetails').innerHTML = html;
+    openModal('invoiceModal');
+}
+
+function payInvoice(invNo) {
+    if(!isAdmin) return showToast('🔒 Admin only!');
+    let o = orders.find(x => x.invoiceNo === invNo);
+    if(!o) return;
+    let amt = prompt('Enter payment amount for ' + o.invoiceNo + ':', o.total - (o.paid || 0));
+    if(!amt || isNaN(amt) || parseFloat(amt) <= 0) return;
+    amt = parseFloat(amt);
+    let paid = Math.min(amt, o.total - (o.paid || 0));
+    o.paid = (o.paid || 0) + paid;
+    o.status = o.paid >= o.total ? 'paid' : (o.paid > 0 ? 'partial' : 'unpaid');
+    if(!o.payments) o.payments = [];
+    o.payments.push({ amount: paid, notes: 'Manual Payment', date: new Date().toISOString() });
+    let cust = customers.find(c => c.phone === o.phone);
+    if(cust) {
+        let inv = cust.invoices.find(i => i.invoiceNo === invNo);
+        if(inv) { inv.paid = o.paid; inv.status = o.status; }
+        cust.totalPaid = (cust.totalPaid || 0) + paid;
+        if(amt > paid) { cust.advance = (cust.advance || 0) + (amt - paid); }
+    }
+    saveData();
+    renderInvoices();
+    renderCustomers();
+    updateSummary();
+    showToast('✅ Payment received: ' + formatCurrency(paid));
+}
+
+function editInvoice(invNo) {
+    if(!isAdmin) return showToast('🔒 Admin only!');
+    let o = orders.find(x => x.invoiceNo === invNo);
+    if(!o) return;
+    let cust = prompt('Customer Name:', o.customer);
+    if(cust !== null && cust.trim() !== '') o.customer = cust.trim();
+    let phone = prompt('Phone Number:', o.phone || '');
+    if(phone !== null) o.phone = phone.trim();
+    let custObj = customers.find(c => c.phone === o.phone);
+    if(custObj) {
+        let inv = custObj.invoices.find(i => i.invoiceNo === invNo);
+        if(inv) inv.customer = o.customer;
+    }
+    saveData();
+    renderInvoices();
+    renderCustomers();
+    showToast('✅ Invoice updated');
+}
+
+function editInvoiceFromModal() {
+    if(currentInvoiceNo) editInvoice(currentInvoiceNo);
+    closeModal('invoiceModal');
+}
+
+function deleteInvoice(invNo) {
+    if(!isAdmin) return showToast('🔒 Admin only!');
+    if(!confirm('Delete invoice ' + invNo + '?')) return;
+    orders = orders.filter(o => o.invoiceNo !== invNo);
+    customers.forEach(c => c.invoices = c.invoices.filter(i => i.invoiceNo !== invNo));
+    saveData();
+    renderInvoices();
+    renderCustomers();
+    updateSummary();
+    showToast('✅ Invoice deleted');
+}
+
+function deleteInvoiceFromModal() {
+    if(currentInvoiceNo) deleteInvoice(currentInvoiceNo);
+    closeModal('invoiceModal');
+}
+
+function printInvoice() {
+    let w = window.open('', '_blank');
+    w.document.write(`<html><head><title>Invoice</title><style>body{padding:20px;}</style></head><body>${document.getElementById('invoiceDetails').innerHTML}</body></html>`);
+    w.document.close();
+    w.print();
+}
+
+function shareInvoiceImage() {
+    let el = document.getElementById('invoicePrint');
+    if(!el) return;
+    let win = window.open('', '_blank');
+    win.document.write(`<html><head><title>Invoice</title><style>body{margin:0;padding:20px;background:white;}</style></head><body>${el.outerHTML}</body></html>`);
+    win.document.close();
+    showToast('📷 Invoice ready - share from new tab');
 }
 
 // ==================== EXPENSES ====================
@@ -1321,7 +1756,7 @@ function editExpense(id) {
     document.getElementById('editExpenseHead').value = exp.head;
     document.getElementById('editExpenseAmount').value = exp.amount;
     document.getElementById('editExpenseNote').value = exp.note || '';
-    document.getElementById('editExpenseModal').style.display = 'flex';
+    openModal('editExpenseModal');
 }
 
 function saveExpenseEdit() {
@@ -1338,7 +1773,7 @@ function saveExpenseEdit() {
     saveData();
     renderExpenses();
     updateSummary();
-    document.getElementById('editExpenseModal').style.display = 'none';
+    closeModal('editExpenseModal');
     showToast('✅ Expense updated');
 }
 
@@ -1500,7 +1935,7 @@ function saveTaxSettings() {
 }
 
 function backupData() {
-    let data = { products, orders, customers, expenses, stockHistory, taxEnabled, taxRate, taxName, date: new Date().toISOString(), version: '3.0' };
+    let data = { products, orders, customers, expenses, stockHistory, date: new Date().toISOString(), version: '3.0' };
     let blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
     let url = URL.createObjectURL(blob);
     let a = document.createElement('a');
@@ -1524,9 +1959,6 @@ function restoreData(input) {
                 if(data.customers) customers = data.customers;
                 if(data.expenses) expenses = data.expenses;
                 if(data.stockHistory) stockHistory = data.stockHistory;
-                if(data.taxEnabled !== undefined) taxEnabled = data.taxEnabled;
-                if(data.taxRate) taxRate = data.taxRate;
-                if(data.taxName) taxName = data.taxName;
                 saveData();
                 renderAll();
                 showToast('✅ Data restored successfully');
@@ -1549,6 +1981,79 @@ function resetAll() {
     }
 }
 
+// ==================== SYNC TO FIREBASE ====================
+function syncToFirebase() {
+    if(!firebaseInitialized || !db) {
+        showToast('❌ Firebase not connected');
+        return;
+    }
+    if(isSyncing) return;
+    isSyncing = true;
+    showToast('🔄 Syncing...');
+    
+    const data = {
+        products: products,
+        orders: orders,
+        customers: customers,
+        expenses: expenses,
+        stockHistory: stockHistory,
+        timestamp: firebase.database.ServerValue.TIMESTAMP
+    };
+    
+    db.ref('warda_data').set(data)
+    .then(() => {
+        showToast('✅ Data synced to cloud');
+        isSyncing = false;
+        document.getElementById('lastSync').textContent = 'Sync: ' + new Date().toLocaleTimeString();
+    })
+    .catch((error) => {
+        showToast('❌ Sync failed: ' + error.message);
+        isSyncing = false;
+    });
+}
+
+function syncFromFirebase() {
+    if(!firebaseInitialized || !db) return;
+    
+    db.ref('warda_data').once('value')
+    .then((snapshot) => {
+        const data = snapshot.val();
+        if(data) {
+            if(data.products) products = data.products;
+            if(data.orders) orders = data.orders;
+            if(data.customers) customers = data.customers;
+            if(data.expenses) expenses = data.expenses;
+            if(data.stockHistory) stockHistory = data.stockHistory;
+            saveData();
+            renderAll();
+            showToast('✅ Data synced from cloud');
+            document.getElementById('lastSync').textContent = 'Sync: ' + new Date().toLocaleTimeString();
+        }
+    })
+    .catch((error) => {
+        console.error('Sync error:', error);
+    });
+}
+
+function listenForChanges() {
+    if(!firebaseInitialized || !db) return;
+    
+    db.ref('warda_data').on('value', (snapshot) => {
+        const data = snapshot.val();
+        if(data && !isSyncing) {
+            if(data.products) products = data.products;
+            if(data.orders) orders = data.orders;
+            if(data.customers) customers = data.customers;
+            if(data.expenses) expenses = data.expenses;
+            if(data.stockHistory) stockHistory = data.stockHistory;
+            saveData();
+            renderAll();
+            document.getElementById('lastSync').textContent = 'Sync: ' + new Date().toLocaleTimeString();
+            showToast('🔄 Data updated from cloud');
+        }
+    });
+}
+
 // ==================== RENDER ALL ====================
 function renderAll() {
     renderProducts();
@@ -1559,7 +2064,6 @@ function renderAll() {
     renderExpenses();
     updateSummary();
     populateStockSelect();
-    loadDevices();
     
     let comp = localStorage.getItem('warda_company');
     if(comp) {
@@ -1570,12 +2074,15 @@ function renderAll() {
             document.getElementById('companyAddress').value = c.address || '';
         } catch(e) {}
     }
-    document.getElementById('taxEnable').checked = taxEnabled;
-    document.getElementById('taxRate').value = taxRate;
-    document.getElementById('taxName').value = taxName;
+    document.getElementById('taxEnable').checked = true;
+    document.getElementById('taxRate').value = 15;
+    document.getElementById('taxName').value = 'VAT';
     updateOnlineStatus();
     document.getElementById('summaryDate').value = getToday();
     document.getElementById('expenseDate').value = getToday();
+    
+    // Set language
+    setLanguage(currentLang);
 }
 
 // ==================== INIT ====================
@@ -1584,16 +2091,16 @@ if(darkMode) document.body.classList.add('dark-mode');
 renderAll();
 getDeviceInfo();
 updateOnlineStatus();
-updateDeviceStatus();
-
-// Update device status every 30 seconds
-setInterval(() => {
-    updateDeviceStatus();
-    document.getElementById('lastSync').textContent = 'Sync: ' + new Date().toLocaleTimeString();
-}, 30000);
 
 // Auto-save every 30 seconds
 setInterval(saveData, 30000);
+
+// Listen for Firebase changes
+if(firebaseInitialized) {
+    listenForChanges();
+    // Initial sync from Firebase
+    setTimeout(syncFromFirebase, 2000);
+}
 
 console.log('✅ Warda Marble System Loaded!');
 console.log('📦 Products:', products.length);
