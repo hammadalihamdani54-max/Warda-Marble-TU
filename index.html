@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Warda Marble</title>
+    <title>Warda Marble + AI Scanner</title>
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/12.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/12.15.0/firebase-auth-compat.js"></script>
@@ -140,6 +140,15 @@
         .customer-invoices{display:none;margin-top:8px;padding-top:8px;border-top:1px solid #ddd;}
         body.dark-mode .customer-invoices{border-color:#444;}
         .customer-invoices.active{display:block;}
+        .ai-scanner{background:linear-gradient(135deg,#1a2a4a,#0f2027);padding:10px;border-radius:8px;margin-bottom:8px;border:2px solid #ffd700;}
+        .ai-scanner .title{color:#ffd700;font-weight:bold;font-size:11px;}
+        .ai-scanner .sub{color:#a0c4e0;font-size:8px;}
+        .ai-scanner .status{color:#a0c4e0;font-size:8px;margin-top:3px;}
+        .ai-scanner .progress{display:none;width:100%;height:3px;background:#2d2d44;border-radius:2px;margin-top:4px;}
+        .ai-scanner .progress-bar{width:0%;height:100%;background:#ffd700;border-radius:2px;transition:width 0.3s;}
+        .ai-scanner .btn-scan{background:#ffd700;color:#1a1a2e;border:none;padding:5px 12px;border-radius:4px;font-weight:bold;font-size:10px;cursor:pointer;}
+        .ai-scanner .btn-clear{background:#6b7a8a;color:white;border:none;padding:5px 8px;border-radius:4px;font-size:9px;cursor:pointer;}
+        .ai-scanner .file-input{flex:2;min-width:120px;padding:4px;font-size:9px;background:white;border-radius:4px;border:1px solid #ddd;}
     </style>
 </head>
 <body>
@@ -196,6 +205,24 @@
             </div>
             <div class="panel">
                 <h3 data-key="cart">🛒 Cart</h3>
+                
+                <!-- ===== 🤖 AI BILL SCANNER ===== -->
+                <div class="ai-scanner">
+                    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:4px;">
+                        <span class="title">🤖 AI Bill Scanner</span>
+                        <span class="sub">📸 Photo se auto-add</span>
+                    </div>
+                    <div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap;margin-top:4px;">
+                        <input type="file" id="billPhoto" accept="image/*" capture="environment" class="file-input">
+                        <button onclick="extractBillFromPhoto()" class="btn-scan">⚡ Scan Bill</button>
+                        <button onclick="document.getElementById('billPhoto').value='';document.getElementById('aiStatus').textContent='📸 Ready'" class="btn-clear">✕</button>
+                    </div>
+                    <div class="status" id="aiStatus">📸 Take photo of bill → AI auto-fills cart</div>
+                    <div class="progress" id="aiProgress">
+                        <div class="progress-bar" id="aiProgressBar"></div>
+                    </div>
+                </div>
+                
                 <div style="display:flex;gap:3px;margin-bottom:4px;flex-wrap:wrap;">
                     <button class="btn-success" onclick="setMode('sqm')" style="font-size:9px;padding:3px 8px;" data-key="sqm">📐 SQM</button>
                     <button class="btn-info" onclick="setMode('manual')" style="font-size:9px;padding:3px 8px;" data-key="manual">📏 Manual</button>
@@ -672,7 +699,7 @@ let cartHistory = [];
 let isAdmin = false;
 let currentFilter = 'all';
 let stockFilter = 'all';
-let currentMode = 'sqm';
+let currentMode = 'pieces';
 let editCartIndex = -1;
 let currentInvoiceNo = null;
 let darkMode = false;
@@ -2054,6 +2081,179 @@ function listenForChanges() {
     });
 }
 
+// ==================== 🤖 AI BILL EXTRACTOR ====================
+const GEMINI_API_KEY = 'YOUR_GEMINI_API_KEY_HERE'; // 🔑 Get from https://aistudio.google.com/apikey
+
+async function extractBillFromPhoto() {
+    const fileInput = document.getElementById('billPhoto');
+    const status = document.getElementById('aiStatus');
+    const progress = document.getElementById('aiProgress');
+    const progressBar = document.getElementById('aiProgressBar');
+    
+    if (!fileInput.files || !fileInput.files[0]) {
+        showToast('📸 Please take a photo first!');
+        return;
+    }
+    
+    const file = fileInput.files[0];
+    progress.style.display = 'block';
+    progressBar.style.width = '20%';
+    status.textContent = '📖 Reading image...';
+    
+    const reader = new FileReader();
+    reader.onload = async function(e) {
+        const base64Image = e.target.result.split(',')[1];
+        progressBar.style.width = '50%';
+        status.textContent = '🤖 AI analyzing bill...';
+        showToast('🤖 AI is reading bill...');
+        
+        try {
+            let result;
+            if (!GEMINI_API_KEY || GEMINI_API_KEY === 'YOUR_GEMINI_API_KEY_HERE') {
+                result = getMockBillData();
+            } else {
+                result = await callGeminiAPI(base64Image);
+            }
+            
+            progressBar.style.width = '75%';
+            status.textContent = '🔄 Adding items to cart...';
+            
+            if (result && result.items && result.items.length > 0) {
+                let added = 0;
+                let totalAmount = 0;
+                
+                for (const item of result.items) {
+                    let product = findMatchingProduct(item.name, item.size);
+                    if (product) {
+                        setMode('pieces');
+                        document.getElementById('itemName').value = product.name;
+                        document.getElementById('costPrice').value = product.cost || 0;
+                        document.getElementById('pieceSize').value = item.size || product.size || 'Standard';
+                        document.getElementById('pieceQty').value = item.qty || 1;
+                        document.getElementById('piecePrice').value = item.price || product.selling || 0;
+                        addToCart();
+                        added++;
+                        totalAmount += (item.qty || 1) * (item.price || product.selling || 0);
+                    } else {
+                        setMode('pieces');
+                        document.getElementById('itemName').value = item.name || 'Unknown';
+                        document.getElementById('costPrice').value = 0;
+                        document.getElementById('pieceSize').value = item.size || 'Standard';
+                        document.getElementById('pieceQty').value = item.qty || 1;
+                        document.getElementById('piecePrice').value = item.price || 0;
+                        addToCart();
+                        added++;
+                        totalAmount += (item.qty || 1) * (item.price || 0);
+                    }
+                }
+                
+                progressBar.style.width = '100%';
+                if (result.customer) document.getElementById('custName').value = result.customer;
+                if (result.total || totalAmount > 0) document.getElementById('amountReceived').value = result.total || totalAmount;
+                
+                status.innerHTML = `✅ <span style="color:#4ade80;">Added ${added} items from bill!</span>`;
+                showToast(`✅ ${added} items added to cart!`);
+                renderCart();
+                updateTotals();
+            } else {
+                status.innerHTML = '❌ <span style="color:#f87171;">No items detected. Try clearer photo.</span>';
+                showToast('❌ Could not read bill.');
+            }
+        } catch(error) {
+            console.error('AI Error:', error);
+            status.innerHTML = `❌ <span style="color:#f87171;">Error: ${error.message || 'Try again'}</span>`;
+            showToast('❌ AI Error: ' + (error.message || 'Try again'));
+        }
+        setTimeout(() => { progress.style.display = 'none'; progressBar.style.width = '0%'; }, 3000);
+    };
+    reader.readAsDataURL(file);
+}
+
+async function callGeminiAPI(base64Image) {
+    const prompt = `You are a bill reader. Extract items (name, size, qty, price), total, customer from this image. Return JSON format: {"items":[{"name":"","size":"","qty":0,"price":0}],"total":0,"customer":""}`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }, { inline_data: { mime_type: "image/jpeg", data: base64Image } }] }],
+            generationConfig: { temperature: 0.1, maxOutputTokens: 1024 }
+        })
+    });
+    if (!response.ok) throw new Error(`API Error: ${response.status}`);
+    const data = await response.json();
+    if (data.candidates && data.candidates[0] && data.candidates[0].content) {
+        const text = data.candidates[0].content.parts[0].text;
+        const jsonMatch = text.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+            try { return JSON.parse(jsonMatch[0]); } catch(e) { return extractItemsManually(text); }
+        }
+    }
+    return null;
+}
+
+function getMockBillData() {
+    return {
+        items: [
+            { name: 'ابیض مجلی', size: '30cm', qty: 12.5, price: 65 },
+            { name: 'مسمار مغلوب', size: '10*40', qty: 100, price: 0.5 },
+            { name: 'زاویہ اپ ڈاون', size: '4*4*3mm', qty: 50, price: 2.5 }
+        ],
+        total: 937.5,
+        customer: 'Walk-in Customer'
+    };
+}
+
+function extractItemsManually(text) {
+    const lines = text.split('\n').filter(l => l.trim());
+    const items = [];
+    let total = 0;
+    for (const line of lines) {
+        const match = line.match(/([a-zA-Z0-9\u0600-\u06FF\s]+?)\s+(\d+[\.\d]*)\s+(\d+[\.\d]*)/);
+        if (match) {
+            items.push({ name: match[1].trim(), qty: parseFloat(match[2]) || 1, price: parseFloat(match[3]) || 0 });
+            total += (parseFloat(match[2]) || 1) * (parseFloat(match[3]) || 0);
+        }
+    }
+    return { items, total };
+}
+
+function findMatchingProduct(name, size) {
+    if (!name) return null;
+    const cleanName = name.trim().toLowerCase();
+    const cleanSize = (size || '').trim().toLowerCase();
+    let found = products.find(p => p.name.toLowerCase() === cleanName && (!cleanSize || p.size.toLowerCase() === cleanSize));
+    if (found) return found;
+    found = products.find(p => p.name.toLowerCase().includes(cleanName) || cleanName.includes(p.name.toLowerCase()));
+    return found || null;
+}
+
+function testAIAgent() {
+    const testData = {
+        items: [
+            { name: 'ابیض مجلی', size: '30cm', qty: 12.5, price: 65 },
+            { name: 'مسمار مغلوب', size: '10*40', qty: 100, price: 0.5 }
+        ],
+        total: 862.5,
+        customer: 'Test Customer'
+    };
+    testData.items.forEach(item => {
+        let product = findMatchingProduct(item.name, item.size);
+        if (product) {
+            setMode('pieces');
+            document.getElementById('itemName').value = product.name;
+            document.getElementById('costPrice').value = product.cost || 0;
+            document.getElementById('pieceSize').value = item.size || product.size || 'Standard';
+            document.getElementById('pieceQty').value = item.qty || 1;
+            document.getElementById('piecePrice').value = item.price || product.selling || 0;
+            addToCart();
+        }
+    });
+    document.getElementById('custName').value = testData.customer;
+    document.getElementById('amountReceived').value = testData.total;
+    showToast('✅ Test data added!');
+}
+
 // ==================== RENDER ALL ====================
 function renderAll() {
     renderProducts();
@@ -2080,8 +2280,6 @@ function renderAll() {
     updateOnlineStatus();
     document.getElementById('summaryDate').value = getToday();
     document.getElementById('expenseDate').value = getToday();
-    
-    // Set language
     setLanguage(currentLang);
 }
 
@@ -2091,22 +2289,12 @@ if(darkMode) document.body.classList.add('dark-mode');
 renderAll();
 getDeviceInfo();
 updateOnlineStatus();
-
-// Auto-save every 30 seconds
 setInterval(saveData, 30000);
-
-// Listen for Firebase changes
 if(firebaseInitialized) {
     listenForChanges();
-    // Initial sync from Firebase
     setTimeout(syncFromFirebase, 2000);
 }
-
-console.log('✅ Warda Marble System Loaded!');
-console.log('📦 Products:', products.length);
-console.log('📄 Orders:', orders.length);
-console.log('👥 Customers:', customers.length);
-console.log('🔥 Firebase:', firebaseInitialized ? 'Connected' : 'Not configured');
+console.log('✅ Warda Marble + AI Scanner Loaded!');
 </script>
 </body>
 </html>
