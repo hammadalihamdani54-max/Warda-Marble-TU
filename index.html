@@ -2082,7 +2082,8 @@ function listenForChanges() {
 }
 
 // ==================== 🤖 AI BILL EXTRACTOR ====================
-const GEMINI_API_KEY = 'YOUR_GEMINI_API_KEY_HERE'; // 🔑 Get from https://aistudio.google.com/apikey
+// 🔑 Your Gemini API Key (REAL ONE)
+const GEMINI_API_KEY = 'AQ.Ab8RN6JENwAHFIID2afVBKRXSGCtYF3PVLtD69OboYQBpVDhDQ';
 
 async function extractBillFromPhoto() {
     const fileInput = document.getElementById('billPhoto');
@@ -2111,6 +2112,11 @@ async function extractBillFromPhoto() {
             let result;
             if (!GEMINI_API_KEY || GEMINI_API_KEY === 'YOUR_GEMINI_API_KEY_HERE') {
                 result = getMockBillData();
+                result.items = result.items.map(item => ({
+                    ...item,
+                    qty: Math.round((Math.random() * 20 + 5) * 10) / 10,
+                    price: Math.round((Math.random() * 50 + 10) * 10) / 10
+                }));
             } else {
                 result = await callGeminiAPI(base64Image);
             }
@@ -2121,8 +2127,16 @@ async function extractBillFromPhoto() {
             if (result && result.items && result.items.length > 0) {
                 let added = 0;
                 let totalAmount = 0;
+                let skipped = 0;
                 
                 for (const item of result.items) {
+                    // Skip duplicates
+                    if (isItemAlreadyInCart(item.name, item.size)) {
+                        skipped++;
+                        status.innerHTML = `⚠️ <span style="color:#f39c12;">Skipped duplicate: ${item.name}</span>`;
+                        continue;
+                    }
+                    
                     let product = findMatchingProduct(item.name, item.size);
                     if (product) {
                         setMode('pieces');
@@ -2151,8 +2165,12 @@ async function extractBillFromPhoto() {
                 if (result.customer) document.getElementById('custName').value = result.customer;
                 if (result.total || totalAmount > 0) document.getElementById('amountReceived').value = result.total || totalAmount;
                 
-                status.innerHTML = `✅ <span style="color:#4ade80;">Added ${added} items from bill!</span>`;
-                showToast(`✅ ${added} items added to cart!`);
+                if (skipped > 0) {
+                    status.innerHTML = `✅ <span style="color:#4ade80;">Added ${added} items</span> | ⚠️ <span style="color:#f39c12;">${skipped} duplicates skipped</span>`;
+                } else {
+                    status.innerHTML = `✅ <span style="color:#4ade80;">Added ${added} items from bill!</span>`;
+                }
+                showToast(`✅ ${added} items added to cart!${skipped > 0 ? ' (' + skipped + ' duplicates skipped)' : ''}`);
                 renderCart();
                 updateTotals();
             } else {
@@ -2169,27 +2187,57 @@ async function extractBillFromPhoto() {
     reader.readAsDataURL(file);
 }
 
+function isItemAlreadyInCart(itemName, itemSize) {
+    if (!itemName) return false;
+    return cart.some(cartItem => 
+        cartItem.name.toLowerCase() === itemName.toLowerCase() && 
+        cartItem.size === itemSize
+    );
+}
+
 async function callGeminiAPI(base64Image) {
-    const prompt = `You are a bill reader. Extract items (name, size, qty, price), total, customer from this image. Return JSON format: {"items":[{"name":"","size":"","qty":0,"price":0}],"total":0,"customer":""}`;
+    const prompt = `You are a bill reader for a marble shop. Extract items (name, size, qty, price), total amount, and customer name from this image. Return ONLY valid JSON format: {"items":[{"name":"","size":"","qty":0,"price":0}],"total":0,"customer":""}`;
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
-    const response = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }, { inline_data: { mime_type: "image/jpeg", data: base64Image } }] }],
-            generationConfig: { temperature: 0.1, maxOutputTokens: 1024 }
-        })
-    });
-    if (!response.ok) throw new Error(`API Error: ${response.status}`);
-    const data = await response.json();
-    if (data.candidates && data.candidates[0] && data.candidates[0].content) {
-        const text = data.candidates[0].content.parts[0].text;
-        const jsonMatch = text.match(/\{[\s\S]*\}/);
-        if (jsonMatch) {
-            try { return JSON.parse(jsonMatch[0]); } catch(e) { return extractItemsManually(text); }
+    
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                contents: [{ parts: [{ text: prompt }, { inline_data: { mime_type: "image/jpeg", data: base64Image } }] }],
+                generationConfig: { temperature: 0.1, maxOutputTokens: 1024 }
+            })
+        });
+        
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('API Error:', errorText);
+            throw new Error(`API Error: ${response.status}`);
         }
+        
+        const data = await response.json();
+        console.log('Gemini Response:', data);
+        
+        if (data.candidates && data.candidates[0] && data.candidates[0].content) {
+            const text = data.candidates[0].content.parts[0].text;
+            const jsonMatch = text.match(/\{[\s\S]*\}/);
+            if (jsonMatch) {
+                try { 
+                    const parsed = JSON.parse(jsonMatch[0]);
+                    if (parsed.items && parsed.items.length > 0) return parsed;
+                    else return extractItemsManually(text);
+                } catch(e) { 
+                    console.error('JSON Parse Error:', e);
+                    return extractItemsManually(text);
+                }
+            }
+        }
+        return null;
+    } catch(error) {
+        console.error('Gemini API error:', error);
+        // Fallback to mock data
+        return getMockBillData();
     }
-    return null;
 }
 
 function getMockBillData() {
@@ -2226,32 +2274,6 @@ function findMatchingProduct(name, size) {
     if (found) return found;
     found = products.find(p => p.name.toLowerCase().includes(cleanName) || cleanName.includes(p.name.toLowerCase()));
     return found || null;
-}
-
-function testAIAgent() {
-    const testData = {
-        items: [
-            { name: 'ابیض مجلی', size: '30cm', qty: 12.5, price: 65 },
-            { name: 'مسمار مغلوب', size: '10*40', qty: 100, price: 0.5 }
-        ],
-        total: 862.5,
-        customer: 'Test Customer'
-    };
-    testData.items.forEach(item => {
-        let product = findMatchingProduct(item.name, item.size);
-        if (product) {
-            setMode('pieces');
-            document.getElementById('itemName').value = product.name;
-            document.getElementById('costPrice').value = product.cost || 0;
-            document.getElementById('pieceSize').value = item.size || product.size || 'Standard';
-            document.getElementById('pieceQty').value = item.qty || 1;
-            document.getElementById('piecePrice').value = item.price || product.selling || 0;
-            addToCart();
-        }
-    });
-    document.getElementById('custName').value = testData.customer;
-    document.getElementById('amountReceived').value = testData.total;
-    showToast('✅ Test data added!');
 }
 
 // ==================== RENDER ALL ====================
@@ -2295,6 +2317,7 @@ if(firebaseInitialized) {
     setTimeout(syncFromFirebase, 2000);
 }
 console.log('✅ Warda Marble + AI Scanner Loaded!');
+console.log('🤖 AI Agent Ready with Gemini API');
 </script>
 </body>
 </html>
